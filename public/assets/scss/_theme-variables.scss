@@ -1,0 +1,12 @@
+:root{
+	--custom-body-bg: #fdfdfd;
+	
+	--app-sidebar-bg: var(--bs-body-bg);
+	--app-header-bg: var(--bs-body-bg);
+}
+[data-bs-theme="dark"]{
+	--custom-body-bg: var(--bs-secondary-bg);
+	
+	--app-sidebar-bg: var(--bs-body-bg);
+	--app-header-bg: var(--bs-body-bg);
+}
