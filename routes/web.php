@@ -62,6 +62,8 @@ Route::middleware('auth')->group(function () {
         Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
         Route::resource('departments', \App\Http\Controllers\Admin\DepartmentController::class);
         Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
+        Route::get('roles-matrix', [\App\Http\Controllers\Admin\RoleController::class, 'matrix'])->name('roles.matrix');
+        Route::post('roles-matrix', [\App\Http\Controllers\Admin\RoleController::class, 'updateMatrix'])->name('roles.matrix.update');
         Route::resource('attendances', \App\Http\Controllers\Admin\AttendanceController::class)->only(['index', 'edit', 'update']);
         Route::resource('projects', \App\Http\Controllers\Admin\ProjectController::class);
         Route::get('projects/{project}/documents/{index}/download', [\App\Http\Controllers\Admin\ProjectController::class, 'downloadDocument'])->name('projects.documents.download');
