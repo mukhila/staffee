@@ -24,7 +24,17 @@ class ChatController extends Controller
             $q->where('from_id', $userId)->where('to_id', Auth::id());
         })->orderBy('created_at', 'asc')->get();
 
+        // Mark incoming messages as read
+        Message::where('from_id', $userId)->where('to_id', Auth::id())->whereNull('read_at')
+            ->update(['read_at' => now()]);
+
         return response()->json($messages);
+    }
+
+    public function unreadCount()
+    {
+        $count = Message::where('to_id', Auth::id())->whereNull('read_at')->count();
+        return response()->json(['count' => $count]);
     }
 
     public function sendMessage(Request $request)

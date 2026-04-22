@@ -29,13 +29,21 @@ class TaskController extends Controller
             'due_date' => 'nullable|date',
         ]);
 
-        \App\Models\Task::create([
+        $task = \App\Models\Task::create([
             'project_id' => $request->project_id,
             'title' => $request->title,
             'description' => $request->description,
             'assigned_to' => $request->assigned_to,
             'status' => 'pending',
             'due_date' => $request->due_date,
+        ]);
+
+        \App\Models\Notification::create([
+            'user_id' => $request->assigned_to,
+            'type'    => 'task_assigned',
+            'title'   => 'New Task Assigned',
+            'message' => 'You have been assigned a new task: ' . $task->title,
+            'url'     => route('staff.tasks.index'),
         ]);
 
         return redirect()->route('admin.tasks.index')->with('success', 'Task created successfully.');

@@ -24,4 +24,14 @@ class Bug extends Model
     {
         return $this->belongsTo(User::class, 'reported_by');
     }
+
+    public function reportedByUser()
+    {
+        return $this->belongsTo(User::class, 'reported_by');
+    }
+
+    public function testCase()
+    {
+        return $this->belongsTo(TestCase::class);
+    }
 }

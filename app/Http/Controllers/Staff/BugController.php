@@ -43,7 +43,7 @@ class BugController extends Controller
             'test_case_id' => 'nullable|exists:test_cases,id',
         ]);
 
-        \App\Models\Bug::create([
+        $bug = \App\Models\Bug::create([
             'project_id' => $request->project_id,
             'title' => $request->title,
             'description' => $request->description,
@@ -53,6 +53,16 @@ class BugController extends Controller
             'severity' => $request->severity,
             'test_case_id' => $request->test_case_id,
         ]);
+
+        if ($request->assigned_to !== auth()->id()) {
+            \App\Models\Notification::create([
+                'user_id' => $request->assigned_to,
+                'type'    => 'bug_assigned',
+                'title'   => 'Bug Assigned to You',
+                'message' => auth()->user()->name . ' assigned a ' . $request->severity . ' severity bug: ' . $bug->title,
+                'url'     => route('staff.bugs.index'),
+            ]);
+        }
 
         return redirect()->route('staff.bugs.index')->with('success', 'Bug reported successfully.');
     }

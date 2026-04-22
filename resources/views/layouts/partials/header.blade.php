@@ -41,27 +41,88 @@
           </div>
           <div class="vr my-3"></div>
           <div class="d-flex align-items-center gap-sm-2 gap-0 px-lg-4 px-sm-2 px-1">
-            
+
+            {{-- Notifications --}}
+            @php
+              $unreadNotifCount = auth()->user()->unreadNotificationsCount();
+              $recentNotifs = auth()->user()->appNotifications()->orderBy('created_at','desc')->limit(6)->get();
+            @endphp
             <div class="dropdown text-end">
-              <button type="button" class="btn btn-icon btn-action-gray rounded-circle waves-effect waves-light" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="true">
+              <button type="button" class="btn btn-icon btn-action-gray rounded-circle waves-effect waves-light position-relative" data-bs-toggle="dropdown" data-bs-auto-close="outside" aria-expanded="true">
                 <i class="fi fi-rr-bell"></i>
+                @if($unreadNotifCount > 0)
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style="font-size: 0.6rem;">
+                  {{ $unreadNotifCount > 9 ? '9+' : $unreadNotifCount }}
+                </span>
+                @endif
               </button>
               <div class="dropdown-menu dropdown-menu-lg-end p-0 w-300px mt-2">
                 <div class="px-3 py-3 border-bottom d-flex justify-content-between align-items-center">
-                  <h6 class="mb-0">Notifications <span class="badge badge-sm rounded-pill bg-primary ms-2">0</span>
+                  <h6 class="mb-0">Notifications
+                    @if($unreadNotifCount > 0)
+                    <span class="badge badge-sm rounded-pill bg-primary ms-2">{{ $unreadNotifCount }}</span>
+                    @endif
                   </h6>
-                  <i class="bi bi-x-lg cursor-pointer"></i>
+                  @if($unreadNotifCount > 0)
+                  <form method="POST" action="{{ route('notifications.mark-all-read') }}">
+                    @csrf
+                    <button type="submit" class="btn btn-sm btn-link p-0 text-muted">Mark all read</button>
+                  </form>
+                  @endif
                 </div>
-                <div class="p-2" style="height: 300px;" data-simplebar>
+                <div class="p-2" style="max-height: 300px; overflow-y: auto;" data-simplebar>
                   <ul class="list-group list-group-hover list-group-smooth list-group-unlined">
-                    <!-- Notifications here -->
+                    @forelse($recentNotifs as $notif)
+                    <li class="list-group-item px-2 py-2 {{ $notif->read_at ? '' : 'bg-primary bg-opacity-05' }}">
+                      <div class="d-flex gap-2 align-items-start">
+                        <div class="avatar avatar-xs rounded-circle
+                          @if($notif->type === 'task_assigned') bg-info
+                          @elseif($notif->type === 'bug_assigned') bg-danger
+                          @elseif($notif->type === 'leave_approved') bg-success
+                          @elseif($notif->type === 'leave_rejected') bg-danger
+                          @else bg-warning @endif text-white">
+                          <i class="fi fi-rr-bell"></i>
+                        </div>
+                        <div class="flex-grow-1">
+                          <div class="small fw-medium">{{ $notif->title }}</div>
+                          <div class="text-muted" style="font-size:0.7rem;">{{ Str::limit($notif->message, 60) }}</div>
+                          <div class="text-muted" style="font-size:0.65rem;">{{ $notif->created_at->diffForHumans() }}</div>
+                        </div>
+                      </div>
+                    </li>
+                    @empty
+                    <li class="list-group-item text-center text-muted small py-3">No notifications</li>
+                    @endforelse
                   </ul>
                 </div>
                 <div class="p-2">
-                  <a href="javascript:void(0);" class="btn w-100 btn-primary waves-effect waves-light">View all notifications</a>
+                  <a href="{{ route('notifications.index') }}" class="btn w-100 btn-primary waves-effect waves-light">View all notifications</a>
                 </div>
               </div>
             </div>
+
+            {{-- Chat unread badge --}}
+            @php $unreadChat = \App\Models\Message::where('to_id', auth()->id())->whereNull('read_at')->count(); @endphp
+            <a href="{{ route('chat.index') }}" class="btn btn-icon btn-action-gray rounded-circle waves-effect waves-light position-relative">
+              <i class="fi fi-rr-comment-alt"></i>
+              @if($unreadChat > 0)
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-success" style="font-size:0.6rem;">
+                {{ $unreadChat > 9 ? '9+' : $unreadChat }}
+              </span>
+              @endif
+            </a>
+
+            {{-- Mail unread badge --}}
+            @php $unreadMail = \App\Models\Email::where('to_id', auth()->id())->whereNull('read_at')->count(); @endphp
+            <a href="{{ route('mail.index') }}" class="btn btn-icon btn-action-gray rounded-circle waves-effect waves-light position-relative">
+              <i class="fi fi-rr-envelope"></i>
+              @if($unreadMail > 0)
+              <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-info" style="font-size:0.6rem;">
+                {{ $unreadMail > 9 ? '9+' : $unreadMail }}
+              </span>
+              @endif
+            </a>
+
           </div>
           <div class="vr my-3"></div>
           <div class="dropdown text-end ms-sm-3 ms-2 ms-lg-4">
@@ -94,17 +155,21 @@
                   <small class="text-body d-block lh-sm">{{ Auth::user()->email ?? '' }}</small>
                 </div>
               </li>
-              <li>
-                <div class="dropdown-divider my-1"></div>
-              </li>
+              <li><div class="dropdown-divider my-1"></div></li>
               <li>
                 <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('profile.edit') }}">
                   <i class="fi fi-rr-user scale-1x"></i> View Profile
                 </a>
               </li>
               <li>
-                <div class="dropdown-divider my-1"></div>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('notifications.index') }}">
+                  <i class="fi fi-rr-bell scale-1x"></i> Notifications
+                  @if($unreadNotifCount > 0)
+                  <span class="badge bg-danger ms-auto">{{ $unreadNotifCount }}</span>
+                  @endif
+                </a>
               </li>
+              <li><div class="dropdown-divider my-1"></div></li>
               <li>
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf

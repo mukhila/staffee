@@ -15,7 +15,15 @@ class MailController extends Controller
             ->with('from')
             ->orderBy('created_at', 'desc')
             ->paginate(10);
-        return view('mail.index', compact('emails'));
+
+        $unreadCount = Email::where('to_id', Auth::id())->whereNull('read_at')->count();
+
+        return view('mail.index', compact('emails', 'unreadCount'));
+    }
+
+    public function unreadCount()
+    {
+        return response()->json(['count' => Email::where('to_id', Auth::id())->whereNull('read_at')->count()]);
     }
 
     public function sent()

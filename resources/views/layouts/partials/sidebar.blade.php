@@ -42,6 +42,22 @@
           <span class="menu-label">Roles</span>
         </a>
       </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.leaves.index') }}">
+          <i class="fi fi-rr-calendar-exclamation"></i>
+          <span class="menu-label">Leave Requests</span>
+          @php $pendingLeaves = \App\Models\LeaveRequest::where('status','pending')->count(); @endphp
+          @if($pendingLeaves > 0)
+          <span class="badge bg-warning ms-auto">{{ $pendingLeaves }}</span>
+          @endif
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.attendances.index') }}">
+          <i class="fi fi-rr-calendar-clock"></i>
+          <span class="menu-label">Attendance</span>
+        </a>
+      </li>
 
       <li class="menu-heading">
         <span class="menu-label">Project Management</span>
@@ -58,10 +74,24 @@
           <span class="menu-label">All Tasks</span>
         </a>
       </li>
+
+      <li class="menu-heading">
+        <span class="menu-label">Communication</span>
+      </li>
       <li class="menu-item">
-        <a class="menu-link" href="{{ route('admin.attendances.index') }}">
-          <i class="fi fi-rr-calendar-clock"></i>
-          <span class="menu-label">Attendance</span>
+        <a class="menu-link" href="{{ route('admin.announcements.index') }}">
+          <i class="fi fi-rr-megaphone"></i>
+          <span class="menu-label">Announcements</span>
+        </a>
+      </li>
+
+      <li class="menu-heading">
+        <span class="menu-label">Analytics</span>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.reports.index') }}">
+          <i class="fi fi-rr-chart-histogram"></i>
+          <span class="menu-label">Reports</span>
         </a>
       </li>
 
@@ -108,6 +138,16 @@
           <i class="fi fi-rr-document"></i>
           <span class="menu-label">DSR</span>
         </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.leaves.index') }}">
+          <i class="fi fi-rr-calendar-minus"></i>
+          <span class="menu-label">My Leaves</span>
+        </a>
+      </li>
+
+      <li class="menu-heading">
+        <span class="menu-label">Communication</span>
       </li>
       <li class="menu-item">
         <a class="menu-link" href="{{ route('chat.index') }}">

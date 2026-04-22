@@ -2,49 +2,22 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use App\Traits\HasPermissions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasPermissions;
 
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
-     */
     protected $fillable = [
-        'name',
-        'email',
-        'password',
-        'role',
-        'phone',
-        'address',
-        'department_id',
-        'reporting_to',
-        'is_active',
-        'avatar',
+        'name', 'email', 'password', 'role', 'phone', 'address',
+        'department_id', 'reporting_to', 'is_active', 'avatar',
     ];
 
-    /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
-     */
-    protected $hidden = [
-        'password',
-        'remember_token',
-    ];
+    protected $hidden = ['password', 'remember_token'];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
     protected function casts(): array
     {
         return [
@@ -53,18 +26,50 @@ class User extends Authenticatable
         ];
     }
 
-    public function isAdmin()
+    // ─── Relationships ────────────────────────────────────────────────────────
+
+    public function department()
     {
-        return $this->role === 'admin';
+        return $this->belongsTo(Department::class);
     }
 
-    public function isStaff()
+    public function manager()
     {
-        return $this->role === 'staff';
+        return $this->belongsTo(User::class, 'reporting_to');
     }
 
-    public function isPm()
+    public function subordinates()
     {
-        return $this->role === 'pm';
+        return $this->hasMany(User::class, 'reporting_to');
+    }
+
+    public function projects()
+    {
+        return $this->belongsToMany(Project::class);
+    }
+
+    public function tasks()
+    {
+        return $this->hasMany(Task::class, 'assigned_to');
+    }
+
+    public function bugs()
+    {
+        return $this->hasMany(Bug::class, 'assigned_to');
+    }
+
+    public function leaveRequests()
+    {
+        return $this->hasMany(LeaveRequest::class);
+    }
+
+    public function appNotifications()
+    {
+        return $this->hasMany(Notification::class);
+    }
+
+    public function unreadNotificationsCount(): int
+    {
+        return $this->appNotifications()->whereNull('read_at')->count();
     }
 }

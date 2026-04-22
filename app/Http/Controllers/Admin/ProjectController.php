@@ -106,4 +106,36 @@ class ProjectController extends Controller
         $project->delete();
         return redirect()->route('admin.projects.index')->with('success', 'Project deleted successfully.');
     }
+
+    public function show(\App\Models\Project $project)
+    {
+        $project->load(['users', 'tasks', 'bugs', 'testCases']);
+        return view('admin.projects.show', compact('project'));
+    }
+
+    public function downloadDocument(\App\Models\Project $project, int $index)
+    {
+        $documents = $project->documents ?? [];
+        if (!isset($documents[$index])) {
+            abort(404);
+        }
+        $path = storage_path('app/public/' . $documents[$index]);
+        if (!file_exists($path)) {
+            abort(404, 'File not found.');
+        }
+        return response()->download($path);
+    }
+
+    public function deleteDocument(\App\Models\Project $project, int $index)
+    {
+        $documents = $project->documents ?? [];
+        if (!isset($documents[$index])) {
+            abort(404);
+        }
+        \Illuminate\Support\Facades\Storage::disk('public')->delete($documents[$index]);
+        unset($documents[$index]);
+        $project->update(['documents' => array_values($documents)]);
+
+        return redirect()->back()->with('success', 'Document deleted.');
+    }
 }

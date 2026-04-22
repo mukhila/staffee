@@ -42,6 +42,7 @@
                       <div class="btn-group" role="group">
                         <button class="btn button-light-success dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">Actions</button>
                         <ul class="dropdown-menu" style="">
+                            <li><a class="dropdown-item" href="{{ route('admin.projects.show', $project->id) }}">View</a></li>
                             <li><a class="dropdown-item" href="{{ route('admin.projects.edit', $project->id) }}">Edit</a></li>
                             <li>
                                 <form action="{{ route('admin.projects.destroy', $project->id) }}" method="POST" onsubmit="return confirm('Are you sure?');">
