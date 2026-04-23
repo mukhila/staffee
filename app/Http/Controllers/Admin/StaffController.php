@@ -7,30 +7,27 @@ use Illuminate\Http\Request;
 
 class StaffController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
+        $this->authorize('view-staff');
+
         $staff = \App\Models\User::where('role', '!=', 'admin')->get();
         return view('admin.staff.index', compact('staff'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
+        $this->authorize('create-staff');
+
         $roles = \App\Models\Role::where('is_active', true)->get();
         $departments = \App\Models\Department::where('is_active', true)->get();
         return view('admin.staff.create', compact('roles', 'departments'));
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(\Illuminate\Http\Request $request)
     {
+        $this->authorize('create-staff');
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
@@ -58,6 +55,8 @@ class StaffController extends Controller
 
     public function edit(\App\Models\User $staff)
     {
+        $this->authorize('edit-staff');
+
         $roles = \App\Models\Role::where('is_active', true)->get();
         $departments = \App\Models\Department::where('is_active', true)->get();
         return view('admin.staff.edit', compact('staff', 'roles', 'departments'));
@@ -65,6 +64,8 @@ class StaffController extends Controller
 
     public function update(\Illuminate\Http\Request $request, \App\Models\User $staff)
     {
+        $this->authorize('edit-staff');
+
         $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users,email,' . $staff->id,
@@ -99,6 +100,8 @@ class StaffController extends Controller
 
     public function destroy(\App\Models\User $staff)
     {
+        $this->authorize('delete-staff');
+
         $staff->delete();
         return redirect()->route('admin.staff.index')->with('success', 'Staff deleted successfully.');
     }

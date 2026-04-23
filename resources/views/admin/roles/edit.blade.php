@@ -49,17 +49,12 @@
                     <div class="mb-3">
                         <label class="form-label">Permissions</label>
                         <div class="row">
-                            @php
-                                $groupedPermissions = $permissions->groupBy(function($item) {
-                                    return explode('.', $item->slug)[0];
-                                });
-                                $rolePermissions = $role->permissions->pluck('id')->toArray();
-                            @endphp
-                            @foreach($groupedPermissions as $module => $perms)
+                            @foreach($permissions as $categoryKey => $perms)
                                 <div class="col-md-4 mb-3">
                                     <div class="card h-100">
-                                        <div class="card-header py-2">
-                                            <h6 class="mb-0 text-capitalize">{{ str_replace('_', ' ', $module) }}</h6>
+                                        <div class="card-header py-2 d-flex align-items-center justify-content-between">
+                                            <h6 class="mb-0">{{ $categories[$categoryKey] ?? ucwords(str_replace('_', ' ', $categoryKey)) }}</h6>
+                                            <span class="badge bg-secondary-subtle text-secondary">{{ $perms->count() }}</span>
                                         </div>
                                         <div class="card-body py-2">
                                             @foreach($perms as $permission)

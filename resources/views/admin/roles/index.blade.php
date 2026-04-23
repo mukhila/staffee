@@ -5,9 +5,14 @@
             <h1 class="app-page-title">Roles</h1>
             <span>Manage roles</span>
           </div>
-          <a href="{{ route('admin.roles.create') }}" class="btn btn-primary waves-effect waves-light">
-            <i class="fi fi-rr-plus me-1"></i> Add Role
-          </a>
+          <div class="d-flex gap-2">
+            <a href="{{ route('admin.roles.matrix') }}" class="btn btn-outline-primary waves-effect waves-light">
+              <i class="fi fi-rr-shield-check me-1"></i> Permission Matrix
+            </a>
+            <a href="{{ route('admin.roles.create') }}" class="btn btn-primary waves-effect waves-light">
+              <i class="fi fi-rr-plus me-1"></i> Add Role
+            </a>
+          </div>
         </div>
 
         <div class="card overflow-hidden">
@@ -21,6 +26,7 @@
                     <th class="minw-150px">Name</th>
                     <th class="minw-150px">Slug</th>
                     <th class="minw-200px">Description</th>
+                    <th class="minw-120px">Permissions</th>
                     <th class="minw-150px">Status</th>
                     <th>Actions</th>
                   </tr>
@@ -31,6 +37,9 @@
                     <td>{{ $role->name }}</td>
                     <td>{{ $role->slug }}</td>
                     <td>{{ $role->description }}</td>
+                    <td>
+                        <span class="badge bg-info-subtle text-info">{{ $role->permissions_count }}</span>
+                    </td>
                     <td>
                         @if($role->is_active)
                             <span class="badge bg-success">Active</span>

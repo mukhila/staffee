@@ -2,7 +2,6 @@
 
 namespace App\Providers;
 
-use App\Models\Permission;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 
@@ -12,29 +11,23 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Admin bypasses every Gate check automatically.
+        // Admin bypasses every Gate check before any policy or ability runs.
         Gate::before(function ($user, $ability) {
             if ($user->isAdmin()) {
                 return true;
             }
         });
 
-        // Register every permission slug as a Gate ability so that
-        // @can('create-staff'), $user->can('create-task'), etc. all work
-        // without manually defining individual Gate::define() calls.
-        $this->registerPermissionGates();
-    }
-
-    private function registerPermissionGates(): void
-    {
-        try {
-            Permission::all()->each(function (Permission $permission) {
-                Gate::define($permission->slug, function ($user) use ($permission) {
-                    return $user->hasPermission($permission->slug);
-                });
-            });
-        } catch (\Exception) {
-            // DB might not exist yet (during fresh migrations).
-        }
+        // Fallback: when no explicit Gate::define / Policy covers an ability,
+        // check the user's role permissions. This means @can('create-staff'),
+        // $user->can('view-tasks'), and $this->authorize('edit-project') all
+        // resolve through HasPermissions::hasPermission() without having to
+        // pre-register every slug at boot (which would require a DB query before
+        // migrations run).
+        Gate::after(function ($user, $ability, $result) {
+            if ($result === null) {
+                return $user->hasPermission($ability);
+            }
+        });
     }
 }

@@ -89,6 +89,60 @@ Route::middleware('auth')->group(function () {
         // Internal API
         Route::get('api/roles', [\App\Http\Controllers\Admin\RoleController::class, 'getRolesByDepartment'])->name('api.roles');
         Route::get('api/projects/{project}/members', [\App\Http\Controllers\Admin\TaskController::class, 'getProjectMembers'])->name('api.project.members');
+
+        // ── HR Management ──────────────────────────────────────────────────
+        Route::prefix('hr')->name('hr.')->group(function () {
+            // Dashboard
+            Route::get('/', [\App\Http\Controllers\Admin\HR\HRDashboardController::class, 'index'])->name('dashboard');
+
+            // Employee profiles
+            Route::get('employees/{employee}', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'show'])->name('employees.show');
+            Route::get('employees/{employee}/edit', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'editProfile'])->name('employees.edit');
+            Route::put('employees/{employee}', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'updateProfile'])->name('employees.update');
+
+            // Satellite: education
+            Route::post('employees/{employee}/education', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'storeEducation'])->name('employees.education.store');
+            Route::delete('employees/{employee}/education/{education}', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'destroyEducation'])->name('employees.education.destroy');
+
+            // Satellite: experience
+            Route::post('employees/{employee}/experience', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'storeExperience'])->name('employees.experience.store');
+            Route::delete('employees/{employee}/experience/{experience}', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'destroyExperience'])->name('employees.experience.destroy');
+
+            // Satellite: skills
+            Route::post('employees/{employee}/skills', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'storeSkill'])->name('employees.skills.store');
+            Route::delete('employees/{employee}/skills/{skill}', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'destroySkill'])->name('employees.skills.destroy');
+
+            // Satellite: documents
+            Route::post('employees/{employee}/documents', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'storeDocument'])->name('employees.documents.store');
+            Route::delete('employees/{employee}/documents/{document}', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'destroyDocument'])->name('employees.documents.destroy');
+
+            // Satellite: emergency contacts
+            Route::post('employees/{employee}/contacts', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'storeEmergencyContact'])->name('employees.contacts.store');
+            Route::delete('employees/{employee}/contacts/{contact}', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'destroyEmergencyContact'])->name('employees.contacts.destroy');
+
+            // Promotions
+            Route::resource('promotions', \App\Http\Controllers\Admin\HR\PromotionController::class)->except(['edit', 'update']);
+            Route::post('promotions/{promotion}/approve', [\App\Http\Controllers\Admin\HR\PromotionController::class, 'approve'])->name('promotions.approve');
+
+            // Resignations
+            Route::get('resignations', [\App\Http\Controllers\Admin\HR\ResignationController::class, 'index'])->name('resignations.index');
+            Route::post('resignations', [\App\Http\Controllers\Admin\HR\ResignationController::class, 'store'])->name('resignations.store');
+            Route::get('resignations/{resignation}', [\App\Http\Controllers\Admin\HR\ResignationController::class, 'show'])->name('resignations.show');
+            Route::post('resignations/{resignation}/manager-decision', [\App\Http\Controllers\Admin\HR\ResignationController::class, 'managerDecision'])->name('resignations.manager-decision');
+            Route::post('resignations/{resignation}/hr-approve', [\App\Http\Controllers\Admin\HR\ResignationController::class, 'hrApprove'])->name('resignations.hr-approve');
+            Route::post('resignations/{resignation}/withdraw', [\App\Http\Controllers\Admin\HR\ResignationController::class, 'withdraw'])->name('resignations.withdraw');
+
+            // Terminations
+            Route::get('terminations', [\App\Http\Controllers\Admin\HR\TerminationController::class, 'index'])->name('terminations.index');
+            Route::get('terminations/create', [\App\Http\Controllers\Admin\HR\TerminationController::class, 'create'])->name('terminations.create');
+            Route::post('terminations', [\App\Http\Controllers\Admin\HR\TerminationController::class, 'store'])->name('terminations.store');
+            Route::get('terminations/{termination}', [\App\Http\Controllers\Admin\HR\TerminationController::class, 'show'])->name('terminations.show');
+            Route::post('terminations/{termination}/approve', [\App\Http\Controllers\Admin\HR\TerminationController::class, 'approve'])->name('terminations.approve');
+            Route::post('terminations/{termination}/checklist/{item}/complete', [\App\Http\Controllers\Admin\HR\TerminationController::class, 'completeChecklistItem'])->name('terminations.checklist.complete');
+            Route::post('terminations/{termination}/settlement/calculate', [\App\Http\Controllers\Admin\HR\TerminationController::class, 'calculateSettlement'])->name('terminations.settlement.calculate');
+            Route::post('terminations/{termination}/settlement/approve', [\App\Http\Controllers\Admin\HR\TerminationController::class, 'approveSettlement'])->name('terminations.settlement.approve');
+            Route::post('terminations/{termination}/finalize', [\App\Http\Controllers\Admin\HR\TerminationController::class, 'finalize'])->name('terminations.finalize');
+        });
     });
 });
 

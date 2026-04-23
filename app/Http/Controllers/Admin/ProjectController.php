@@ -9,18 +9,24 @@ class ProjectController extends Controller
 {
     public function index()
     {
+        $this->authorize('view-projects');
+
         $projects = \App\Models\Project::with('users')->get();
         return view('admin.projects.index', compact('projects'));
     }
 
     public function create()
     {
+        $this->authorize('create-project');
+
         $users = \App\Models\User::where('role', '!=', 'admin')->get();
         return view('admin.projects.create', compact('users'));
     }
 
     public function store(\Illuminate\Http\Request $request)
     {
+        $this->authorize('create-project');
+
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -60,12 +66,16 @@ class ProjectController extends Controller
 
     public function edit(\App\Models\Project $project)
     {
+        $this->authorize('edit-project');
+
         $users = \App\Models\User::where('role', '!=', 'admin')->get();
         return view('admin.projects.edit', compact('project', 'users'));
     }
 
     public function update(\Illuminate\Http\Request $request, \App\Models\Project $project)
     {
+        $this->authorize('edit-project');
+
         $request->validate([
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',
@@ -103,6 +113,8 @@ class ProjectController extends Controller
 
     public function destroy(\App\Models\Project $project)
     {
+        $this->authorize('archive-project');
+
         $project->delete();
         return redirect()->route('admin.projects.index')->with('success', 'Project deleted successfully.');
     }

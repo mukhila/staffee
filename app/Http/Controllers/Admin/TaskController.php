@@ -9,18 +9,24 @@ class TaskController extends Controller
 {
     public function index()
     {
+        $this->authorize('view-tasks');
+
         $tasks = \App\Models\Task::with(['project', 'assignedUser'])->get();
         return view('admin.tasks.index', compact('tasks'));
     }
 
     public function create()
     {
+        $this->authorize('create-task');
+
         $projects = \App\Models\Project::where('status', '!=', 'completed')->get();
         return view('admin.tasks.create', compact('projects'));
     }
 
     public function store(\Illuminate\Http\Request $request)
     {
+        $this->authorize('create-task');
+
         $request->validate([
             'project_id' => 'required|exists:projects,id',
             'title' => 'required|string|max:255',
@@ -51,12 +57,16 @@ class TaskController extends Controller
 
     public function edit(\App\Models\Task $task)
     {
+        $this->authorize('update-task');
+
         $projects = \App\Models\Project::where('status', '!=', 'completed')->get();
         return view('admin.tasks.edit', compact('task', 'projects'));
     }
 
     public function update(\Illuminate\Http\Request $request, \App\Models\Task $task)
     {
+        $this->authorize('update-task');
+
         $request->validate([
             'project_id' => 'required|exists:projects,id',
             'title' => 'required|string|max:255',
@@ -73,6 +83,8 @@ class TaskController extends Controller
 
     public function destroy(\App\Models\Task $task)
     {
+        $this->authorize('delete-task');
+
         $task->delete();
         return redirect()->route('admin.tasks.index')->with('success', 'Task deleted successfully.');
     }

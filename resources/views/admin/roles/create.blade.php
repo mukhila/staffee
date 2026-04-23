@@ -48,16 +48,12 @@
                     <div class="mb-3">
                         <label class="form-label">Permissions</label>
                         <div class="row">
-                            @php
-                                $groupedPermissions = $permissions->groupBy(function($item) {
-                                    return explode('.', $item->slug)[0];
-                                });
-                            @endphp
-                            @foreach($groupedPermissions as $module => $perms)
+                            @foreach($permissions as $categoryKey => $perms)
                                 <div class="col-md-4 mb-3">
                                     <div class="card h-100">
-                                        <div class="card-header py-2">
-                                            <h6 class="mb-0 text-capitalize">{{ str_replace('_', ' ', $module) }}</h6>
+                                        <div class="card-header py-2 d-flex align-items-center justify-content-between">
+                                            <h6 class="mb-0">{{ $categories[$categoryKey] ?? ucwords(str_replace('_', ' ', $categoryKey)) }}</h6>
+                                            <span class="badge bg-secondary-subtle text-secondary">{{ $perms->count() }}</span>
                                         </div>
                                         <div class="card-body py-2">
                                             @foreach($perms as $permission)
@@ -72,6 +68,12 @@
                                     </div>
                                 </div>
                             @endforeach
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="is_active" name="is_active" value="1" checked>
+                            <label class="form-check-label" for="is_active">Active</label>
                         </div>
                     </div>
                     <button type="submit" class="btn btn-primary">Create Role</button>

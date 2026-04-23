@@ -116,11 +116,35 @@ trait HasPermissions
         $this->flushPermissionCache();
     }
 
+    // ─── Query scope ──────────────────────────────────────────────────────────
+
+    /**
+     * Scope: users whose role carries a given permission slug.
+     * Usage: User::whereHasPermission('create-task')->get()
+     */
+    public function scopeWhereHasPermission($query, string $slug)
+    {
+        // Admins bypass gates, so always include them; then add any role that
+        // has the permission explicitly assigned.
+        $roleSlugs = \App\Models\Role::whereHas(
+            'permissions',
+            fn ($q) => $q->where('slug', $slug)
+        )->pluck('slug')->push('admin');
+
+        return $query->whereIn('role', $roleSlugs);
+    }
+
     // ─── Convenience wrappers ─────────────────────────────────────────────────
 
     public function isAdmin(): bool
     {
         return $this->role === 'admin';
+    }
+
+    /** Alias kept for compatibility with code that calls isSuperAdmin(). */
+    public function isSuperAdmin(): bool
+    {
+        return $this->isAdmin();
     }
 
     public function isStaff(): bool
