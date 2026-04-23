@@ -1,7 +1,12 @@
 {
   "permissions": {
     "allow": [
-      "Bash(php artisan *)"
+      "Bash(php artisan *)",
+      "Bash(php -l app/Jobs/DailyAttendanceValidationJob.php)",
+      "Bash(php -l app/Jobs/ShiftAssignmentReminderJob.php)",
+      "Bash(php -l app/Notifications/ShiftAssignedNotification.php)",
+      "Bash(php -l app/Notifications/ShiftChangeRequestNotification.php)",
+      "Bash(php -l app/Notifications/ExceptionMarkedNotification.php)"
     ]
   }
 }

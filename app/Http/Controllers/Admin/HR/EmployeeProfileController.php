@@ -19,6 +19,29 @@ class EmployeeProfileController extends Controller
 {
     // ─── Profile ──────────────────────────────────────────────────────────────
 
+    public function index(Request $request)
+    {
+        $this->authorize('view-staff');
+
+        $employees = User::excludeAdmin()
+            ->withHrProfile()
+            ->with(['department', 'profile'])
+            ->when($request->search, fn ($q) => $q->where(function ($q) use ($request) {
+                $q->where('name', 'like', "%{$request->search}%")
+                  ->orWhere('employee_id', 'like', "%{$request->search}%")
+                  ->orWhere('email', 'like', "%{$request->search}%");
+            }))
+            ->when($request->status, fn ($q) => $q->where('employment_status', $request->status))
+            ->when($request->department, fn ($q) => $q->where('department_id', $request->department))
+            ->orderBy('name')
+            ->paginate(20)
+            ->withQueryString();
+
+        $departments = \App\Models\Department::where('is_active', true)->orderBy('name')->get();
+
+        return view('admin.hr.employees.index', compact('employees', 'departments'));
+    }
+
     public function show(User $employee)
     {
         $this->authorize('view-staff');

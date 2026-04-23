@@ -58,6 +58,62 @@
           <span class="menu-label">Attendance</span>
         </a>
       </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.shifts.dashboard') }}">
+          <i class="fi fi-rr-time-half-past"></i>
+          <span class="menu-label">Shifts</span>
+          @php $pendingExceptions = \App\Models\Shift\AttendanceException::where('status','pending')->whereDate('date','>=',now()->subDays(7))->count(); @endphp
+          @if($pendingExceptions > 0)
+          <span class="badge bg-danger ms-auto">{{ $pendingExceptions }}</span>
+          @endif
+        </a>
+      </li>
+
+      <li class="menu-heading">
+        <span class="menu-label">HR Management</span>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.hr.dashboard') }}">
+          <i class="fi fi-rr-people"></i>
+          <span class="menu-label">HR Dashboard</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.hr.employees.index') }}">
+          <i class="fi fi-rr-id-card-clip-alt"></i>
+          <span class="menu-label">Employees</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.hr.promotions.index') }}">
+          <i class="fi fi-rr-arrow-up"></i>
+          <span class="menu-label">Promotions</span>
+          @php $pendingPromotions = \App\Models\HR\PromotionRequest::whereIn('status',['pending_manager','manager_approved','hr_approved'])->count(); @endphp
+          @if($pendingPromotions > 0)
+          <span class="badge bg-info ms-auto">{{ $pendingPromotions }}</span>
+          @endif
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.hr.resignations.index') }}">
+          <i class="fi fi-rr-file-invoice"></i>
+          <span class="menu-label">Resignations</span>
+          @php $pendingResignations = \App\Models\HR\ResignationRequest::whereIn('status',['manager_reviewing','manager_accepted'])->count(); @endphp
+          @if($pendingResignations > 0)
+          <span class="badge bg-warning ms-auto">{{ $pendingResignations }}</span>
+          @endif
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.hr.terminations.index') }}">
+          <i class="fi fi-rr-user-minus"></i>
+          <span class="menu-label">Terminations</span>
+          @php $activeTerminations = \App\Models\HR\TerminationRequest::whereNotIn('status',['completed','cancelled'])->count(); @endphp
+          @if($activeTerminations > 0)
+          <span class="badge bg-danger ms-auto">{{ $activeTerminations }}</span>
+          @endif
+        </a>
+      </li>
 
       <li class="menu-heading">
         <span class="menu-label">Project Management</span>

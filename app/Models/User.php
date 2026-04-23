@@ -117,6 +117,33 @@ class User extends Authenticatable
         return $this->hasMany(WarningRecord::class);
     }
 
+    // ── Shift relationships ───────────────────────────────────────────────────
+
+    public function shiftAssignments()
+    {
+        return $this->hasMany(\App\Models\Shift\ShiftAssignment::class);
+    }
+
+    public function currentShiftAssignment()
+    {
+        return $this->hasOne(\App\Models\Shift\ShiftAssignment::class)
+            ->where('status', 'active')
+            ->where('effective_from', '<=', today()->toDateString())
+            ->where(function ($q) {
+                $q->whereNull('effective_to')->orWhere('effective_to', '>=', today()->toDateString());
+            });
+    }
+
+    public function attendanceExceptions()
+    {
+        return $this->hasMany(\App\Models\Shift\AttendanceException::class);
+    }
+
+    public function shiftChangeRequests()
+    {
+        return $this->hasMany(\App\Models\Shift\ShiftChangeRequest::class, 'requester_id');
+    }
+
     // ── Convenience ──────────────────────────────────────────────────────────
 
     public function currentSalary(): ?float

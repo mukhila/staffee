@@ -86,6 +86,44 @@ Route::middleware('auth')->group(function () {
         Route::get('reports/projects', [\App\Http\Controllers\Admin\ReportController::class, 'projects'])->name('reports.projects');
         Route::get('reports/bugs', [\App\Http\Controllers\Admin\ReportController::class, 'bugs'])->name('reports.bugs');
 
+        // ── Shift Management ───────────────────────────────────────────────
+        Route::prefix('shifts')->name('shifts.')->group(function () {
+            // Dashboard
+            Route::get('/',            [\App\Http\Controllers\Admin\Shift\ShiftDashboardController::class, 'index'])->name('dashboard');
+
+            // Shift definitions (CRUD)
+            Route::get('definitions',                [\App\Http\Controllers\Admin\Shift\ShiftController::class, 'index'])->name('index');
+            Route::get('definitions/create',         [\App\Http\Controllers\Admin\Shift\ShiftController::class, 'create'])->name('create');
+            Route::post('definitions',               [\App\Http\Controllers\Admin\Shift\ShiftController::class, 'store'])->name('store');
+            Route::get('definitions/{shift}',        [\App\Http\Controllers\Admin\Shift\ShiftController::class, 'show'])->name('show');
+            Route::get('definitions/{shift}/edit',   [\App\Http\Controllers\Admin\Shift\ShiftController::class, 'edit'])->name('edit');
+            Route::put('definitions/{shift}',        [\App\Http\Controllers\Admin\Shift\ShiftController::class, 'update'])->name('update');
+            Route::delete('definitions/{shift}',     [\App\Http\Controllers\Admin\Shift\ShiftController::class, 'destroy'])->name('destroy');
+
+            // Assignments
+            Route::get('assignments',                     [\App\Http\Controllers\Admin\Shift\ShiftAssignmentController::class, 'index'])->name('assignments.index');
+            Route::get('assignments/create',              [\App\Http\Controllers\Admin\Shift\ShiftAssignmentController::class, 'create'])->name('assignments.create');
+            Route::post('assignments',                    [\App\Http\Controllers\Admin\Shift\ShiftAssignmentController::class, 'store'])->name('assignments.store');
+            Route::delete('assignments/{assignment}',     [\App\Http\Controllers\Admin\Shift\ShiftAssignmentController::class, 'destroy'])->name('assignments.destroy');
+
+            // Exceptions
+            Route::get('exceptions',                      [\App\Http\Controllers\Admin\Shift\AttendanceExceptionController::class, 'index'])->name('exceptions.index');
+            Route::post('exceptions/bulk-approve',        [\App\Http\Controllers\Admin\Shift\AttendanceExceptionController::class, 'bulkApprove'])->name('exceptions.bulk-approve');
+            Route::post('exceptions/validate-date',       [\App\Http\Controllers\Admin\Shift\AttendanceExceptionController::class, 'validateDate'])->name('exceptions.validate-date');
+            Route::post('exceptions/{exception}/approve', [\App\Http\Controllers\Admin\Shift\AttendanceExceptionController::class, 'approve'])->name('exceptions.approve');
+            Route::post('exceptions/{exception}/reject',  [\App\Http\Controllers\Admin\Shift\AttendanceExceptionController::class, 'reject'])->name('exceptions.reject');
+
+            // Change requests
+            Route::get('change-requests',                           [\App\Http\Controllers\Admin\Shift\ShiftChangeRequestController::class, 'index'])->name('change-requests.index');
+            Route::post('change-requests/{changeRequest}/approve',  [\App\Http\Controllers\Admin\Shift\ShiftChangeRequestController::class, 'approve'])->name('change-requests.approve');
+            Route::post('change-requests/{changeRequest}/reject',   [\App\Http\Controllers\Admin\Shift\ShiftChangeRequestController::class, 'reject'])->name('change-requests.reject');
+
+            // Holidays
+            Route::get('holidays',            [\App\Http\Controllers\Admin\Shift\ShiftHolidayController::class, 'index'])->name('holidays.index');
+            Route::post('holidays',           [\App\Http\Controllers\Admin\Shift\ShiftHolidayController::class, 'store'])->name('holidays.store');
+            Route::delete('holidays/{holiday}', [\App\Http\Controllers\Admin\Shift\ShiftHolidayController::class, 'destroy'])->name('holidays.destroy');
+        });
+
         // Internal API
         Route::get('api/roles', [\App\Http\Controllers\Admin\RoleController::class, 'getRolesByDepartment'])->name('api.roles');
         Route::get('api/projects/{project}/members', [\App\Http\Controllers\Admin\TaskController::class, 'getProjectMembers'])->name('api.project.members');
@@ -96,6 +134,7 @@ Route::middleware('auth')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\HR\HRDashboardController::class, 'index'])->name('dashboard');
 
             // Employee profiles
+            Route::get('employees', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'index'])->name('employees.index');
             Route::get('employees/{employee}', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'show'])->name('employees.show');
             Route::get('employees/{employee}/edit', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'editProfile'])->name('employees.edit');
             Route::put('employees/{employee}', [\App\Http\Controllers\Admin\HR\EmployeeProfileController::class, 'updateProfile'])->name('employees.update');
