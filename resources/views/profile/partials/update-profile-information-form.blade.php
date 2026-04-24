@@ -22,13 +22,15 @@
             
             <div class="mt-2 flex items-center gap-4">
                 <div class="relative">
-                    @if($user->avatar)
-                        <img src="{{ Str::startsWith($user->avatar, 'http') ? $user->avatar : asset('storage/' . $user->avatar) }}" alt="{{ $user->name }}" class="w-20 h-20 rounded-full object-cover border">
-                    @else
-                        <div class="w-20 h-20 rounded-full bg-gray-200 flex items-center justify-center text-gray-500">
-                            <i class="fi fi-rr-user text-2xl"></i>
-                        </div>
-                    @endif
+                    <div id="avatar-preview-fallback" class="w-20 h-20 rounded-full bg-primary-subtle border d-flex align-items-center justify-content-center text-primary fw-semibold {{ $user->avatar_url ? 'hidden' : '' }}">
+                        {{ $user->avatar_initials }}
+                    </div>
+                    <img
+                        id="avatar-preview-image"
+                        src="{{ $user->avatar_url }}"
+                        alt="{{ $user->name }}"
+                        class="w-20 h-20 rounded-full object-cover border {{ $user->avatar_url ? '' : 'hidden' }}"
+                    >
                 </div>
                 
                 <div class="flex-1">
@@ -40,7 +42,7 @@
 
                     <!-- URL Input -->
                     <div class="flex gap-2">
-                        <x-text-input id="avatar_url" name="avatar_url" type="url" class="block w-full text-sm" placeholder="Or paste image link..." :value="old('avatar_url')" />
+                        <x-text-input id="avatar_url" name="avatar_url" type="url" class="block w-full text-sm" placeholder="Or paste image link..." :value="old('avatar_url', Str::startsWith((string) $user->avatar, 'http') ? $user->avatar : '')" />
                     </div>
                 </div>
             </div>

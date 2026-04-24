@@ -60,6 +60,9 @@
             const cropperModal = document.getElementById('cropper-modal');
             const cropperModalBackdrop = document.getElementById('cropper-modal-backdrop');
             const cropperImage = document.getElementById('cropper-image');
+            const avatarPreviewImage = document.getElementById('avatar-preview-image');
+            const avatarPreviewFallback = document.getElementById('avatar-preview-fallback');
+            const avatarUrlInput = document.getElementById('avatar_url');
             const cropBtn = document.getElementById('crop-btn');
             const cancelCropBtn = document.getElementById('cancel-crop-btn');
             let cropper;
@@ -130,6 +133,22 @@
                 }
             }
 
+            function setPreview(src) {
+                if (!avatarPreviewImage || !avatarPreviewFallback) {
+                    return;
+                }
+
+                if (src) {
+                    avatarPreviewImage.src = src;
+                    avatarPreviewImage.classList.remove('hidden');
+                    avatarPreviewFallback.classList.add('hidden');
+                } else {
+                    avatarPreviewImage.src = '';
+                    avatarPreviewImage.classList.add('hidden');
+                    avatarPreviewFallback.classList.remove('hidden');
+                }
+            }
+
             cancelCropBtn.addEventListener('click', () => closeModal(true));
 
             cropBtn.addEventListener('click', function () {
@@ -162,16 +181,27 @@
                     dataTransfer.items.add(file);
                     avatarUpload.files = dataTransfer.files;
 
-                    // Update preview immediately
-                    const preview = document.querySelector('img[alt="{{ $user->name }}"]');
-                    if (preview) {
-                        preview.src = canvas.toDataURL();
+                    if (avatarUrlInput) {
+                        avatarUrlInput.value = '';
                     }
+                    setPreview(canvas.toDataURL());
 
                     // Close modal without clearing input
                     closeModal(false);
                 }, 'image/png');
             });
+
+            if (avatarUrlInput) {
+                avatarUrlInput.addEventListener('input', function () {
+                    const value = this.value.trim();
+                    if (value !== '') {
+                        avatarUpload.value = '';
+                        setPreview(value);
+                    } else if (!avatarUpload.files.length) {
+                        setPreview('');
+                    }
+                });
+            }
 
             // Close modal when clicking backdrop
             if (cropperModalBackdrop) {

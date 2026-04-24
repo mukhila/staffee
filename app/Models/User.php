@@ -19,6 +19,7 @@ use App\Traits\HasPermissions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -268,5 +269,30 @@ class User extends Authenticatable
     public function revokeAgentToken(): void
     {
         $this->update(['agent_token' => null]);
+    }
+
+    public function getAvatarInitialsAttribute(): string
+    {
+        $parts = preg_split('/\s+/', trim((string) $this->name)) ?: [];
+        $initials = collect($parts)
+            ->filter()
+            ->take(2)
+            ->map(fn ($part) => strtoupper(substr($part, 0, 1)))
+            ->implode('');
+
+        return $initials !== '' ? $initials : 'U';
+    }
+
+    public function getAvatarUrlAttribute(): ?string
+    {
+        if (!$this->avatar) {
+            return null;
+        }
+
+        if (str_starts_with($this->avatar, 'http')) {
+            return $this->avatar;
+        }
+
+        return Storage::disk('public')->url($this->avatar);
     }
 }

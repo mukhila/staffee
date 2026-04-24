@@ -133,22 +133,14 @@
                   <i class="fi fi-rr-angle-down text-3xs me-1"></i> {{ Auth::user()->role ?? 'Guest' }}
                 </small>
               </div>
-              <div class="avatar avatar-sm rounded-circle avatar-status-success">
-                @if(Auth::user()->avatar)
-                    <img src="{{ Str::startsWith(Auth::user()->avatar, 'http') ? Auth::user()->avatar : asset('storage/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" class="rounded-circle object-cover">
-                @else
-                    <img src="{{ asset('assets/images/avatar/avatar1.webp') }}" alt="">
-                @endif
+              <div class="avatar avatar-sm rounded-circle avatar-status-success bg-primary text-white d-inline-flex align-items-center justify-content-center fw-semibold">
+                {{ Auth::user()->avatar_initials }}
               </div>
             </a>
             <ul class="dropdown-menu dropdown-menu-end w-225px mt-1">
               <li class="d-flex align-items-center p-2">
-                <div class="avatar avatar-sm rounded-circle">
-                    @if(Auth::user()->avatar)
-                        <img src="{{ Str::startsWith(Auth::user()->avatar, 'http') ? Auth::user()->avatar : asset('storage/' . Auth::user()->avatar) }}" alt="{{ Auth::user()->name }}" class="rounded-circle object-cover">
-                    @else
-                        <img src="{{ asset('assets/images/avatar/avatar1.webp') }}" alt="">
-                    @endif
+                <div class="avatar avatar-sm rounded-circle bg-primary text-white d-inline-flex align-items-center justify-content-center fw-semibold">
+                    {{ Auth::user()->avatar_initials }}
                 </div>
                 <div class="ms-2">
                   <div class="fw-bold text-dark">{{ Auth::user()->name ?? 'Guest' }}</div>
