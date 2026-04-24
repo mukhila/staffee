@@ -29,7 +29,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('payroll_calendar_id')->constrained('payroll_calendars')->cascadeOnDelete();
             $table->enum('run_type', ['regular', 'supplementary', 'adjustment', 'full_final'])->default('regular');
-            $table->string('currency_code', 3)->default('Ruppee');
+            $table->string('currency_code', 3)->default('INR');
             $table->enum('employee_scope_type', ['all', 'department', 'employee_list'])->default('all');
             $table->json('employee_scope')->nullable();
             $table->enum('status', [
@@ -76,7 +76,7 @@ return new class extends Migration
                 ->nullable()
                 ->constrained('employee_salary_structures')
                 ->nullOnDelete();
-            $table->string('currency_code', 3)->default('USD');
+            $table->string('currency_code', 3)->default('INR');
             $table->enum('pay_frequency', ['monthly', 'bi_weekly'])->default('monthly');
             $table->date('period_start');
             $table->date('period_end');

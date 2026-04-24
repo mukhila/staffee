@@ -25,7 +25,7 @@ return new class extends Migration
             ]);
             $table->date('effective_date');
             $table->date('retroactive_from')->nullable();
-            $table->string('proposed_currency_code', 3)->default('Ruppee');
+            $table->string('proposed_currency_code', 3)->default('INR');
             $table->decimal('proposed_base_salary', 18, 6);
             $table->decimal('old_gross_monthly', 18, 6)->nullable();
             $table->decimal('new_gross_monthly', 18, 6);

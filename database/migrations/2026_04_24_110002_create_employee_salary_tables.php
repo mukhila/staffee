@@ -20,7 +20,7 @@ return new class extends Migration
                 ->constrained('payroll_grade_structures')
                 ->nullOnDelete();
             $table->enum('pay_frequency', ['monthly', 'bi_weekly'])->default('monthly');
-            $table->string('currency_code', 3)->default('Rs');
+            $table->string('currency_code', 3)->default('INR');
             $table->decimal('annual_ctc', 18, 6)->nullable();
             $table->decimal('monthly_base_salary', 18, 6);
             $table->unsignedSmallInteger('standard_work_days')->default(30);

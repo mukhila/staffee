@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('code', 50);
             $table->string('name', 150);
             $table->foreignId('department_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('currency_code', 3)->default('Ruppee');
+            $table->string('currency_code', 3)->default('INR');
             $table->enum('pay_frequency', ['monthly', 'bi_weekly'])->default('monthly');
             $table->decimal('min_ctc', 18, 6)->nullable();
             $table->decimal('max_ctc', 18, 6)->nullable();
