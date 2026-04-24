@@ -52,6 +52,11 @@ class PermissionSeeder extends Seeder
         // Admin Settings
         'manage-system-settings' => ['Manage System Settings','admin_settings',    'Change company-wide application settings'],
         'view-audit-logs'        => ['View Audit Logs',       'admin_settings',    'Access system audit and activity logs'],
+
+        // Employee Monitoring
+        'view-monitoring'        => ['View Monitoring',       'monitoring',        'Access the live monitoring dashboard and activity logs'],
+        'view-screenshots'       => ['View Screenshots',      'monitoring',        'View captured employee screenshots'],
+        'manage-monitoring'      => ['Manage Monitoring',     'monitoring',        'Configure monitoring settings and manage agent tokens'],
     ];
 
     /**

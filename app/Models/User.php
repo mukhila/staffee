@@ -14,6 +14,7 @@ use App\Models\Payroll\PayrollAdjustment;
 use App\Models\Payroll\PayrollRunEmployee;
 use App\Models\Payroll\PayrollSlip;
 use App\Models\Payroll\SalaryRevisionRequest;
+use App\Models\Monitoring\MonitoringSession;
 use App\Traits\HasPermissions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -25,7 +26,7 @@ class User extends Authenticatable
 
     protected $fillable = [
         'name', 'email', 'password', 'role', 'phone', 'address',
-        'department_id', 'reporting_to', 'is_active', 'avatar',
+        'department_id', 'reporting_to', 'is_active', 'avatar', 'agent_token',
     ];
 
     protected $hidden = ['password', 'remember_token'];
@@ -234,5 +235,38 @@ class User extends Authenticatable
     public function scopeExcludeAdmin($query)
     {
         return $query->where('role', '!=', 'admin');
+    }
+
+    // ─── Monitoring ───────────────────────────────────────────────────────────
+
+    public function monitoringSessions()
+    {
+        return $this->hasMany(MonitoringSession::class);
+    }
+
+    public function activeMonitoringSession(): ?MonitoringSession
+    {
+        return $this->monitoringSessions()
+            ->where('status', 'active')
+            ->where('last_heartbeat_at', '>=', now()->subMinutes(3))
+            ->latest('last_heartbeat_at')
+            ->first();
+    }
+
+    public function isOnline(): bool
+    {
+        return $this->activeMonitoringSession() !== null;
+    }
+
+    public function generateAgentToken(): string
+    {
+        $token = bin2hex(random_bytes(32)); // 64-char hex
+        $this->update(['agent_token' => $token]);
+        return $token;
+    }
+
+    public function revokeAgentToken(): void
+    {
+        $this->update(['agent_token' => null]);
     }
 }

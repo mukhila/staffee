@@ -149,6 +149,24 @@ Route::middleware('auth')->group(function () {
         // Announcements
         Route::resource('announcements', \App\Http\Controllers\Admin\AnnouncementController::class);
 
+        // ── Employee Monitoring ────────────────────────────────────────────────
+        Route::prefix('monitoring')->name('monitoring.')->group(function () {
+            // Live status board
+            Route::get('/', [\App\Http\Controllers\Admin\Monitoring\MonitoringController::class, 'index'])->name('index');
+            // Per-employee detail + activity
+            Route::get('employees/{user}', [\App\Http\Controllers\Admin\Monitoring\MonitoringController::class, 'show'])->name('show');
+            // Screenshot gallery
+            Route::get('employees/{user}/screenshots', [\App\Http\Controllers\Admin\Monitoring\MonitoringScreenshotController::class, 'index'])->name('screenshots.index');
+            Route::post('screenshots/{screenshot}/flag', [\App\Http\Controllers\Admin\Monitoring\MonitoringScreenshotController::class, 'flag'])->name('screenshots.flag');
+            Route::delete('screenshots/{screenshot}', [\App\Http\Controllers\Admin\Monitoring\MonitoringScreenshotController::class, 'destroy'])->name('screenshots.destroy');
+            // Settings & token management
+            Route::get('settings', [\App\Http\Controllers\Admin\Monitoring\MonitoringSettingController::class, 'index'])->name('settings.index');
+            Route::post('settings', [\App\Http\Controllers\Admin\Monitoring\MonitoringSettingController::class, 'store'])->name('settings.store');
+            Route::delete('settings/{setting}', [\App\Http\Controllers\Admin\Monitoring\MonitoringSettingController::class, 'destroy'])->name('settings.destroy');
+            Route::post('tokens/{user}/generate', [\App\Http\Controllers\Admin\Monitoring\MonitoringSettingController::class, 'generateToken'])->name('tokens.generate');
+            Route::delete('tokens/{user}/revoke', [\App\Http\Controllers\Admin\Monitoring\MonitoringSettingController::class, 'revokeToken'])->name('tokens.revoke');
+        });
+
         // Reports
         Route::get('reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
         Route::get('reports/attendance', [\App\Http\Controllers\Admin\ReportController::class, 'attendance'])->name('reports.attendance');

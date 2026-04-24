@@ -154,6 +154,29 @@
       </li>
 
       <li class="menu-heading">
+        <span class="menu-label">Monitoring</span>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.monitoring.index') }}">
+          <i class="fi fi-rr-desktop"></i>
+          <span class="menu-label">Live Status</span>
+          @php
+            $onlineCount = \App\Models\Monitoring\MonitoringSession::where('status','active')
+              ->where('last_heartbeat_at','>=',now()->subMinutes(3))->count();
+          @endphp
+          @if($onlineCount > 0)
+          <span class="badge bg-success ms-auto">{{ $onlineCount }}</span>
+          @endif
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.monitoring.settings.index') }}">
+          <i class="fi fi-rr-shield-check"></i>
+          <span class="menu-label">Settings & Tokens</span>
+        </a>
+      </li>
+
+      <li class="menu-heading">
         <span class="menu-label">Settings</span>
       </li>
       <li class="menu-item">
