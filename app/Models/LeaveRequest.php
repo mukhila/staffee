@@ -103,6 +103,12 @@ class LeaveRequest extends Model
         return $query->whereNotIn('status', ['rejected', 'cancelled']);
     }
 
+    public function scopeForDateRange($query, string $start, string $end)
+    {
+        return $query->where('from_date', '<=', $end)
+                     ->where('to_date', '>=', $start);
+    }
+
     // ── Helpers ───────────────────────────────────────────────────────────────
 
     public function isPending(): bool   { return $this->status === 'pending'; }
@@ -111,6 +117,41 @@ class LeaveRequest extends Model
     {
         return in_array($this->status, ['pending', 'manager_approved'])
             && $this->from_date->isFuture();
+    }
+
+    /**
+     * Calendar duration in working days (already stored in `days`).
+     * This accessor is the canonical "how long is this leave" method.
+     */
+    public function leavesDuration(): float
+    {
+        return (float) $this->days;
+    }
+
+    /**
+     * Does this request's date range overlap with another request?
+     */
+    public function isOverlapping(self $other): bool
+    {
+        return $this->from_date->lte($other->to_date)
+            && $this->to_date->gte($other->from_date);
+    }
+
+    /**
+     * Can a given user approve / act on this request?
+     */
+    public function canApprove(\App\Models\User $user): bool
+    {
+        if (!in_array($this->status, ['pending', 'manager_approved'])) {
+            return false;
+        }
+
+        if ($user->id === $this->user_id) {
+            return false; // cannot approve own leave
+        }
+
+        return $user->role === 'admin'
+            || ($user->role === 'pm' && $user->department_id === $this->user->department_id);
     }
 
     public function getStatusColorAttribute(): string

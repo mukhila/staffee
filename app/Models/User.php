@@ -9,6 +9,11 @@ use App\Models\HR\ResignationRequest;
 use App\Models\HR\SalaryRevision;
 use App\Models\HR\TerminationRequest;
 use App\Models\HR\WarningRecord;
+use App\Models\Payroll\EmployeeSalaryStructure;
+use App\Models\Payroll\PayrollAdjustment;
+use App\Models\Payroll\PayrollRunEmployee;
+use App\Models\Payroll\PayrollSlip;
+use App\Models\Payroll\SalaryRevisionRequest;
 use App\Traits\HasPermissions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -115,6 +120,42 @@ class User extends Authenticatable
     public function warnings()
     {
         return $this->hasMany(WarningRecord::class);
+    }
+
+    public function salaryStructures()
+    {
+        return $this->hasMany(EmployeeSalaryStructure::class)->orderByDesc('effective_from');
+    }
+
+    public function activeSalaryStructure()
+    {
+        return $this->hasOne(EmployeeSalaryStructure::class)
+            ->where('status', 'active')
+            ->whereDate('effective_from', '<=', today()->toDateString())
+            ->where(function ($query) {
+                $query->whereNull('effective_to')
+                    ->orWhereDate('effective_to', '>=', today()->toDateString());
+            });
+    }
+
+    public function payrollSlips()
+    {
+        return $this->hasMany(PayrollSlip::class)->orderByDesc('period_end');
+    }
+
+    public function payrollAdjustments()
+    {
+        return $this->hasMany(PayrollAdjustment::class);
+    }
+
+    public function payrollRunEntries()
+    {
+        return $this->hasMany(PayrollRunEmployee::class);
+    }
+
+    public function salaryRevisionRequests()
+    {
+        return $this->hasMany(SalaryRevisionRequest::class)->orderByDesc('effective_date');
     }
 
     // ── Shift relationships ───────────────────────────────────────────────────

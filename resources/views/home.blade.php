@@ -176,43 +176,162 @@
         </div>
     </main>
 
+    @php
+        $applicationModules = [
+            [
+                'title' => 'Dashboard',
+                'icon' => 'fa-chart-pie',
+                'accent' => 'bg-[#022a65]',
+                'iconWrap' => 'bg-[#022a65]',
+                'description' => 'Live visibility into daily operations, team movement, and what needs attention now.',
+                'items' => ['Live status', 'Team activity', 'Notifications'],
+            ],
+            [
+                'title' => 'Attendance',
+                'icon' => 'fa-clock',
+                'accent' => 'bg-[#1861cf]',
+                'iconWrap' => 'bg-[#1861cf]',
+                'description' => 'Keep check-ins reliable, resolve exceptions quickly, and maintain accurate attendance records.',
+                'items' => ['Check-in/out', 'Records', 'Admin override'],
+            ],
+            [
+                'title' => 'Projects & Tasks',
+                'icon' => 'fa-diagram-project',
+                'accent' => 'bg-[#17ac8e]',
+                'iconWrap' => 'bg-[#17ac8e]',
+                'description' => 'Coordinate project delivery with clear ownership, workflows, and shared project assets.',
+                'items' => ['Project management', 'Task assignment', 'Kanban', 'Documents'],
+            ],
+            [
+                'title' => 'Time Tracking',
+                'icon' => 'fa-stopwatch',
+                'accent' => 'bg-[#f89f10]',
+                'iconWrap' => 'bg-[#f89f10]',
+                'description' => 'Track effort with flexible timers, categories, and billable reporting across teams.',
+                'items' => ['Timer', 'Categories', 'Billable rates', 'Reports'],
+            ],
+            [
+                'title' => 'Leave Management',
+                'icon' => 'fa-calendar-check',
+                'accent' => 'bg-[#0f766e]',
+                'iconWrap' => 'bg-[#0f766e]',
+                'description' => 'Manage requests, balances, and policy-driven approvals without leaving the platform.',
+                'items' => ['Requests', 'Types', 'Policies', 'Balances', 'Calendar'],
+            ],
+            [
+                'title' => 'Shift Management',
+                'icon' => 'fa-business-time',
+                'accent' => 'bg-[#2563eb]',
+                'iconWrap' => 'bg-[#2563eb]',
+                'description' => 'Define shifts, plan assignments, and handle edge cases like holidays and exceptions.',
+                'items' => ['Definitions', 'Assignments', 'Exceptions', 'Holidays'],
+            ],
+            [
+                'title' => 'HR Management',
+                'icon' => 'fa-user-tie',
+                'accent' => 'bg-[#022a65]',
+                'iconWrap' => 'bg-white/15',
+                'description' => 'A high-control layer for employee lifecycle operations and sensitive people workflows.',
+                'items' => ['Profiles', 'Promotions', 'Resignations', 'Terminations'],
+                'featured' => true,
+                'surface' => 'bg-[#022a65] text-white border-[#022a65] shadow-[0_28px_80px_rgba(2,42,101,0.18)]',
+                'muted' => 'text-[#d7e9ff]',
+                'chip' => 'border-white/15 bg-white/10 text-white',
+            ],
+            [
+                'title' => 'Communication',
+                'icon' => 'fa-comments',
+                'accent' => 'bg-[#7c3aed]',
+                'iconWrap' => 'bg-[#7c3aed]',
+                'description' => 'Keep people aligned through direct messages, announcements, and built-in notifications.',
+                'items' => ['Chat', 'Mail', 'Notifications', 'Announcements'],
+            ],
+            [
+                'title' => 'QA Tools',
+                'icon' => 'fa-bug',
+                'accent' => 'bg-[#dc2626]',
+                'iconWrap' => 'bg-[#dc2626]',
+                'description' => 'Support delivery quality with bug tracking, test coverage, and daily status visibility.',
+                'items' => ['Bug tracking', 'Test cases', 'DSR'],
+            ],
+            [
+                'title' => 'Reports',
+                'icon' => 'fa-chart-line',
+                'accent' => 'bg-[#1d4ed8]',
+                'iconWrap' => 'bg-[#1d4ed8]',
+                'description' => 'Turn operational activity into usable insights across workforce and delivery metrics.',
+                'items' => ['Attendance', 'Projects', 'Bugs'],
+            ],
+            [
+                'title' => 'Admin & Settings',
+                'icon' => 'fa-shield-halved',
+                'accent' => 'bg-[#1861cf]',
+                'iconWrap' => 'bg-white/15',
+                'description' => 'Centralize administration, access control, and the configuration that governs the platform.',
+                'items' => ['Staff', 'Departments', 'Roles matrix', 'Permissions'],
+                'featured' => true,
+                'surface' => 'bg-[#1861cf] text-white border-[#1861cf] shadow-[0_28px_80px_rgba(24,97,207,0.18)]',
+                'muted' => 'text-[#dbeafe]',
+                'chip' => 'border-white/15 bg-white/10 text-white',
+            ],
+        ];
+    @endphp
+
     <section id="features" class="py-20 bg-slate-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="text-center mx-auto max-w-2xl">
-                <p class="text-sm font-semibold uppercase tracking-[0.32em] text-[#1861cf]">Core capabilities</p>
-                <h2 class="mt-4 text-4xl font-extrabold tracking-tight text-[#022a65] sm:text-5xl">Designed to simplify every part of your workflow.</h2>
-                <p class="mt-4 text-lg leading-8 text-slate-600">From attendance and tasks to reports and chat, Staffee gives your team the tools needed to stay aligned and productive.</p>
+            <div class="mx-auto max-w-3xl text-center">
+                <p class="text-sm font-semibold uppercase tracking-[0.32em] text-[#1861cf]">Application overview</p>
+                <h2 class="mt-4 text-4xl font-extrabold tracking-tight text-[#022a65] sm:text-5xl">All 11 Staffee modules in one connected workspace.</h2>
+                <p class="mt-4 text-lg leading-8 text-slate-600">The platform spans day-to-day execution, team coordination, HR operations, and admin control. HR Management and Admin & Settings are intentionally highlighted to reflect their broader organizational scope.</p>
             </div>
 
-            <div class="mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-                <article class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm hover:shadow-lg transition">
-                    <div class="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-[#022a65] text-white shadow-md">
-                        <i class="fa-solid fa-clock text-lg"></i>
+            <div class="mt-10 rounded-[2rem] border border-slate-200 bg-white/80 p-6 shadow-sm backdrop-blur-sm">
+                <div class="grid gap-4 md:grid-cols-3">
+                    <div class="rounded-[1.5rem] bg-slate-50 px-5 py-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Operational flow</p>
+                        <p class="mt-3 text-2xl font-bold text-[#022a65]">6 modules</p>
+                        <p class="mt-2 text-sm text-slate-600">Dashboard through Shift Management cover everyday workforce execution.</p>
                     </div>
-                    <h3 class="mt-6 text-xl font-semibold text-[#022a65]">Attendance tracking</h3>
-                    <p class="mt-3 text-sm leading-6 text-slate-600">Fast clock-ins, attendance history, and compliance-ready reporting.</p>
-                </article>
-                <article class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm hover:shadow-lg transition">
-                    <div class="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-[#1861cf] text-white shadow-md">
-                        <i class="fa-solid fa-list-check text-lg"></i>
+                    <div class="rounded-[1.5rem] bg-slate-50 px-5 py-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Collaboration layer</p>
+                        <p class="mt-3 text-2xl font-bold text-[#022a65]">3 modules</p>
+                        <p class="mt-2 text-sm text-slate-600">Projects, communication, and QA tools keep delivery and feedback moving.</p>
                     </div>
-                    <h3 class="mt-6 text-xl font-semibold text-[#022a65]">Task management</h3>
-                    <p class="mt-3 text-sm leading-6 text-slate-600">Create assignments, track progress, and keep every deadline in view.</p>
-                </article>
-                <article class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm hover:shadow-lg transition">
-                    <div class="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-[#17ac8e] text-white shadow-md">
-                        <i class="fa-solid fa-comments text-lg"></i>
+                    <div class="rounded-[1.5rem] bg-slate-50 px-5 py-4">
+                        <p class="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Control center</p>
+                        <p class="mt-3 text-2xl font-bold text-[#022a65]">2 featured</p>
+                        <p class="mt-2 text-sm text-slate-600">HR Management and Admin & Settings stand out as platform-level oversight modules.</p>
                     </div>
-                    <h3 class="mt-6 text-xl font-semibold text-[#022a65]">Team communication</h3>
-                    <p class="mt-3 text-sm leading-6 text-slate-600">Keep conversations, files, and feedback in one secure channel.</p>
-                </article>
-                <article class="rounded-[2rem] border border-slate-200 bg-white p-8 shadow-sm hover:shadow-lg transition">
-                    <div class="inline-flex h-14 w-14 items-center justify-center rounded-3xl bg-[#f89f10] text-white shadow-md">
-                        <i class="fa-solid fa-chart-line text-lg"></i>
-                    </div>
-                    <h3 class="mt-6 text-xl font-semibold text-[#022a65]">Reports & analytics</h3>
-                    <p class="mt-3 text-sm leading-6 text-slate-600">Instant insights into performance, workload, and team health.</p>
-                </article>
+                </div>
+            </div>
+
+            <div class="mt-16 grid gap-6 md:grid-cols-2 xl:grid-cols-3">
+                @foreach ($applicationModules as $module)
+                    <article class="rounded-[2rem] border p-8 transition hover:-translate-y-1 hover:shadow-xl {{ $module['surface'] ?? 'border-slate-200 bg-white shadow-sm' }}">
+                        <div class="flex items-start justify-between gap-4">
+                            <div class="inline-flex h-14 w-14 items-center justify-center rounded-3xl text-white shadow-md {{ $module['iconWrap'] }}">
+                                <i class="fa-solid {{ $module['icon'] }} text-lg"></i>
+                            </div>
+                            <span class="inline-flex items-center rounded-full px-3 py-1 text-xs font-semibold uppercase tracking-[0.18em] {{ $module['chip'] ?? 'border border-slate-200 bg-slate-50 text-slate-500' }}">
+                                {{ !empty($module['featured']) ? 'Featured module' : 'Core module' }}
+                            </span>
+                        </div>
+
+                        <div class="mt-6">
+                            <div class="h-1.5 w-16 rounded-full {{ $module['accent'] }}"></div>
+                            <h3 class="mt-5 text-2xl font-semibold {{ !empty($module['featured']) ? 'text-white' : 'text-[#022a65]' }}">{{ $module['title'] }}</h3>
+                            <p class="mt-3 text-sm leading-6 {{ $module['muted'] ?? 'text-slate-600' }}">{{ $module['description'] }}</p>
+                        </div>
+
+                        <div class="mt-6 flex flex-wrap gap-2">
+                            @foreach ($module['items'] as $item)
+                                <span class="inline-flex items-center rounded-full border px-3 py-2 text-xs font-medium {{ $module['chip'] ?? 'border-slate-200 bg-slate-50 text-slate-700' }}">
+                                    {{ $item }}
+                                </span>
+                            @endforeach
+                        </div>
+                    </article>
+                @endforeach
             </div>
         </div>
     </section>

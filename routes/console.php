@@ -23,3 +23,27 @@ Schedule::job(new ShiftAssignmentReminderJob())
     ->at('18:00')
     ->name('shift-assignment-reminder')
     ->withoutOverlapping();
+
+// Monthly leave accrual: runs at 00:30 on the 1st of each month
+Schedule::job(new \App\Jobs\Leave\MonthlyLeaveAccrualJob(Carbon::today()->startOfMonth()))
+    ->monthlyOn(1, '00:30')
+    ->name('monthly-leave-accrual')
+    ->withoutOverlapping();
+
+// Year-end carry-forward: runs at 23:00 on Dec 31
+Schedule::job(new \App\Jobs\Leave\YearEndCarryForwardJob(Carbon::today()->year))
+    ->yearlyOn(12, 31, '23:00')
+    ->name('year-end-leave-carry-forward')
+    ->withoutOverlapping();
+
+// Low balance warning: runs on the 1st of each month
+Schedule::job(new \App\Jobs\Leave\LowBalanceWarningJob())
+    ->monthlyOn(1, '09:00')
+    ->name('low-leave-balance-warning')
+    ->withoutOverlapping();
+
+// Daily leave reminders: runs every morning at 08:00
+Schedule::job(new \App\Jobs\Leave\LeaveReminderJob())
+    ->dailyAt('08:00')
+    ->name('leave-reminder')
+    ->withoutOverlapping();

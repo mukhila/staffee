@@ -49,11 +49,14 @@ Route::middleware('auth')->group(function () {
     Route::resource('bugs', \App\Http\Controllers\Staff\BugController::class, ['as' => 'staff']);
     Route::post('time-tracker/start', [App\Http\Controllers\Staff\TimeTrackerController::class, 'start'])->name('time-tracker.start');
     Route::post('time-tracker/stop', [App\Http\Controllers\Staff\TimeTrackerController::class, 'stop'])->name('time-tracker.stop');
+    Route::get('time-tracker/active', [App\Http\Controllers\Staff\TimeTrackerController::class, 'active'])->name('time-tracker.active');
+    Route::get('time-tracker/categories', [App\Http\Controllers\Staff\TimeTrackerController::class, 'categories'])->name('time-tracker.categories');
     Route::resource('daily-status-reports', \App\Http\Controllers\Staff\DailyStatusReportController::class, ['as' => 'staff']);
 
     // Leave requests (staff)
     Route::resource('leaves', \App\Http\Controllers\Staff\LeaveController::class, ['as' => 'staff'])
-        ->only(['index', 'create', 'store', 'destroy']);
+        ->only(['index', 'create', 'store', 'show', 'destroy'])
+        ->parameters(['leaves' => 'leave']);
 
     // Admin panel
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -74,8 +77,74 @@ Route::middleware('auth')->group(function () {
 
         // Leave management (admin)
         Route::get('leaves', [\App\Http\Controllers\Admin\LeaveController::class, 'index'])->name('leaves.index');
+        Route::get('leaves/{leave}', [\App\Http\Controllers\Admin\LeaveController::class, 'show'])->name('leaves.show');
         Route::post('leaves/{leave}/approve', [\App\Http\Controllers\Admin\LeaveController::class, 'approve'])->name('leaves.approve');
+        Route::post('leaves/{leave}/hr-approve', [\App\Http\Controllers\Admin\LeaveController::class, 'hrApprove'])->name('leaves.hr-approve');
         Route::post('leaves/{leave}/reject', [\App\Http\Controllers\Admin\LeaveController::class, 'reject'])->name('leaves.reject');
+
+        // Leave Types
+        Route::prefix('leave-types')->name('leaves.types.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\Leave\LeaveTypeController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\Leave\LeaveTypeController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\Leave\LeaveTypeController::class, 'store'])->name('store');
+            Route::get('/{type}/edit', [\App\Http\Controllers\Admin\Leave\LeaveTypeController::class, 'edit'])->name('edit');
+            Route::put('/{type}', [\App\Http\Controllers\Admin\Leave\LeaveTypeController::class, 'update'])->name('update');
+            Route::delete('/{type}', [\App\Http\Controllers\Admin\Leave\LeaveTypeController::class, 'destroy'])->name('destroy');
+        });
+
+        // Leave Policies
+        Route::prefix('leave-policies')->name('leaves.policies.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\Leave\LeavePolicyController::class, 'index'])->name('index');
+            Route::get('/create', [\App\Http\Controllers\Admin\Leave\LeavePolicyController::class, 'create'])->name('create');
+            Route::post('/', [\App\Http\Controllers\Admin\Leave\LeavePolicyController::class, 'store'])->name('store');
+            Route::delete('/{policy}', [\App\Http\Controllers\Admin\Leave\LeavePolicyController::class, 'destroy'])->name('destroy');
+        });
+
+        // Leave Balances
+        Route::prefix('leave-balances')->name('leaves.balances.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\Leave\LeaveBalanceController::class, 'index'])->name('index');
+            Route::post('/adjust', [\App\Http\Controllers\Admin\Leave\LeaveBalanceController::class, 'adjust'])->name('adjust');
+            Route::post('/run-accrual', [\App\Http\Controllers\Admin\Leave\LeaveBalanceController::class, 'runAccrual'])->name('run-accrual');
+        });
+
+        // Leave Reports
+        Route::prefix('leave-reports')->name('leaves.reports.')->group(function () {
+            Route::get('/', [\App\Http\Controllers\Admin\Leave\LeaveReportController::class, 'index'])->name('index');
+            Route::get('/compliance', [\App\Http\Controllers\Admin\Leave\LeaveReportController::class, 'compliance'])->name('compliance');
+            Route::get('/trends', [\App\Http\Controllers\Admin\Leave\LeaveReportController::class, 'trends'])->name('trends');
+        });
+
+        // Leave Approval Dashboard
+        Route::get('leave-approvals', [\App\Http\Controllers\Admin\LeaveController::class, 'approvalDashboard'])->name('leaves.approvals');
+
+        // Team Leave Calendar
+        Route::get('leave-calendar', [\App\Http\Controllers\Admin\LeaveController::class, 'calendar'])->name('leaves.calendar');
+
+        // ── Time Tracking ──────────────────────────────────────────────────────
+        Route::prefix('time')->name('time.')->group(function () {
+            // Time log
+            Route::get('/', [\App\Http\Controllers\Admin\TimeTrackerController::class, 'index'])->name('index');
+            Route::delete('{entry}', [\App\Http\Controllers\Admin\TimeTrackerController::class, 'destroy'])->name('destroy');
+
+            // Categories CRUD
+            Route::resource('categories', \App\Http\Controllers\Admin\Time\TimeCategoryController::class)
+                ->except(['show'])
+                ->names('categories');
+
+            // Billable Rates
+            Route::get('rates', [\App\Http\Controllers\Admin\Time\BillableRateController::class, 'index'])->name('rates.index');
+            Route::get('rates/create', [\App\Http\Controllers\Admin\Time\BillableRateController::class, 'create'])->name('rates.create');
+            Route::post('rates', [\App\Http\Controllers\Admin\Time\BillableRateController::class, 'store'])->name('rates.store');
+            Route::delete('rates/{rate}', [\App\Http\Controllers\Admin\Time\BillableRateController::class, 'destroy'])->name('rates.destroy');
+
+            // Reports
+            Route::prefix('reports')->name('reports.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\Time\TimeReportController::class, 'index'])->name('index');
+                Route::get('utilization', [\App\Http\Controllers\Admin\Time\TimeReportController::class, 'utilization'])->name('utilization');
+                Route::get('revenue', [\App\Http\Controllers\Admin\Time\TimeReportController::class, 'revenue'])->name('revenue');
+                Route::get('export', [\App\Http\Controllers\Admin\Time\TimeReportController::class, 'export'])->name('export');
+            });
+        });
 
         // Announcements
         Route::resource('announcements', \App\Http\Controllers\Admin\AnnouncementController::class);
@@ -182,7 +251,30 @@ Route::middleware('auth')->group(function () {
             Route::post('terminations/{termination}/settlement/approve', [\App\Http\Controllers\Admin\HR\TerminationController::class, 'approveSettlement'])->name('terminations.settlement.approve');
             Route::post('terminations/{termination}/finalize', [\App\Http\Controllers\Admin\HR\TerminationController::class, 'finalize'])->name('terminations.finalize');
         });
+
+        Route::prefix('payroll')->name('payroll.')->group(function () {
+            Route::get('salary-structures', [\App\Http\Controllers\Admin\Payroll\SalaryStructureController::class, 'index'])->name('salary-structures.index');
+            Route::get('salary-structures/create', [\App\Http\Controllers\Admin\Payroll\SalaryStructureController::class, 'create'])->name('salary-structures.create');
+            Route::post('salary-structures', [\App\Http\Controllers\Admin\Payroll\SalaryStructureController::class, 'store'])->name('salary-structures.store');
+            Route::get('salary-structures/{salaryStructure}/edit', [\App\Http\Controllers\Admin\Payroll\SalaryStructureController::class, 'edit'])->name('salary-structures.edit');
+            Route::put('salary-structures/{salaryStructure}', [\App\Http\Controllers\Admin\Payroll\SalaryStructureController::class, 'update'])->name('salary-structures.update');
+            Route::get('salary-structures/{salaryStructure}/revisions', [\App\Http\Controllers\Admin\Payroll\SalaryStructureController::class, 'revisions'])->name('salary-structures.revisions');
+
+            Route::get('runs', [\App\Http\Controllers\Admin\Payroll\PayrollController::class, 'index'])->name('runs.index');
+            Route::post('runs/initiate', [\App\Http\Controllers\Admin\Payroll\PayrollController::class, 'initiateRun'])->name('runs.initiate');
+            Route::post('runs/{payrollRun}/process', [\App\Http\Controllers\Admin\Payroll\PayrollController::class, 'processPayroll'])->name('runs.process');
+            Route::post('runs/{payrollRun}/publish', [\App\Http\Controllers\Admin\Payroll\PayrollController::class, 'publishSlips'])->name('runs.publish');
+            Route::get('runs/{payrollRun}/status', [\App\Http\Controllers\Admin\Payroll\PayrollController::class, 'viewStatus'])->name('runs.status');
+
+            Route::post('settlements/initiate', [\App\Http\Controllers\Admin\Payroll\SettlementController::class, 'initiate'])->name('settlements.initiate');
+            Route::post('settlements/{termination}/finalize', [\App\Http\Controllers\Admin\Payroll\SettlementController::class, 'finalize'])->name('settlements.finalize');
+        });
     });
+});
+
+Route::middleware('auth')->prefix('payroll')->name('payroll.')->group(function () {
+    Route::get('slips/{payrollSlip}', [\App\Http\Controllers\Payroll\PayrollSlipController::class, 'showSlip'])->name('slips.show');
+    Route::get('slips/{payrollSlip}/download', [\App\Http\Controllers\Payroll\PayrollSlipController::class, 'downloadSlip'])->name('slips.download');
 });
 
 require __DIR__.'/auth.php';

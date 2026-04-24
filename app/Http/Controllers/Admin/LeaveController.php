@@ -3,61 +3,80 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Leave\LeaveType;
 use App\Models\LeaveRequest;
-use App\Models\Notification;
+use App\Services\Leave\LeaveApprovalService;
+use App\Services\Leave\LeaveRequestService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 
 class LeaveController extends Controller
 {
+    public function __construct(
+        private readonly LeaveRequestService $leaveSvc,
+        private readonly LeaveApprovalService $approvalSvc,
+    ) {}
+
     public function index(Request $request)
     {
-        $query = LeaveRequest::with('user')->orderBy('created_at', 'desc');
+        $leaves = LeaveRequest::with(['user.department', 'leaveType'])
+            ->when($request->status, fn ($q) => $q->where('status', $request->status))
+            ->when($request->type, fn ($q) => $q->where('leave_type_id', $request->type))
+            ->when($request->department, fn ($q) => $q->whereHas('user', fn ($q2) => $q2->where('department_id', $request->department)))
+            ->orderByDesc('created_at')
+            ->paginate(25)
+            ->withQueryString();
 
-        if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
+        $leaveTypes = LeaveType::active()->orderBy('name')->get();
 
-        $leaves = $query->paginate(20);
-
-        return view('admin.leaves.index', compact('leaves'));
+        return view('admin.leaves.index', compact('leaves', 'leaveTypes'));
     }
 
-    public function approve(LeaveRequest $leave)
+    public function show(LeaveRequest $leave)
     {
-        $leave->update([
-            'status'      => 'approved',
-            'reviewed_by' => auth()->id(),
-        ]);
+        $leave->load(['user.department', 'leaveType', 'approvals.approver', 'managerApprover', 'hrApprover']);
+        return view('admin.leaves.show', compact('leave'));
+    }
 
-        Notification::create([
-            'user_id' => $leave->user_id,
-            'type'    => 'leave_approved',
-            'title'   => 'Leave Request Approved',
-            'message' => 'Your ' . $leave->type . ' leave request from ' . $leave->from_date . ' to ' . $leave->to_date . ' has been approved.',
-            'url'     => route('staff.leaves.index'),
-        ]);
+    public function approve(Request $request, LeaveRequest $leave)
+    {
+        $this->leaveSvc->managerApprove($leave, auth()->user(), $request->notes);
+        return back()->with('success', 'Leave approved successfully.');
+    }
 
-        return redirect()->back()->with('success', 'Leave approved.');
+    public function hrApprove(Request $request, LeaveRequest $leave)
+    {
+        $this->leaveSvc->hrApprove($leave, auth()->user(), $request->notes);
+        return back()->with('success', 'Leave HR-approved successfully.');
     }
 
     public function reject(Request $request, LeaveRequest $leave)
     {
         $request->validate(['rejection_reason' => 'required|string|max:500']);
+        $this->leaveSvc->reject($leave, auth()->user(), $request->rejection_reason);
+        return back()->with('success', 'Leave rejected.');
+    }
 
-        $leave->update([
-            'status'           => 'rejected',
-            'reviewed_by'      => auth()->id(),
-            'rejection_reason' => $request->rejection_reason,
-        ]);
+    public function approvalDashboard()
+    {
+        $pending = $this->approvalSvc->getPendingForApprover(auth()->user());
+        return view('admin.leaves.approvals', compact('pending'));
+    }
 
-        Notification::create([
-            'user_id' => $leave->user_id,
-            'type'    => 'leave_rejected',
-            'title'   => 'Leave Request Rejected',
-            'message' => 'Your ' . $leave->type . ' leave request has been rejected. Reason: ' . $request->rejection_reason,
-            'url'     => route('staff.leaves.index'),
-        ]);
+    public function calendar(Request $request)
+    {
+        $year  = (int) ($request->year ?? now()->year);
+        $month = (int) ($request->month ?? now()->month);
 
-        return redirect()->back()->with('success', 'Leave rejected.');
+        $start = Carbon::create($year, $month, 1)->startOfMonth();
+        $end   = $start->copy()->endOfMonth();
+
+        $leaves = LeaveRequest::approved()
+            ->forDateRange($start->toDateString(), $end->toDateString())
+            ->with(['user.department', 'leaveType'])
+            ->orderBy('from_date')
+            ->get();
+
+        return view('admin.leaves.calendar', compact('leaves', 'year', 'month', 'start', 'end'));
     }
 }

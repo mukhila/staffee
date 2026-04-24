@@ -50,9 +50,12 @@
                                     @endif
                                 </td>
                                 <td>{{ $leave->created_at->format('M d, Y') }}</td>
-                                <td>
-                                    @if($leave->status === 'pending')
-                                    <form method="POST" action="{{ route('staff.leaves.destroy', $leave) }}" onsubmit="return confirm('Cancel this leave request?')">
+                                <td class="text-end">
+                                    <a href="{{ route('staff.leaves.show', $leave) }}" class="btn btn-sm btn-outline-secondary me-1">
+                                        <i class="fi fi-rr-eye"></i>
+                                    </a>
+                                    @if($leave->isCancellable())
+                                    <form method="POST" action="{{ route('staff.leaves.destroy', $leave) }}" class="d-inline" onsubmit="return confirm('Cancel this leave request?')">
                                         @csrf @method('DELETE')
                                         <button type="submit" class="btn btn-sm btn-outline-danger">Cancel</button>
                                     </form>

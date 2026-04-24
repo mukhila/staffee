@@ -2,13 +2,15 @@
 <aside class="app-menubar" id="appMenubar">
   <div class="app-navbar-brand">
     <a class="navbar-brand-logo" href="{{ route('dashboard') }}">
-      <img src="{{ asset('assets/images/logo.svg') }}" alt="GXON Admin Dashboard Logo">
+      <img src="{{ asset('assets/images/logo.png') }}" alt="Staffee logo" class="h-11 w-11 rounded-2xl border border-slate-200 object-cover shadow-sm">
     </a>
     <a class="navbar-brand-mini visible-light" href="{{ route('dashboard') }}">
-      <img src="{{ asset('assets/images/logo-text.svg') }}" alt="GXON Admin Dashboard Logo">
+       <img src="{{ asset('assets/images/logo.png') }}" alt="Staffee logo" class="h-11 w-11 rounded-2xl border border-slate-200 object-cover shadow-sm">
+    </a>
     </a>
     <a class="navbar-brand-mini visible-dark" href="{{ route('dashboard') }}">
-      <img src="{{ asset('assets/images/logo-text-white.svg') }}" alt="GXON Admin Dashboard Logo">
+      <img src="{{ asset('assets/images/logo.png') }}" alt="Staffee logo" class="h-11 w-11 rounded-2xl border border-slate-200 object-cover shadow-sm">
+    </a>
     </a>
   </div>
   <nav class="app-navbar" data-simplebar>

@@ -46,6 +46,11 @@ class LeaveBalance extends Model
         return $query->where('year', $year);
     }
 
+    public function scopeCurrent($query)
+    {
+        return $query->where('year', now()->year);
+    }
+
     public function scopeForUser($query, \App\Models\User $user)
     {
         return $query->where('user_id', $user->id);

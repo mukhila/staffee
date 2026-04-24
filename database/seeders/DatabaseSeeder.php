@@ -24,6 +24,7 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
+        $this->call(PayrollComponentSeeder::class);
         $this->call(HRSeeder::class);
         $this->call(ShiftSeeder::class);
     }

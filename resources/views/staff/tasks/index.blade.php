@@ -114,8 +114,19 @@
                 <div class="modal-body">
                     <form id="stopTimerForm">
                         <div class="mb-3">
-                            <label for="timerDescription" class="form-label">Description (What did you do?)</label>
+                            <label for="timerDescription" class="form-label">Description (What did you do?) <span class="text-danger">*</span></label>
                             <textarea class="form-control" id="timerDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="timerCategory" class="form-label">Category</label>
+                            <select class="form-select" id="timerCategory">
+                                <option value="">— Loading categories… —</option>
+                            </select>
+                            <div class="form-text" id="categoryBillableHint"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="timerNotes" class="form-label">Notes</label>
+                            <input type="text" class="form-control" id="timerNotes" maxlength="500" placeholder="Optional internal notes">
                         </div>
                         <div class="mb-3">
                             <label for="timerStatus" class="form-label">Update Status</label>
@@ -138,72 +149,97 @@
     @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            const csrfToken = '{{ csrf_token() }}';
+            const loginUrl  = '{{ route("login") }}';
+
+            function handleUnauth(response) {
+                if (response.status === 401 || response.status === 419) {
+                    window.location.href = loginUrl;
+                    return true;
+                }
+                return false;
+            }
+
+            // Load categories into the stop modal when it opens
+            const stopModal = document.getElementById('stopTimerModal');
+            stopModal.addEventListener('show.bs.modal', function() {
+                fetch('{{ route("time-tracker.categories") }}', {
+                    headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken }
+                })
+                .then(r => r.json())
+                .then(categories => {
+                    const sel = document.getElementById('timerCategory');
+                    sel.innerHTML = '<option value="">— No category —</option>';
+                    categories.forEach(c => {
+                        const opt = document.createElement('option');
+                        opt.value = c.id;
+                        opt.textContent = c.name + (c.is_billable ? ' (Billable)' : ' (Non-billable)');
+                        opt.dataset.billable = c.is_billable ? '1' : '0';
+                        sel.appendChild(opt);
+                    });
+                })
+                .catch(() => {
+                    document.getElementById('timerCategory').innerHTML = '<option value="">— Categories unavailable —</option>';
+                });
+            });
+
+            // Show billable hint when category changes
+            document.getElementById('timerCategory').addEventListener('change', function() {
+                const opt = this.options[this.selectedIndex];
+                const hint = document.getElementById('categoryBillableHint');
+                if (opt && opt.dataset.billable === '1') {
+                    hint.textContent = 'This entry will be counted as billable.';
+                    hint.className = 'form-text text-success';
+                } else if (opt && opt.value) {
+                    hint.textContent = 'This entry will be counted as non-billable.';
+                    hint.className = 'form-text text-muted';
+                } else {
+                    hint.textContent = '';
+                }
+            });
+
             // Start Timer
             document.querySelectorAll('.start-timer-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
-                    const id = this.dataset.id;
+                    const id   = this.dataset.id;
                     const type = this.dataset.type;
 
                     fetch('{{ route("time-tracker.start") }}', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'Accept': 'application/json',
-                            'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                        },
+                        headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
                         body: JSON.stringify({ id, type })
                     })
-                    .then(response => {
-                        if (response.status === 401 || response.status === 419) {
-                            window.location.href = '{{ route("login") }}';
-                            return;
-                        }
-                        return response.json();
-                    })
+                    .then(response => { if (handleUnauth(response)) return; return response.json(); })
                     .then(data => {
-                        if (!data) return; // Handled redirect
-                        if(data.success) {
-                            location.reload();
-                        } else {
-                            alert(data.error || 'Error starting timer');
-                        }
+                        if (!data) return;
+                        if (data.success) { location.reload(); }
+                        else { alert(data.error || 'Error starting timer'); }
                     });
                 });
             });
 
             // Stop Timer
             document.getElementById('confirmStopTimer').addEventListener('click', function() {
-                const description = document.getElementById('timerDescription').value;
-                const status = document.getElementById('timerStatus').value;
+                const description = document.getElementById('timerDescription').value.trim();
+                const status      = document.getElementById('timerStatus').value;
+                const category_id = document.getElementById('timerCategory').value || null;
+                const notes       = document.getElementById('timerNotes').value.trim() || null;
 
-                if(!description) {
+                if (!description) {
                     alert('Please enter a description');
                     return;
                 }
 
                 fetch('{{ route("time-tracker.stop") }}', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Accept': 'application/json',
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
-                    },
-                    body: JSON.stringify({ description, status })
+                    headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
+                    body: JSON.stringify({ description, status, category_id, notes })
                 })
-                .then(response => {
-                    if (response.status === 401 || response.status === 419) {
-                        window.location.href = '{{ route("login") }}';
-                        return;
-                    }
-                    return response.json();
-                })
+                .then(response => { if (handleUnauth(response)) return; return response.json(); })
                 .then(data => {
-                    if (!data) return; // Handled redirect
-                    if(data.success) {
-                        location.reload();
-                    } else {
-                        alert(data.error || 'Error stopping timer');
-                    }
+                    if (!data) return;
+                    if (data.success) { location.reload(); }
+                    else { alert(data.error || 'Error stopping timer'); }
                 });
             });
         });

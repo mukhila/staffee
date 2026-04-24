@@ -1,4 +1,4 @@
-    <!-- begin::GXON Page Header -->
+    <!-- begin::Staffee Page Header -->
     <header class="app-header">
       <div class="app-header-inner">
         <button class="app-toggler" type="button" aria-label="app toggler">
@@ -183,4 +183,4 @@
         </div>
       </div>
     </header>
-    <!-- end::GXON Page Header -->
+    <!-- end::Staffee Page Header -->
