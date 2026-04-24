@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('code', 50);
             $table->string('name', 150);
             $table->foreignId('department_id')->nullable()->constrained()->nullOnDelete();
-            $table->string('currency_code', 3)->default('USD');
+            $table->string('currency_code', 3)->default('Ruppee');
             $table->enum('pay_frequency', ['monthly', 'bi_weekly'])->default('monthly');
             $table->decimal('min_ctc', 18, 6)->nullable();
             $table->decimal('max_ctc', 18, 6)->nullable();
@@ -63,9 +63,9 @@ return new class extends Migration
             $table->foreignId('component_definition_id')
                 ->constrained('payroll_component_definitions')
                 ->cascadeOnDelete();
-            $table->foreignId('basis_component_definition_id')
-                ->constrained('payroll_component_definitions')
-                ->cascadeOnDelete();
+           $table->foreignId('basis_component_definition_id')
+    ->constrained('payroll_component_definitions', 'id', 'pcd_basis_comp_def_fk')
+    ->cascadeOnDelete();
             $table->decimal('percentage', 10, 6);
             $table->decimal('cap_amount', 18, 6)->nullable();
             $table->date('effective_from');
