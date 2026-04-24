@@ -5,8 +5,7 @@
           <div class="card card-body p-4 p-sm-5 maxw-450px m-auto rounded-4 auth-card" data-simplebar>
             <div class="mb-4 text-center">
               <a href="{{ route('dashboard') }}" aria-label="GXON logo">
-                <img class="visible-light" src="{{ asset('assets/images/logo-full.svg') }}" alt="GXON logo">
-                <img class="visible-dark" src="{{ asset('assets/images/logo-full-white.svg') }}" alt="GXON logo">
+                <img src="{{ asset('assets/images/logo.png') }}" alt="Staffee logo" class="h-11 w-11 rounded-2xl border border-slate-200 object-cover shadow-sm">
               </a>
             </div>
             <div class="text-center mb-4">
