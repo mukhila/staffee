@@ -8,7 +8,7 @@ return new class extends Migration
 {
     public function up(): void
     {
-       /* Schema::create('payroll_grade_structures', function (Blueprint $table) {
+        Schema::create('payroll_grade_structures', function (Blueprint $table) {
             $table->id();
             $table->string('code', 50);
             $table->string('name', 150);
@@ -57,7 +57,7 @@ return new class extends Migration
             $table->json('metadata')->nullable();
             $table->timestamps();
         });
-    */
+
         Schema::create('payroll_component_dependencies', function (Blueprint $table) {
             $table->id();
             $table->foreignId('component_definition_id')

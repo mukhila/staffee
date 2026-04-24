@@ -25,7 +25,7 @@ return new class extends Migration
             ]);
             $table->date('effective_date');
             $table->date('retroactive_from')->nullable();
-            $table->string('proposed_currency_code', 3)->default('USD');
+            $table->string('proposed_currency_code', 3)->default('Ruppee');
             $table->decimal('proposed_base_salary', 18, 6);
             $table->decimal('old_gross_monthly', 18, 6)->nullable();
             $table->decimal('new_gross_monthly', 18, 6);
@@ -50,7 +50,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('revision_request_id')->constrained('salary_revision_requests')->cascadeOnDelete();
             $table->foreignId('component_definition_id')
-                ->constrained('payroll_component_definitions')
+                ->constrained('payroll_component_definitions', 'id', 'srrc_component_def_fk')
                 ->cascadeOnDelete();
             $table->decimal('old_amount', 18, 6)->nullable();
             $table->decimal('new_amount', 18, 6)->nullable();

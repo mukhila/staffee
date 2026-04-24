@@ -8,6 +8,10 @@ return new class extends Migration
 {
     public function up(): void
     {
+        // Drop in dependency order in case a previous partial run left these tables
+        Schema::dropIfExists('employee_salary_components');
+        Schema::dropIfExists('employee_salary_structures');
+
         Schema::create('employee_salary_structures', function (Blueprint $table) {
             $table->id();
             $table->foreignId('user_id')->constrained()->cascadeOnDelete();
@@ -16,7 +20,7 @@ return new class extends Migration
                 ->constrained('payroll_grade_structures')
                 ->nullOnDelete();
             $table->enum('pay_frequency', ['monthly', 'bi_weekly'])->default('monthly');
-            $table->string('currency_code', 3)->default('USD');
+            $table->string('currency_code', 3)->default('Ruppee');
             $table->decimal('annual_ctc', 18, 6)->nullable();
             $table->decimal('monthly_base_salary', 18, 6);
             $table->unsignedSmallInteger('standard_work_days')->default(30);
@@ -62,7 +66,7 @@ return new class extends Migration
             $table->json('metadata')->nullable();
             $table->timestamps();
 
-            $table->unique(['salary_structure_id', 'component_definition_id']);
+            $table->unique(['salary_structure_id', 'component_definition_id'], 'esc_structure_component_unique');
         });
     }
 
