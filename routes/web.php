@@ -62,6 +62,24 @@ Route::middleware('auth')->group(function () {
     Route::get('/kanban', [\App\Http\Controllers\Staff\KanbanController::class, 'index'])->name('kanban.index');
     Route::post('/kanban/update-status/{id}', [\App\Http\Controllers\Staff\KanbanController::class, 'updateStatus'])->name('kanban.update-status');
 
+    // ── Staff self-service pages ───────────────────────────────────────────────
+
+    // Attendance history
+    Route::get('/my-attendance', [\App\Http\Controllers\Staff\AttendanceHistoryController::class, 'index'])->name('staff.attendance.index');
+
+    // Personal time log
+    Route::get('/my-time-log',              [\App\Http\Controllers\Staff\TimeLogController::class, 'index'])->name('staff.time-log.index');
+    Route::post('/my-time-log',             [\App\Http\Controllers\Staff\TimeLogController::class, 'store'])->name('staff.time-log.store');
+    Route::delete('/my-time-log/{entry}',   [\App\Http\Controllers\Staff\TimeLogController::class, 'destroy'])->name('staff.time-log.destroy');
+
+    // Payslips
+    Route::get('/my-payslips', [\App\Http\Controllers\Staff\PayslipController::class, 'index'])->name('staff.payslips.index');
+
+    // My shifts + shift change requests
+    Route::get('/my-shifts',                                                         [\App\Http\Controllers\Staff\MyShiftController::class, 'index'])->name('staff.shifts.index');
+    Route::post('/my-shifts/change-request',                                         [\App\Http\Controllers\Staff\MyShiftController::class, 'requestChange'])->name('staff.shifts.change-request');
+    Route::delete('/my-shifts/change-request/{changeRequest}/cancel',                [\App\Http\Controllers\Staff\MyShiftController::class, 'cancelRequest'])->name('staff.shifts.cancel-request');
+
     // Admin panel
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::resource('staff', \App\Http\Controllers\Admin\StaffController::class);
@@ -270,9 +288,28 @@ Route::middleware('auth')->group(function () {
             Route::post('terminations/{termination}/settlement/calculate', [\App\Http\Controllers\Admin\HR\TerminationController::class, 'calculateSettlement'])->name('terminations.settlement.calculate');
             Route::post('terminations/{termination}/settlement/approve', [\App\Http\Controllers\Admin\HR\TerminationController::class, 'approveSettlement'])->name('terminations.settlement.approve');
             Route::post('terminations/{termination}/finalize', [\App\Http\Controllers\Admin\HR\TerminationController::class, 'finalize'])->name('terminations.finalize');
+
+            // Transfers
+            Route::get('transfers',                                     [\App\Http\Controllers\Admin\HR\TransferController::class, 'index'])->name('transfers.index');
+            Route::get('transfers/create',                              [\App\Http\Controllers\Admin\HR\TransferController::class, 'create'])->name('transfers.create');
+            Route::post('transfers',                                    [\App\Http\Controllers\Admin\HR\TransferController::class, 'store'])->name('transfers.store');
+            Route::get('transfers/{transfer}',                          [\App\Http\Controllers\Admin\HR\TransferController::class, 'show'])->name('transfers.show');
+            Route::post('transfers/{transfer}/approve',                 [\App\Http\Controllers\Admin\HR\TransferController::class, 'approve'])->name('transfers.approve');
+            Route::post('transfers/{transfer}/reject',                  [\App\Http\Controllers\Admin\HR\TransferController::class, 'reject'])->name('transfers.reject');
+
+            // Warnings (disciplinary)
+            Route::get('warnings',                                      [\App\Http\Controllers\Admin\HR\WarningController::class, 'index'])->name('warnings.index');
+            Route::get('warnings/create',                               [\App\Http\Controllers\Admin\HR\WarningController::class, 'create'])->name('warnings.create');
+            Route::post('warnings',                                     [\App\Http\Controllers\Admin\HR\WarningController::class, 'store'])->name('warnings.store');
+            Route::get('warnings/{warning}',                            [\App\Http\Controllers\Admin\HR\WarningController::class, 'show'])->name('warnings.show');
+            Route::delete('warnings/{warning}',                         [\App\Http\Controllers\Admin\HR\WarningController::class, 'destroy'])->name('warnings.destroy');
+            Route::post('warnings/{warning}/resolve',                   [\App\Http\Controllers\Admin\HR\WarningController::class, 'resolve'])->name('warnings.resolve');
+            Route::post('warnings/{warning}/acknowledge',               [\App\Http\Controllers\Admin\HR\WarningController::class, 'acknowledge'])->name('warnings.acknowledge');
         });
 
         Route::prefix('payroll')->name('payroll.')->group(function () {
+            Route::get('dashboard', [\App\Http\Controllers\Admin\Payroll\PayrollController::class, 'dashboard'])->name('dashboard');
+
             Route::get('salary-structures', [\App\Http\Controllers\Admin\Payroll\SalaryStructureController::class, 'index'])->name('salary-structures.index');
             Route::get('salary-structures/create', [\App\Http\Controllers\Admin\Payroll\SalaryStructureController::class, 'create'])->name('salary-structures.create');
             Route::post('salary-structures', [\App\Http\Controllers\Admin\Payroll\SalaryStructureController::class, 'store'])->name('salary-structures.store');
@@ -286,8 +323,33 @@ Route::middleware('auth')->group(function () {
             Route::post('runs/{payrollRun}/publish', [\App\Http\Controllers\Admin\Payroll\PayrollController::class, 'publishSlips'])->name('runs.publish');
             Route::get('runs/{payrollRun}/status', [\App\Http\Controllers\Admin\Payroll\PayrollController::class, 'viewStatus'])->name('runs.status');
 
+            // Tax Regimes & Brackets
+            Route::get('tax-regimes',                        [\App\Http\Controllers\Admin\Payroll\TaxRegimeController::class, 'index'])->name('tax-regimes.index');
+            Route::get('tax-regimes/create',                 [\App\Http\Controllers\Admin\Payroll\TaxRegimeController::class, 'create'])->name('tax-regimes.create');
+            Route::post('tax-regimes',                       [\App\Http\Controllers\Admin\Payroll\TaxRegimeController::class, 'store'])->name('tax-regimes.store');
+            Route::get('tax-regimes/{taxRegime}',            [\App\Http\Controllers\Admin\Payroll\TaxRegimeController::class, 'show'])->name('tax-regimes.show');
+            Route::get('tax-regimes/{taxRegime}/edit',       [\App\Http\Controllers\Admin\Payroll\TaxRegimeController::class, 'edit'])->name('tax-regimes.edit');
+            Route::put('tax-regimes/{taxRegime}',            [\App\Http\Controllers\Admin\Payroll\TaxRegimeController::class, 'update'])->name('tax-regimes.update');
+            Route::delete('tax-regimes/{taxRegime}',         [\App\Http\Controllers\Admin\Payroll\TaxRegimeController::class, 'destroy'])->name('tax-regimes.destroy');
+
+            // Payroll Adjustments
+            Route::get('adjustments',                        [\App\Http\Controllers\Admin\Payroll\PayrollAdjustmentController::class, 'index'])->name('adjustments.index');
+            Route::get('adjustments/create',                 [\App\Http\Controllers\Admin\Payroll\PayrollAdjustmentController::class, 'create'])->name('adjustments.create');
+            Route::post('adjustments',                       [\App\Http\Controllers\Admin\Payroll\PayrollAdjustmentController::class, 'store'])->name('adjustments.store');
+            Route::get('adjustments/{adjustment}',           [\App\Http\Controllers\Admin\Payroll\PayrollAdjustmentController::class, 'show'])->name('adjustments.show');
+            Route::post('adjustments/{adjustment}/approve',  [\App\Http\Controllers\Admin\Payroll\PayrollAdjustmentController::class, 'approve'])->name('adjustments.approve');
+            Route::post('adjustments/{adjustment}/reject',   [\App\Http\Controllers\Admin\Payroll\PayrollAdjustmentController::class, 'reject'])->name('adjustments.reject');
+            Route::post('adjustments/{adjustment}/cancel',   [\App\Http\Controllers\Admin\Payroll\PayrollAdjustmentController::class, 'cancel'])->name('adjustments.cancel');
+
             Route::post('settlements/initiate', [\App\Http\Controllers\Admin\Payroll\SettlementController::class, 'initiate'])->name('settlements.initiate');
             Route::post('settlements/{termination}/finalize', [\App\Http\Controllers\Admin\Payroll\SettlementController::class, 'finalize'])->name('settlements.finalize');
+        });
+
+        // Time entry approvals
+        Route::prefix('time-entries')->name('time-entries.')->group(function () {
+            Route::get('approvals',                                [\App\Http\Controllers\Admin\Time\TimeEntryApprovalController::class, 'index'])->name('approvals.index');
+            Route::post('approvals/{entry}/approve',               [\App\Http\Controllers\Admin\Time\TimeEntryApprovalController::class, 'approve'])->name('approvals.approve');
+            Route::post('approvals/{entry}/reject',                [\App\Http\Controllers\Admin\Time\TimeEntryApprovalController::class, 'reject'])->name('approvals.reject');
         });
     });
 });

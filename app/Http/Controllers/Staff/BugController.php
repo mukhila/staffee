@@ -86,11 +86,39 @@ class BugController extends Controller
         }
 
         $request->validate([
-            'status' => 'required|in:open,in_progress,resolved,closed',
-            'severity' => 'required|in:low,medium,high,critical',
+            'status'           => 'required|in:open,in_progress,resolved,closed',
+            'severity'         => 'required|in:low,medium,high,critical',
+            'resolution_notes' => 'nullable|string|max:5000',
         ]);
 
-        $bug->update($request->only(['status', 'severity']));
+        $newStatus = $request->status;
+
+        // Enforce lifecycle transitions
+        if ($newStatus !== $bug->status && !$bug->canTransitionTo($newStatus)) {
+            return back()->withErrors(['status' => "Cannot transition from '{$bug->status}' to '{$newStatus}'."])->withInput();
+        }
+
+        // Resolution notes required for resolved/closed
+        if (in_array($newStatus, \App\Models\Bug::REQUIRES_NOTES) && empty($request->resolution_notes)) {
+            return back()->withErrors(['resolution_notes' => 'Resolution notes are required when resolving or closing a bug.'])->withInput();
+        }
+
+        $data = ['status' => $newStatus, 'severity' => $request->severity];
+
+        if ($newStatus === 'resolved' && $bug->status !== 'resolved') {
+            $data['resolution_notes'] = $request->resolution_notes;
+            $data['resolved_at']      = now();
+            $data['resolved_by']      = auth()->id();
+        }
+        if ($newStatus === 'closed' && $bug->status !== 'closed') {
+            $data['resolution_notes'] = $request->resolution_notes ?? $bug->resolution_notes;
+            $data['closed_at']        = now();
+        }
+        if (!in_array($newStatus, \App\Models\Bug::REQUIRES_NOTES)) {
+            // Keep existing notes when moving back to active state
+        }
+
+        $bug->update($data);
 
         return redirect()->route('staff.bugs.index')->with('success', 'Bug updated successfully.');
     }

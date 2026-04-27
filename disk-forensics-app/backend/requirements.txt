@@ -1,0 +1,8 @@
+fastapi==0.110.0
+uvicorn[standard]==0.29.0
+python-multipart==0.0.9
+pydantic==2.6.4
+
+# Optional but recommended: The Sleuth Kit Python bindings
+# Install guide: https://github.com/py4n6/pytsk
+# pytsk3==20231214

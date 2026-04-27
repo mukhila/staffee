@@ -8,7 +8,32 @@ use App\Models\User;
 
 class Bug extends Model
 {
-    protected $fillable = ['project_id', 'title', 'description', 'assigned_to', 'reported_by', 'status', 'severity', 'test_case_id'];
+    // Valid status transitions: from → [allowed to]
+    public const TRANSITIONS = [
+        'open'        => ['in_progress', 'closed'],
+        'in_progress' => ['resolved', 'open'],
+        'resolved'    => ['closed', 'in_progress'],
+        'closed'      => [],
+    ];
+
+    // Statuses that require resolution_notes
+    public const REQUIRES_NOTES = ['resolved', 'closed'];
+
+    protected $fillable = [
+        'project_id', 'title', 'description', 'assigned_to', 'reported_by',
+        'status', 'severity', 'test_case_id',
+        'resolution_notes', 'resolved_at', 'closed_at', 'resolved_by',
+    ];
+
+    protected $casts = [
+        'resolved_at' => 'datetime',
+        'closed_at'   => 'datetime',
+    ];
+
+    public function canTransitionTo(string $newStatus): bool
+    {
+        return in_array($newStatus, self::TRANSITIONS[$this->status] ?? []);
+    }
 
     public function project()
     {
@@ -33,5 +58,10 @@ class Bug extends Model
     public function testCase()
     {
         return $this->belongsTo(TestCase::class);
+    }
+
+    public function resolvedByUser()
+    {
+        return $this->belongsTo(User::class, 'resolved_by');
     }
 }

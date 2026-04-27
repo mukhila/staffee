@@ -54,7 +54,11 @@
                             @endphp
 
                             @if($activeTimer)
-                                <button type="button" class="btn btn-sm btn-danger stop-timer-btn" data-id="{{ $bug->id }}" data-type="bug" data-bs-toggle="modal" data-bs-target="#stopTimerModal">
+                                <button type="button" class="btn btn-sm btn-danger stop-timer-btn"
+                                        data-id="{{ $bug->id }}" data-type="bug"
+                                        data-status="{{ $bug->status }}"
+                                        data-transitions="{{ json_encode(\App\Models\Bug::TRANSITIONS[$bug->status] ?? []) }}"
+                                        data-bs-toggle="modal" data-bs-target="#stopTimerModal">
                                     <i class="fi fi-rr-stop"></i> Stop
                                 </button>
                             @else
@@ -108,11 +112,16 @@
                         </div>
                         <div class="mb-3">
                             <label for="timerStatus" class="form-label">Update Status</label>
-                            <select class="form-select" id="timerStatus" required>
-                                <option value="in_progress">In Progress</option>
-                                <option value="resolved">Resolved</option>
-                                <option value="closed">Closed</option>
+                            <select class="form-select" id="timerStatus" required onchange="toggleTimerResolutionNotes(this.value)">
+                                <option value="in_progress">In Progress (keep open)</option>
                             </select>
+                        </div>
+                        <div class="mb-3 d-none" id="timerResolutionNotesField">
+                            <label for="timerResolutionNotes" class="form-label">
+                                Resolution Notes <span class="text-danger">*</span>
+                            </label>
+                            <textarea class="form-control" id="timerResolutionNotes" rows="3"
+                                      placeholder="Describe what was resolved or why it's being closed..."></textarea>
                         </div>
                     </form>
                 </div>
@@ -126,6 +135,17 @@
 
     @push('scripts')
     <script>
+        const bugRequiresNotes = @json(\App\Models\Bug::REQUIRES_NOTES);
+        const bugStatusLabels  = { in_progress: 'In Progress', resolved: 'Resolved', closed: 'Closed', open: 'Open' };
+
+        function toggleTimerResolutionNotes(status) {
+            const field    = document.getElementById('timerResolutionNotesField');
+            const textarea = document.getElementById('timerResolutionNotes');
+            const needed   = bugRequiresNotes.includes(status);
+            field.classList.toggle('d-none', !needed);
+            textarea.required = needed;
+        }
+
         document.addEventListener('DOMContentLoaded', function() {
             const csrfToken = '{{ csrf_token() }}';
             const loginUrl  = '{{ route("login") }}';
@@ -138,22 +158,46 @@
                 return false;
             }
 
-            // Load categories into the stop modal when it opens
+            // Populate status dropdown based on the bug's valid transitions
             const stopModal = document.getElementById('stopTimerModal');
-            stopModal.addEventListener('show.bs.modal', function() {
+            stopModal.addEventListener('show.bs.modal', function(event) {
+                const btn         = event.relatedTarget;
+                const currentSt   = btn ? btn.dataset.status : 'in_progress';
+                const transitions = btn ? JSON.parse(btn.dataset.transitions || '[]') : ['in_progress'];
+
+                const sel = document.getElementById('timerStatus');
+                sel.innerHTML = '';
+
+                // Always offer "keep current status" as first option
+                const keepOpt = document.createElement('option');
+                keepOpt.value = currentSt;
+                keepOpt.textContent = (bugStatusLabels[currentSt] || currentSt) + ' (keep current)';
+                sel.appendChild(keepOpt);
+
+                transitions.forEach(t => {
+                    if (t === currentSt) return;
+                    const opt = document.createElement('option');
+                    opt.value = t;
+                    opt.textContent = (bugStatusLabels[t] || t) + (bugRequiresNotes.includes(t) ? ' — requires notes' : '');
+                    sel.appendChild(opt);
+                });
+
+                toggleTimerResolutionNotes(sel.value);
+
+                // Load categories
                 fetch('{{ route("time-tracker.categories") }}', {
                     headers: { 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken }
                 })
                 .then(r => r.json())
                 .then(categories => {
-                    const sel = document.getElementById('timerCategory');
-                    sel.innerHTML = '<option value="">— No category —</option>';
+                    const catSel = document.getElementById('timerCategory');
+                    catSel.innerHTML = '<option value="">— No category —</option>';
                     categories.forEach(c => {
                         const opt = document.createElement('option');
                         opt.value = c.id;
                         opt.textContent = c.name + (c.is_billable ? ' (Billable)' : ' (Non-billable)');
                         opt.dataset.billable = c.is_billable ? '1' : '0';
-                        sel.appendChild(opt);
+                        catSel.appendChild(opt);
                     });
                 })
                 .catch(() => {
@@ -163,7 +207,7 @@
 
             // Show billable hint when category changes
             document.getElementById('timerCategory').addEventListener('change', function() {
-                const opt = this.options[this.selectedIndex];
+                const opt  = this.options[this.selectedIndex];
                 const hint = document.getElementById('categoryBillableHint');
                 if (opt && opt.dataset.billable === '1') {
                     hint.textContent = 'This entry will be counted as billable.';
@@ -198,20 +242,23 @@
 
             // Stop Timer
             document.getElementById('confirmStopTimer').addEventListener('click', function() {
-                const description = document.getElementById('timerDescription').value.trim();
-                const status      = document.getElementById('timerStatus').value;
-                const category_id = document.getElementById('timerCategory').value || null;
-                const notes       = document.getElementById('timerNotes').value.trim() || null;
+                const description      = document.getElementById('timerDescription').value.trim();
+                const status           = document.getElementById('timerStatus').value;
+                const category_id      = document.getElementById('timerCategory').value || null;
+                const notes            = document.getElementById('timerNotes').value.trim() || null;
+                const resolution_notes = document.getElementById('timerResolutionNotes').value.trim() || null;
 
-                if (!description) {
-                    alert('Please enter a description');
+                if (!description) { alert('Please enter a description'); return; }
+
+                if (bugRequiresNotes.includes(status) && !resolution_notes) {
+                    alert('Resolution notes are required when marking as ' + (bugStatusLabels[status] || status));
                     return;
                 }
 
                 fetch('{{ route("time-tracker.stop") }}', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'Accept': 'application/json', 'X-CSRF-TOKEN': csrfToken },
-                    body: JSON.stringify({ description, status, category_id, notes })
+                    body: JSON.stringify({ description, status, category_id, notes, resolution_notes })
                 })
                 .then(response => { if (handleUnauth(response)) return; return response.json(); })
                 .then(data => {

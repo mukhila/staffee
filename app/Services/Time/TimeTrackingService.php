@@ -3,6 +3,7 @@
 namespace App\Services\Time;
 
 use App\Models\BillableRate;
+use App\Models\Bug;
 use App\Models\Project;
 use App\Models\TimeCategory;
 use App\Models\TimeTracker;
@@ -27,6 +28,7 @@ class TimeTrackingService
         ?int $categoryId,
         ?string $notes = null,
         ?string $status = null,
+        ?string $resolutionNotes = null,
     ): TimeTracker {
         $entry = TimeTracker::forUser($user->id)->running()->firstOrFail();
 
@@ -48,9 +50,29 @@ class TimeTrackingService
         // Snapshot the effective rate
         $this->rateSvc->snapshotRate($entry);
 
-        // Propagate status to trackable item
+        // Propagate status to trackable item with lifecycle enforcement for bugs
         if ($status && $entry->trackable) {
-            $entry->trackable->update(['status' => $status]);
+            $trackable = $entry->trackable;
+
+            if ($trackable instanceof Bug) {
+                if (!$trackable->canTransitionTo($status)) {
+                    throw new \RuntimeException("Invalid status transition from '{$trackable->status}' to '{$status}'.");
+                }
+                $fields = ['status' => $status];
+                if (in_array($status, Bug::REQUIRES_NOTES)) {
+                    $fields['resolution_notes'] = $resolutionNotes;
+                }
+                if ($status === 'resolved') {
+                    $fields['resolved_at'] = now();
+                    $fields['resolved_by'] = $user->id;
+                }
+                if ($status === 'closed') {
+                    $fields['closed_at'] = now();
+                }
+                $trackable->update($fields);
+            } else {
+                $trackable->update(['status' => $status]);
+            }
         }
 
         return $entry->fresh();

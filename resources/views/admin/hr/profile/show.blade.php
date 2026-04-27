@@ -26,6 +26,12 @@
                 $sc = $statusColors[$employee->employment_status] ?? 'secondary';
             @endphp
             <span class="badge bg-{{ $sc }} fs-6">{{ ucwords(str_replace('_',' ',$employee->employment_status)) }}</span>
+            <a href="{{ route('admin.hr.transfers.create', ['employee' => $employee->id]) }}" class="btn btn-outline-secondary btn-sm">
+                <i class="fi fi-rr-arrows-alt-h me-1"></i> Transfer
+            </a>
+            <a href="{{ route('admin.hr.warnings.create', ['employee' => $employee->id]) }}" class="btn btn-outline-danger btn-sm">
+                <i class="fi fi-rr-triangle-warning me-1"></i> Issue Warning
+            </a>
             <a href="{{ route('admin.hr.employees.edit', $employee) }}" class="btn btn-outline-primary btn-sm">
                 <i class="fi fi-rr-edit me-1"></i> Edit Profile
             </a>

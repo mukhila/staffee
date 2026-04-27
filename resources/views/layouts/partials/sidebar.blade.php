@@ -115,6 +115,27 @@
         </a>
       </li>
 
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.hr.transfers.index') }}">
+          <i class="fi fi-rr-arrows-alt-h"></i>
+          <span class="menu-label">Transfers</span>
+          @php $pendingTransfers = \App\Models\HR\TransferRequest::where('status','pending')->count(); @endphp
+          @if($pendingTransfers > 0)
+          <span class="badge bg-warning ms-auto">{{ $pendingTransfers }}</span>
+          @endif
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.hr.warnings.index') }}">
+          <i class="fi fi-rr-triangle-warning"></i>
+          <span class="menu-label">Warnings</span>
+          @php $activeWarnings = \App\Models\HR\WarningRecord::whereNull('resolved_at')->count(); @endphp
+          @if($activeWarnings > 0)
+          <span class="badge bg-danger ms-auto">{{ $activeWarnings }}</span>
+          @endif
+        </a>
+      </li>
+
       <li class="menu-heading">
         <span class="menu-label">Project Management</span>
       </li>
@@ -135,6 +156,12 @@
         <span class="menu-label">Finance</span>
       </li>
       <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.payroll.dashboard') }}">
+          <i class="fi fi-rr-chart-pie-alt"></i>
+          <span class="menu-label">Payroll Dashboard</span>
+        </a>
+      </li>
+      <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.payroll.runs.index') }}">
           <i class="fi fi-rr-payroll"></i>
           <span class="menu-label">Payroll Runs</span>
@@ -144,6 +171,32 @@
         <a class="menu-link" href="{{ route('admin.payroll.salary-structures.index') }}">
           <i class="fi fi-rr-sack-dollar"></i>
           <span class="menu-label">Salary Structures</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.payroll.adjustments.index') }}">
+          <i class="fi fi-rr-exchange"></i>
+          <span class="menu-label">Adjustments</span>
+          @php $pendingAdj = \App\Models\Payroll\PayrollAdjustment::where('status','pending')->count(); @endphp
+          @if($pendingAdj > 0)
+          <span class="badge bg-warning ms-auto">{{ $pendingAdj }}</span>
+          @endif
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.payroll.tax-regimes.index') }}">
+          <i class="fi fi-rr-receipt"></i>
+          <span class="menu-label">Tax Regimes</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.time-entries.approvals.index') }}">
+          <i class="fi fi-rr-time-check"></i>
+          <span class="menu-label">Time Approvals</span>
+          @php $pendingTimeApprovals = \App\Models\TimeTracker::where('approval_status','pending')->count(); @endphp
+          @if($pendingTimeApprovals > 0)
+          <span class="badge bg-danger ms-auto">{{ $pendingTimeApprovals }}</span>
+          @endif
         </a>
       </li>
 
@@ -254,6 +307,34 @@
         <a class="menu-link" href="{{ route('staff.leaves.index') }}">
           <i class="fi fi-rr-calendar-minus"></i>
           <span class="menu-label">My Leaves</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.attendance.index') }}">
+          <i class="fi fi-rr-calendar-clock"></i>
+          <span class="menu-label">My Attendance</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.time-log.index') }}">
+          <i class="fi fi-rr-clock"></i>
+          <span class="menu-label">My Time Log</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.shifts.index') }}">
+          <i class="fi fi-rr-time-half-past"></i>
+          <span class="menu-label">My Shift</span>
+        </a>
+      </li>
+
+      <li class="menu-heading">
+        <span class="menu-label">Finance</span>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.payslips.index') }}">
+          <i class="fi fi-rr-money"></i>
+          <span class="menu-label">My Payslips</span>
         </a>
       </li>
 

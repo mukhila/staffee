@@ -22,9 +22,11 @@ class TransferRequest extends Model
         return ['effective_date' => 'date', 'approved_at' => 'datetime'];
     }
 
-    public function employee()       { return $this->belongsTo(User::class, 'user_id'); }
-    public function requestedBy()    { return $this->belongsTo(User::class, 'requested_by'); }
-    public function fromDepartment() { return $this->belongsTo(Department::class, 'from_department_id'); }
-    public function toDepartment()   { return $this->belongsTo(Department::class, 'to_department_id'); }
-    public function approver()       { return $this->belongsTo(User::class, 'approved_by'); }
+    public function employee()        { return $this->belongsTo(User::class, 'user_id'); }
+    public function requestedBy()     { return $this->belongsTo(User::class, 'requested_by'); }
+    public function fromDepartment()  { return $this->belongsTo(Department::class, 'from_department_id'); }
+    public function toDepartment()    { return $this->belongsTo(Department::class, 'to_department_id'); }
+    public function approver()        { return $this->belongsTo(User::class, 'approved_by'); }
+    public function fromReportingTo() { return $this->belongsTo(User::class, 'from_reporting_to'); }
+    public function toReportingTo()   { return $this->belongsTo(User::class, 'to_reporting_to'); }
 }

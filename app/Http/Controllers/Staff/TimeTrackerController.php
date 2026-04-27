@@ -58,19 +58,25 @@ class TimeTrackerController extends Controller
     public function stop(Request $request)
     {
         $request->validate([
-            'description' => 'required|string|max:1000',
-            'status'      => 'required|string',
-            'category_id' => 'nullable|exists:time_categories,id',
-            'notes'       => 'nullable|string|max:500',
+            'description'      => 'required|string|max:1000',
+            'status'           => 'required|string',
+            'category_id'      => 'nullable|exists:time_categories,id',
+            'notes'            => 'nullable|string|max:500',
+            'resolution_notes' => 'nullable|string|max:5000',
         ]);
 
-        $this->trackingSvc->stop(
-            user:        auth()->user(),
-            description: $request->description,
-            categoryId:  $request->category_id ? (int) $request->category_id : null,
-            notes:       $request->notes,
-            status:      $request->status,
-        );
+        try {
+            $this->trackingSvc->stop(
+                user:            auth()->user(),
+                description:     $request->description,
+                categoryId:      $request->category_id ? (int) $request->category_id : null,
+                notes:           $request->notes,
+                status:          $request->status,
+                resolutionNotes: $request->resolution_notes,
+            );
+        } catch (\RuntimeException $e) {
+            return response()->json(['error' => $e->getMessage()], 422);
+        }
 
         return response()->json(['success' => true]);
     }
