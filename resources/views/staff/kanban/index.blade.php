@@ -57,7 +57,7 @@
                         const taskId = itemEl.getAttribute('data-id');
                         
                         // Send AJAX request to update status
-                        fetch(`/staff/kanban/update-status/${taskId}`, {
+                        fetch(`/kanban/update-status/${taskId}`, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',

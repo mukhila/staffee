@@ -7,10 +7,8 @@
     <a class="navbar-brand-mini visible-light" href="{{ route('dashboard') }}">
        <img src="{{ asset('assets/images/logo.png') }}" alt="Staffee logo" class="h-11 w-11 rounded-2xl border border-slate-200 object-cover shadow-sm">
     </a>
-    </a>
     <a class="navbar-brand-mini visible-dark" href="{{ route('dashboard') }}">
       <img src="{{ asset('assets/images/logo.png') }}" alt="Staffee logo" class="h-11 w-11 rounded-2xl border border-slate-200 object-cover shadow-sm">
-    </a>
     </a>
   </div>
   <nav class="app-navbar" data-simplebar>
@@ -134,6 +132,38 @@
       </li>
 
       <li class="menu-heading">
+        <span class="menu-label">Finance</span>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.payroll.runs.index') }}">
+          <i class="fi fi-rr-payroll"></i>
+          <span class="menu-label">Payroll Runs</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.payroll.salary-structures.index') }}">
+          <i class="fi fi-rr-sack-dollar"></i>
+          <span class="menu-label">Salary Structures</span>
+        </a>
+      </li>
+
+      <li class="menu-heading">
+        <span class="menu-label">Time Tracking</span>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.time.index') }}">
+          <i class="fi fi-rr-clock"></i>
+          <span class="menu-label">Time Logs</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.time.reports.index') }}">
+          <i class="fi fi-rr-chart-line-up"></i>
+          <span class="menu-label">Time Reports</span>
+        </a>
+      </li>
+
+      <li class="menu-heading">
         <span class="menu-label">Communication</span>
       </li>
       <li class="menu-item">
@@ -197,7 +227,7 @@
         </a>
       </li>
       <li class="menu-item">
-        <a class="menu-link" href="{{ route('admin.kanban.index') }}">
+        <a class="menu-link" href="{{ route('kanban.index') }}">
           <i class="fi fi-rr-layout-fluid"></i>
           <span class="menu-label">Kanban Board</span>
         </a>

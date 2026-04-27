@@ -58,6 +58,10 @@ Route::middleware('auth')->group(function () {
         ->only(['index', 'create', 'store', 'show', 'destroy'])
         ->parameters(['leaves' => 'leave']);
 
+    // Kanban board (all authenticated users — staff see their own tasks)
+    Route::get('/kanban', [\App\Http\Controllers\Staff\KanbanController::class, 'index'])->name('kanban.index');
+    Route::post('/kanban/update-status/{id}', [\App\Http\Controllers\Staff\KanbanController::class, 'updateStatus'])->name('kanban.update-status');
+
     // Admin panel
     Route::middleware(['role:admin'])->prefix('admin')->name('admin.')->group(function () {
         Route::resource('staff', \App\Http\Controllers\Admin\StaffController::class);
@@ -72,8 +76,6 @@ Route::middleware('auth')->group(function () {
         Route::get('projects/{project}/documents/{index}/download', [\App\Http\Controllers\Admin\ProjectController::class, 'downloadDocument'])->name('projects.documents.download');
         Route::delete('projects/{project}/documents/{index}', [\App\Http\Controllers\Admin\ProjectController::class, 'deleteDocument'])->name('projects.documents.delete');
         Route::resource('tasks', \App\Http\Controllers\Admin\TaskController::class);
-        Route::get('kanban', [\App\Http\Controllers\Staff\KanbanController::class, 'index'])->name('kanban.index');
-        Route::post('kanban/update-status/{id}', [\App\Http\Controllers\Staff\KanbanController::class, 'updateStatus'])->name('kanban.update-status');
 
         // Leave management (admin)
         Route::get('leaves', [\App\Http\Controllers\Admin\LeaveController::class, 'index'])->name('leaves.index');
