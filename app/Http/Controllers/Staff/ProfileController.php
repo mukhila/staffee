@@ -12,7 +12,7 @@ class ProfileController extends Controller
 {
     public function index()
     {
-        $user    = auth()->user()->load('department', 'role');
+        $user    = auth()->user()->load('department');
         $profile = EmployeeProfile::where('user_id', $user->id)->first();
 
         $documents = EmployeeDocument::where('user_id', $user->id)
