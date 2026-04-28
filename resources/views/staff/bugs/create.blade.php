@@ -38,14 +38,27 @@
                         <label for="description" class="form-label">Description</label>
                         <textarea class="form-control" id="description" name="description" rows="3">{{ $testCase ? "Test Case Failed:\n" . $testCase->description : '' }}</textarea>
                     </div>
-                    <div class="mb-3">
-                        <label for="severity" class="form-label">Severity</label>
-                        <select class="form-select" id="severity" name="severity" required>
-                            <option value="low">Low</option>
-                            <option value="medium" selected>Medium</option>
-                            <option value="high">High</option>
-                            <option value="critical">Critical</option>
-                        </select>
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label for="severity" class="form-label">Severity</label>
+                            <select class="form-select" id="severity" name="severity" required>
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                            <div class="form-text text-muted">How bad is the bug technically?</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select class="form-select" id="priority" name="priority" required>
+                                <option value="low">Low</option>
+                                <option value="medium" selected>Medium</option>
+                                <option value="high">High</option>
+                                <option value="critical">Critical</option>
+                            </select>
+                            <div class="form-text text-muted">How urgently should it be fixed?</div>
+                        </div>
                     </div>
                     <div class="mb-3">
                         <label for="assigned_to" class="form-label">Assign To</label>

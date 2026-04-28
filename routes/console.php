@@ -47,3 +47,9 @@ Schedule::job(new \App\Jobs\Leave\LeaveReminderJob())
     ->dailyAt('08:00')
     ->name('leave-reminder')
     ->withoutOverlapping();
+
+// Idle threshold alerts: runs every 5 minutes during working hours
+Schedule::command('monitoring:check-idle')
+    ->everyFiveMinutes()
+    ->name('monitoring-idle-check')
+    ->withoutOverlapping();

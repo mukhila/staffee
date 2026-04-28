@@ -20,19 +20,38 @@ Route::middleware('auth')->group(function () {
     Route::post('/attendance/check-in', [\App\Http\Controllers\Staff\AttendanceController::class, 'checkIn'])->name('attendance.check-in');
     Route::post('/attendance/check-out', [\App\Http\Controllers\Staff\AttendanceController::class, 'checkOut'])->name('attendance.check-out');
 
-    // Chat
+    // Chat (direct messages)
     Route::get('chat', [App\Http\Controllers\ChatController::class, 'index'])->name('chat.index');
     Route::get('chat/messages/{userId}', [App\Http\Controllers\ChatController::class, 'getMessages'])->name('chat.messages');
     Route::post('chat/send', [App\Http\Controllers\ChatController::class, 'sendMessage'])->name('chat.send');
     Route::get('chat/unread-count', [App\Http\Controllers\ChatController::class, 'unreadCount'])->name('chat.unread-count');
 
+    // Chat channels (group)
+    Route::get('channels', [App\Http\Controllers\ChatChannelController::class, 'index'])->name('chat.channels.index');
+    Route::post('channels', [App\Http\Controllers\ChatChannelController::class, 'store'])->name('chat.channels.store');
+    Route::get('channels/{channel}', [App\Http\Controllers\ChatChannelController::class, 'show'])->name('chat.channels.show');
+    Route::post('channels/{channel}/messages', [App\Http\Controllers\ChatChannelController::class, 'sendMessage'])->name('chat.channels.send');
+    Route::get('channels/{channel}/messages', [App\Http\Controllers\ChatChannelController::class, 'messages'])->name('chat.channels.messages');
+    Route::post('channels/{channel}/join', [App\Http\Controllers\ChatChannelController::class, 'join'])->name('chat.channels.join');
+    Route::post('channels/{channel}/read', [App\Http\Controllers\ChatChannelController::class, 'markRead'])->name('chat.channels.read');
+
     // Mail
     Route::get('mail', [App\Http\Controllers\MailController::class, 'index'])->name('mail.index');
     Route::get('mail/sent', [App\Http\Controllers\MailController::class, 'sent'])->name('mail.sent');
+    Route::get('mail/drafts', [App\Http\Controllers\MailController::class, 'drafts'])->name('mail.drafts');
     Route::get('mail/create', [App\Http\Controllers\MailController::class, 'create'])->name('mail.create');
     Route::post('mail', [App\Http\Controllers\MailController::class, 'store'])->name('mail.store');
     Route::get('mail/unread-count', [App\Http\Controllers\MailController::class, 'unreadCount'])->name('mail.unread-count');
     Route::get('mail/{email}', [App\Http\Controllers\MailController::class, 'show'])->name('mail.show');
+    Route::delete('mail/{email}', [App\Http\Controllers\MailController::class, 'destroy'])->name('mail.destroy');
+
+    // Task comments
+    Route::post('tasks/{task}/comments', [\App\Http\Controllers\Staff\TaskCommentController::class, 'store'])->name('tasks.comments.store');
+    Route::delete('task-comments/{comment}', [\App\Http\Controllers\Staff\TaskCommentController::class, 'destroy'])->name('tasks.comments.destroy');
+
+    // Staff self-service profile
+    Route::get('my-profile', [\App\Http\Controllers\Staff\ProfileController::class, 'index'])->name('staff.profile.index');
+    Route::get('my-profile/documents/{document}/download', [\App\Http\Controllers\Staff\ProfileController::class, 'downloadDocument'])->name('staff.profile.document.download');
 
     // Notifications
     Route::get('notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
@@ -57,6 +76,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('leaves', \App\Http\Controllers\Staff\LeaveController::class, ['as' => 'staff'])
         ->only(['index', 'create', 'store', 'show', 'destroy'])
         ->parameters(['leaves' => 'leave']);
+
+    // Team leave calendar (staff-visible)
+    Route::get('leaves/team-calendar', [\App\Http\Controllers\Staff\LeaveController::class, 'teamCalendar'])->name('staff.leaves.team-calendar');
 
     // Kanban board (all authenticated users — staff see their own tasks)
     Route::get('/kanban', [\App\Http\Controllers\Staff\KanbanController::class, 'index'])->name('kanban.index');
@@ -94,6 +116,12 @@ Route::middleware('auth')->group(function () {
         Route::get('projects/{project}/documents/{index}/download', [\App\Http\Controllers\Admin\ProjectController::class, 'downloadDocument'])->name('projects.documents.download');
         Route::delete('projects/{project}/documents/{index}', [\App\Http\Controllers\Admin\ProjectController::class, 'deleteDocument'])->name('projects.documents.delete');
         Route::resource('tasks', \App\Http\Controllers\Admin\TaskController::class);
+        Route::post('tasks/{task}/dependencies', [\App\Http\Controllers\Admin\TaskController::class, 'addDependency'])->name('tasks.dependencies.add');
+        Route::delete('tasks/{task}/dependencies/{blocker}', [\App\Http\Controllers\Admin\TaskController::class, 'removeDependency'])->name('tasks.dependencies.remove');
+
+        // Staff import via CSV
+        Route::get('staff/import', [\App\Http\Controllers\Admin\StaffController::class, 'importForm'])->name('staff.import');
+        Route::post('staff/import', [\App\Http\Controllers\Admin\StaffController::class, 'import'])->name('staff.import.upload');
 
         // Leave management (admin)
         Route::get('leaves', [\App\Http\Controllers\Admin\LeaveController::class, 'index'])->name('leaves.index');
@@ -178,6 +206,8 @@ Route::middleware('auth')->group(function () {
             // Screenshot gallery
             Route::get('employees/{user}/screenshots', [\App\Http\Controllers\Admin\Monitoring\MonitoringScreenshotController::class, 'index'])->name('screenshots.index');
             Route::post('screenshots/{screenshot}/flag', [\App\Http\Controllers\Admin\Monitoring\MonitoringScreenshotController::class, 'flag'])->name('screenshots.flag');
+            Route::post('screenshots/{screenshot}/accept', [\App\Http\Controllers\Admin\Monitoring\MonitoringScreenshotController::class, 'accept'])->name('screenshots.accept');
+            Route::post('screenshots/{screenshot}/escalate', [\App\Http\Controllers\Admin\Monitoring\MonitoringScreenshotController::class, 'escalate'])->name('screenshots.escalate');
             Route::delete('screenshots/{screenshot}', [\App\Http\Controllers\Admin\Monitoring\MonitoringScreenshotController::class, 'destroy'])->name('screenshots.destroy');
             // Settings & token management
             Route::get('settings', [\App\Http\Controllers\Admin\Monitoring\MonitoringSettingController::class, 'index'])->name('settings.index');
@@ -187,11 +217,44 @@ Route::middleware('auth')->group(function () {
             Route::delete('tokens/{user}/revoke', [\App\Http\Controllers\Admin\Monitoring\MonitoringSettingController::class, 'revokeToken'])->name('tokens.revoke');
         });
 
-        // Reports
-        Route::get('reports', [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
-        Route::get('reports/attendance', [\App\Http\Controllers\Admin\ReportController::class, 'attendance'])->name('reports.attendance');
-        Route::get('reports/projects', [\App\Http\Controllers\Admin\ReportController::class, 'projects'])->name('reports.projects');
-        Route::get('reports/bugs', [\App\Http\Controllers\Admin\ReportController::class, 'bugs'])->name('reports.bugs');
+        // Reports + CSV exports
+        Route::get('reports',                   [\App\Http\Controllers\Admin\ReportController::class, 'index'])->name('reports.index');
+        Route::get('reports/attendance',        [\App\Http\Controllers\Admin\ReportController::class, 'attendance'])->name('reports.attendance');
+        Route::get('reports/attendance/export', [\App\Http\Controllers\Admin\ReportController::class, 'exportAttendance'])->name('reports.attendance.export');
+        Route::get('reports/projects',          [\App\Http\Controllers\Admin\ReportController::class, 'projects'])->name('reports.projects');
+        Route::get('reports/bugs',              [\App\Http\Controllers\Admin\ReportController::class, 'bugs'])->name('reports.bugs');
+        Route::get('reports/leaves',            [\App\Http\Controllers\Admin\ReportController::class, 'leaves'])->name('reports.leaves');
+        Route::get('reports/leaves/export',     [\App\Http\Controllers\Admin\ReportController::class, 'exportLeaves'])->name('reports.leaves.export');
+        Route::get('reports/payroll',           [\App\Http\Controllers\Admin\ReportController::class, 'payroll'])->name('reports.payroll');
+        Route::get('reports/payroll/export',    [\App\Http\Controllers\Admin\ReportController::class, 'exportPayroll'])->name('reports.payroll.export');
+        Route::get('reports/time/export',       [\App\Http\Controllers\Admin\ReportController::class, 'exportTime'])->name('reports.time.export');
+
+        // Project timeline (Gantt)
+        Route::get('projects/{project}/timeline', [\App\Http\Controllers\Admin\ProjectController::class, 'timeline'])->name('projects.timeline');
+
+        // Milestones
+        Route::get('projects/{project}/milestones', [\App\Http\Controllers\Admin\MilestoneController::class, 'index'])->name('projects.milestones.index');
+        Route::post('projects/{project}/milestones', [\App\Http\Controllers\Admin\MilestoneController::class, 'store'])->name('projects.milestones.store');
+        Route::put('projects/{project}/milestones/{milestone}', [\App\Http\Controllers\Admin\MilestoneController::class, 'update'])->name('projects.milestones.update');
+        Route::delete('projects/{project}/milestones/{milestone}', [\App\Http\Controllers\Admin\MilestoneController::class, 'destroy'])->name('projects.milestones.destroy');
+
+        // Sprints
+        Route::get('projects/{project}/sprints', [\App\Http\Controllers\Admin\SprintController::class, 'index'])->name('projects.sprints.index');
+        Route::post('projects/{project}/sprints', [\App\Http\Controllers\Admin\SprintController::class, 'store'])->name('projects.sprints.store');
+        Route::get('projects/{project}/sprints/{sprint}', [\App\Http\Controllers\Admin\SprintController::class, 'show'])->name('projects.sprints.show');
+        Route::put('projects/{project}/sprints/{sprint}', [\App\Http\Controllers\Admin\SprintController::class, 'update'])->name('projects.sprints.update');
+        Route::delete('projects/{project}/sprints/{sprint}', [\App\Http\Controllers\Admin\SprintController::class, 'destroy'])->name('projects.sprints.destroy');
+
+        // Payroll bank export
+        Route::get('payroll/bank-export', [\App\Http\Controllers\Admin\PayrollBankExportController::class, 'index'])->name('payroll.bank-export');
+        Route::post('payroll/bank-export/generate', [\App\Http\Controllers\Admin\PayrollBankExportController::class, 'generate'])->name('payroll.bank-export.generate');
+
+        // Monitoring reports
+        Route::prefix('monitoring/reports')->name('monitoring.reports.')->group(function () {
+            Route::get('daily',      [\App\Http\Controllers\Admin\Monitoring\MonitoringReportController::class, 'daily'])->name('daily');
+            Route::get('weekly',     [\App\Http\Controllers\Admin\Monitoring\MonitoringReportController::class, 'weekly'])->name('weekly');
+            Route::get('department', [\App\Http\Controllers\Admin\Monitoring\MonitoringReportController::class, 'department'])->name('department');
+        });
 
         // ── Shift Management ───────────────────────────────────────────────
         Route::prefix('shifts')->name('shifts.')->group(function () {

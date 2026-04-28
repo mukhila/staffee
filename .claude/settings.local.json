@@ -16,7 +16,8 @@
       "Bash(php *)",
       "Bash(python3 -c ' *)",
       "Bash(grep -E \"^-.*\\\\.\\(md|MD|txt|json\\)$|README\")",
-      "Bash(xargs grep *)"
+      "Bash(xargs grep *)",
+      "Bash(grep -E \"\\\\.php$\")"
     ]
   }
 }

@@ -59,4 +59,50 @@ class MonitoringScreenshotController extends Controller
         $screenshot->delete();
         return back()->with('success', 'Screenshot deleted.');
     }
+
+    /** Formally accept a screenshot as appropriate/normal. */
+    public function accept(MonitoringScreenshot $screenshot, Request $request)
+    {
+        $data = $request->validate(['review_notes' => 'nullable|string|max:500']);
+
+        $screenshot->update([
+            'review_status' => 'accepted',
+            'reviewed_by'   => auth()->id(),
+            'reviewed_at'   => now(),
+            'review_notes'  => $data['review_notes'] ?? null,
+            'is_flagged'    => false,
+            'flag_reason'   => null,
+        ]);
+
+        return back()->with('success', 'Screenshot accepted.');
+    }
+
+    /** Escalate a screenshot for further review / disciplinary action. */
+    public function escalate(MonitoringScreenshot $screenshot, Request $request)
+    {
+        $data = $request->validate(['review_notes' => 'nullable|string|max:500']);
+
+        $screenshot->update([
+            'review_status' => 'escalated',
+            'reviewed_by'   => auth()->id(),
+            'reviewed_at'   => now(),
+            'review_notes'  => $data['review_notes'] ?? null,
+            'is_flagged'    => true,
+        ]);
+
+        // Notify HR/admin about escalation
+        \App\Models\User::where('role', 'admin')
+            ->where('id', '!=', auth()->id())
+            ->each(function ($admin) use ($screenshot) {
+                \App\Models\Notification::create([
+                    'user_id' => $admin->id,
+                    'type'    => 'screenshot_escalated',
+                    'title'   => 'Screenshot Escalated',
+                    'message' => "Screenshot from {$screenshot->user->name} has been escalated for review.",
+                    'url'     => route('admin.monitoring.screenshots.index', $screenshot->user_id),
+                ]);
+            });
+
+        return back()->with('success', 'Screenshot escalated and admins notified.');
+    }
 }

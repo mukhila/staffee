@@ -83,4 +83,24 @@ class LeaveController extends Controller
 
         return redirect()->route('staff.leaves.index')->with('success', 'Leave request cancelled.');
     }
+
+    public function teamCalendar()
+    {
+        $user       = auth()->user();
+        $month      = (int) request('month', now()->month);
+        $year       = (int) request('year', now()->year);
+        $start      = \Carbon\Carbon::create($year, $month, 1)->startOfMonth();
+        $end        = $start->copy()->endOfMonth();
+
+        // Staff see their department teammates' approved leaves
+        $deptId = $user->department_id;
+        $leaves = LeaveRequest::with(['user', 'leaveType'])
+            ->approved()
+            ->whereHas('user', fn ($q) => $q->where('department_id', $deptId))
+            ->forDateRange($start->toDateString(), $end->toDateString())
+            ->orderBy('from_date')
+            ->get();
+
+        return view('staff.leaves.team-calendar', compact('leaves', 'month', 'year', 'start', 'end'));
+    }
 }

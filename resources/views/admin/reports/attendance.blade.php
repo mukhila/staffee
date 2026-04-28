@@ -4,9 +4,14 @@
             <div class="clearfix">
                 <h1 class="app-page-title">Attendance Report</h1>
             </div>
-            <a href="{{ route('admin.reports.index') }}" class="btn btn-outline-secondary waves-effect">
-                <i class="fi fi-rr-arrow-left me-1"></i> Reports
-            </a>
+            <div class="d-flex gap-2">
+                <a href="{{ route('admin.reports.attendance.export', ['from' => $from, 'to' => $to]) }}" class="btn btn-success btn-sm">
+                    <i class="fi fi-rr-file-csv me-1"></i> Export CSV
+                </a>
+                <a href="{{ route('admin.reports.index') }}" class="btn btn-outline-secondary btn-sm">
+                    <i class="fi fi-rr-arrow-left me-1"></i> Reports
+                </a>
+            </div>
         </div>
 
         <div class="card mb-3">

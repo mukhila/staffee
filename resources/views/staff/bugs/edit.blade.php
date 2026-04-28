@@ -33,14 +33,23 @@
                         <textarea class="form-control" rows="3" disabled>{{ $bug->description }}</textarea>
                     </div>
 
-                    <div class="mb-3">
-                        <label for="severity" class="form-label">Severity</label>
-                        <select class="form-select" id="severity" name="severity" required>
-                            <option value="low" {{ old('severity', $bug->severity) == 'low' ? 'selected' : '' }}>Low</option>
-                            <option value="medium" {{ old('severity', $bug->severity) == 'medium' ? 'selected' : '' }}>Medium</option>
-                            <option value="high" {{ old('severity', $bug->severity) == 'high' ? 'selected' : '' }}>High</option>
-                            <option value="critical" {{ old('severity', $bug->severity) == 'critical' ? 'selected' : '' }}>Critical</option>
-                        </select>
+                    <div class="row g-3 mb-3">
+                        <div class="col-sm-6">
+                            <label for="severity" class="form-label">Severity</label>
+                            <select class="form-select" id="severity" name="severity" required>
+                                @foreach(['low','medium','high','critical'] as $sev)
+                                <option value="{{ $sev }}" {{ old('severity', $bug->severity) == $sev ? 'selected' : '' }}>{{ ucfirst($sev) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="col-sm-6">
+                            <label for="priority" class="form-label">Priority</label>
+                            <select class="form-select" id="priority" name="priority" required>
+                                @foreach(['low','medium','high','critical'] as $pri)
+                                <option value="{{ $pri }}" {{ old('priority', $bug->priority ?? 'medium') == $pri ? 'selected' : '' }}>{{ ucfirst($pri) }}</option>
+                                @endforeach
+                            </select>
+                        </div>
                     </div>
 
                     <div class="mb-3">

@@ -31,6 +31,12 @@
         </a>
       </li>
       <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.staff.import') }}">
+          <i class="fi fi-rr-file-upload"></i>
+          <span class="menu-label">Bulk Import</span>
+        </a>
+      </li>
+      <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.departments.index') }}">
           <i class="fi fi-rr-building"></i>
           <span class="menu-label">Departments</span>
@@ -168,6 +174,12 @@
         </a>
       </li>
       <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.payroll.bank-export') }}">
+          <i class="fi fi-rr-bank"></i>
+          <span class="menu-label">Bank Export</span>
+        </a>
+      </li>
+      <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.payroll.salary-structures.index') }}">
           <i class="fi fi-rr-sack-dollar"></i>
           <span class="menu-label">Salary Structures</span>
@@ -258,6 +270,12 @@
           <span class="menu-label">Settings & Tokens</span>
         </a>
       </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.monitoring.reports.daily') }}">
+          <i class="fi fi-rr-chart-line-up"></i>
+          <span class="menu-label">Monitoring Reports</span>
+        </a>
+      </li>
 
       <li class="menu-heading">
         <span class="menu-label">Settings</span>
@@ -310,6 +328,12 @@
         </a>
       </li>
       <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.leaves.team-calendar') }}">
+          <i class="fi fi-rr-calendar-users"></i>
+          <span class="menu-label">Team Calendar</span>
+        </a>
+      </li>
+      <li class="menu-item">
         <a class="menu-link" href="{{ route('staff.attendance.index') }}">
           <i class="fi fi-rr-calendar-clock"></i>
           <span class="menu-label">My Attendance</span>
@@ -344,13 +368,35 @@
       <li class="menu-item">
         <a class="menu-link" href="{{ route('chat.index') }}">
           <i class="fi fi-rr-comment-alt"></i>
-          <span class="menu-label">Chat</span>
+          <span class="menu-label">Direct Messages</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('chat.channels.index') }}">
+          <i class="fi fi-rr-comments"></i>
+          <span class="menu-label">Group Channels</span>
         </a>
       </li>
       <li class="menu-item">
         <a class="menu-link" href="{{ route('mail.index') }}">
           <i class="fi fi-rr-envelope"></i>
           <span class="menu-label">Mail</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('mail.drafts') }}">
+          <i class="fi fi-rr-save"></i>
+          <span class="menu-label">Drafts</span>
+        </a>
+      </li>
+
+      <li class="menu-heading">
+        <span class="menu-label">My Account</span>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.profile.index') }}">
+          <i class="fi fi-rr-id-card-clip-alt"></i>
+          <span class="menu-label">My Profile</span>
         </a>
       </li>
     </ul>

@@ -21,9 +21,11 @@ class Bug extends Model
 
     protected $fillable = [
         'project_id', 'title', 'description', 'assigned_to', 'reported_by',
-        'status', 'severity', 'test_case_id',
+        'status', 'severity', 'priority', 'test_case_id',
         'resolution_notes', 'resolved_at', 'closed_at', 'resolved_by',
     ];
+
+    public const PRIORITIES = ['low', 'medium', 'high', 'critical'];
 
     protected $casts = [
         'resolved_at' => 'datetime',

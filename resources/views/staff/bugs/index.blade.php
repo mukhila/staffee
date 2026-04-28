@@ -22,6 +22,7 @@
                     <th class="minw-150px">Project</th>
                     <th class="minw-100px">Status</th>
                     <th class="minw-100px">Severity</th>
+                    <th class="minw-100px">Priority</th>
                     <th class="minw-150px">Assigned To</th>
                     <th class="minw-100px">Timer</th>
                     <th>Actions</th>
@@ -34,13 +35,12 @@
                     <td>{{ $bug->project->name }}</td>
                     <td><span class="badge bg-info">{{ ucfirst(str_replace('_', ' ', $bug->status)) }}</span></td>
                     <td>
-                        @if($bug->severity == 'critical')
-                            <span class="badge bg-danger">Critical</span>
-                        @elseif($bug->severity == 'high')
-                            <span class="badge bg-warning text-dark">High</span>
-                        @else
-                            <span class="badge bg-secondary">{{ ucfirst($bug->severity) }}</span>
-                        @endif
+                        @php $sev = $bug->severity; @endphp
+                        <span class="badge bg-{{ $sev === 'critical' ? 'danger' : ($sev === 'high' ? 'warning text-dark' : 'secondary') }}">{{ ucfirst($sev) }}</span>
+                    </td>
+                    <td>
+                        @php $pri = $bug->priority ?? 'medium'; @endphp
+                        <span class="badge bg-{{ $pri === 'critical' ? 'danger' : ($pri === 'high' ? 'warning text-dark' : ($pri === 'medium' ? 'info' : 'secondary')) }}">{{ ucfirst($pri) }}</span>
                     </td>
                     <td>{{ $bug->assignedUser->name }}</td>
                     <td>

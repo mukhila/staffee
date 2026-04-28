@@ -29,19 +29,21 @@ class TaskController extends Controller
 
         $request->validate([
             'project_id' => 'required|exists:projects,id',
-            'title' => 'required|string|max:255',
+            'title'      => 'required|string|max:255',
             'description' => 'nullable|string',
             'assigned_to' => 'required|exists:users,id',
-            'due_date' => 'nullable|date',
+            'due_date'   => 'nullable|date',
+            'start_date' => 'nullable|date',
         ]);
 
         $task = \App\Models\Task::create([
-            'project_id' => $request->project_id,
-            'title' => $request->title,
+            'project_id'  => $request->project_id,
+            'title'       => $request->title,
             'description' => $request->description,
             'assigned_to' => $request->assigned_to,
-            'status' => 'pending',
-            'due_date' => $request->due_date,
+            'status'      => 'pending',
+            'due_date'    => $request->due_date,
+            'start_date'  => $request->start_date,
         ]);
 
         \App\Models\Notification::create([
@@ -53,6 +55,35 @@ class TaskController extends Controller
         ]);
 
         return redirect()->route('admin.tasks.index')->with('success', 'Task created successfully.');
+    }
+
+    public function show(\App\Models\Task $task)
+    {
+        $task->load(['project', 'assignedUser', 'comments.user', 'blockers', 'blocking']);
+        $candidateTasks = \App\Models\Task::where('project_id', $task->project_id)
+            ->where('id', '!=', $task->id)
+            ->whereNotIn('id', $task->blockers->pluck('id'))
+            ->get();
+        return view('admin.tasks.show', compact('task', 'candidateTasks'));
+    }
+
+    public function addDependency(\App\Models\Task $task, Request $request)
+    {
+        $request->validate(['blocker_id' => 'required|exists:tasks,id']);
+        $blockerId = (int) $request->blocker_id;
+
+        if ($blockerId === $task->id) {
+            return back()->with('error', 'A task cannot block itself.');
+        }
+
+        $task->blockers()->syncWithoutDetaching([$blockerId]);
+        return back()->with('success', 'Dependency added.');
+    }
+
+    public function removeDependency(\App\Models\Task $task, \App\Models\Task $blocker)
+    {
+        $task->blockers()->detach($blocker->id);
+        return back()->with('success', 'Dependency removed.');
     }
 
     public function edit(\App\Models\Task $task)

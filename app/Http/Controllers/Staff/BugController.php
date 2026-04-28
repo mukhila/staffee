@@ -40,6 +40,7 @@ class BugController extends Controller
             'description' => 'nullable|string',
             'assigned_to' => 'required|exists:users,id',
             'severity' => 'required|in:low,medium,high,critical',
+            'priority' => 'required|in:low,medium,high,critical',
             'test_case_id' => 'nullable|exists:test_cases,id',
         ]);
 
@@ -51,6 +52,7 @@ class BugController extends Controller
             'reported_by' => auth()->id(),
             'status' => 'open',
             'severity' => $request->severity,
+            'priority' => $request->priority,
             'test_case_id' => $request->test_case_id,
         ]);
 
@@ -88,6 +90,7 @@ class BugController extends Controller
         $request->validate([
             'status'           => 'required|in:open,in_progress,resolved,closed',
             'severity'         => 'required|in:low,medium,high,critical',
+            'priority'         => 'nullable|in:low,medium,high,critical',
             'resolution_notes' => 'nullable|string|max:5000',
         ]);
 
@@ -103,7 +106,7 @@ class BugController extends Controller
             return back()->withErrors(['resolution_notes' => 'Resolution notes are required when resolving or closing a bug.'])->withInput();
         }
 
-        $data = ['status' => $newStatus, 'severity' => $request->severity];
+        $data = ['status' => $newStatus, 'severity' => $request->severity, 'priority' => $request->priority ?? $bug->priority];
 
         if ($newStatus === 'resolved' && $bug->status !== 'resolved') {
             $data['resolution_notes'] = $request->resolution_notes;

@@ -150,4 +150,31 @@ class ProjectController extends Controller
 
         return redirect()->back()->with('success', 'Document deleted.');
     }
+
+    public function timeline(\App\Models\Project $project)
+    {
+        $tasks = $project->tasks()
+            ->with('assignedUser')
+            ->whereNotNull('start_date')
+            ->orWhereNotNull('due_date')
+            ->orderBy('start_date')
+            ->orderBy('due_date')
+            ->get();
+
+        // Gantt boundaries: project start/end or min/max of task dates
+        $minDate = $tasks->filter(fn ($t) => $t->start_date)->min('start_date')
+            ?? $tasks->filter(fn ($t) => $t->due_date)->min('due_date')
+            ?? $project->start_date
+            ?? now()->toDateString();
+
+        $maxDate = $tasks->filter(fn ($t) => $t->due_date)->max('due_date')
+            ?? $project->end_date
+            ?? now()->addMonth()->toDateString();
+
+        $rangeStart = \Carbon\Carbon::parse($minDate)->startOfMonth();
+        $rangeEnd   = \Carbon\Carbon::parse($maxDate)->endOfMonth();
+        $totalDays  = max(1, $rangeStart->diffInDays($rangeEnd));
+
+        return view('admin.projects.timeline', compact('project', 'tasks', 'rangeStart', 'rangeEnd', 'totalDays'));
+    }
 }
