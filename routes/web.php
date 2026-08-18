@@ -107,6 +107,19 @@ Route::middleware('auth')->group(function () {
     Route::post('/my-shifts/change-request',                                         [\App\Http\Controllers\Staff\MyShiftController::class, 'requestChange'])->name('staff.shifts.change-request');
     Route::delete('/my-shifts/change-request/{changeRequest}/cancel',                [\App\Http\Controllers\Staff\MyShiftController::class, 'cancelRequest'])->name('staff.shifts.cancel-request');
 
+    // My Assets (staff self-service)
+    Route::get('my-assets', [\App\Http\Controllers\Staff\MyAssetController::class, 'index'])->name('staff.assets.index');
+
+    // Learning (staff self-service)
+    Route::prefix('learning')->name('staff.learning.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Staff\LearningController::class, 'index'])->name('index');
+        Route::get('/{enrollment}', [\App\Http\Controllers\Staff\LearningController::class, 'show'])->name('show');
+        Route::post('/courses/{course}/enroll', [\App\Http\Controllers\Staff\LearningController::class, 'enroll'])->name('enroll');
+        Route::post('/{enrollment}/start', [\App\Http\Controllers\Staff\LearningController::class, 'start'])->name('start');
+        Route::post('/{enrollment}/complete', [\App\Http\Controllers\Staff\LearningController::class, 'complete'])->name('complete');
+        Route::post('/{enrollment}/drop', [\App\Http\Controllers\Staff\LearningController::class, 'drop'])->name('drop');
+    });
+
     // Expense claims (staff self-service)
     Route::prefix('expenses')->name('staff.expenses.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Staff\ExpenseController::class, 'index'])->name('index');
@@ -376,6 +389,28 @@ Route::middleware('auth')->group(function () {
                 Route::post('/{invoice}/send', [\App\Http\Controllers\Admin\Client\InvoiceController::class, 'send'])->name('send');
                 Route::post('/{invoice}/payment', [\App\Http\Controllers\Admin\Client\InvoiceController::class, 'recordPayment'])->name('payment');
                 Route::post('/{invoice}/cancel', [\App\Http\Controllers\Admin\Client\InvoiceController::class, 'cancel'])->name('cancel');
+            });
+
+            // Assets & Equipment
+            Route::prefix('assets')->name('assets.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\Asset\AssetController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Admin\Asset\AssetController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\Asset\AssetController::class, 'store'])->name('store');
+                Route::get('/{asset}', [\App\Http\Controllers\Admin\Asset\AssetController::class, 'show'])->name('show');
+                Route::get('/{asset}/edit', [\App\Http\Controllers\Admin\Asset\AssetController::class, 'edit'])->name('edit');
+                Route::put('/{asset}', [\App\Http\Controllers\Admin\Asset\AssetController::class, 'update'])->name('update');
+                Route::post('/{asset}/assign', [\App\Http\Controllers\Admin\Asset\AssetController::class, 'assign'])->name('assign');
+                Route::post('/{asset}/repair', [\App\Http\Controllers\Admin\Asset\AssetController::class, 'repair'])->name('repair');
+            });
+            Route::post('asset-assignments/{assignment}/return', [\App\Http\Controllers\Admin\Asset\AssetAssignmentController::class, 'returnAsset'])->name('asset-assignments.return');
+
+            // Learning & Certification
+            Route::prefix('learning')->name('learning.')->group(function () {
+                Route::get('courses', [\App\Http\Controllers\Admin\Learning\LearningCourseController::class, 'index'])->name('courses.index');
+                Route::get('courses/create', [\App\Http\Controllers\Admin\Learning\LearningCourseController::class, 'create'])->name('courses.create');
+                Route::post('courses', [\App\Http\Controllers\Admin\Learning\LearningCourseController::class, 'store'])->name('courses.store');
+                Route::get('courses/{course}', [\App\Http\Controllers\Admin\Learning\LearningCourseController::class, 'show'])->name('courses.show');
+                Route::post('courses/{course}/enroll', [\App\Http\Controllers\Admin\Learning\LearningCourseController::class, 'enroll'])->name('courses.enroll');
             });
 
             // Internal API (admin-only — used by admin UI)

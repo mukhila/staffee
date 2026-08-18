@@ -176,7 +176,24 @@
           <span class="menu-label">Onboarding</span>
         </a>
       </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.assets.index') }}">
+          <i class="fi fi-rr-laptop"></i>
+          <span class="menu-label">Assets</span>
+        </a>
+      </li>
       @endif {{-- end HR Management --}}
+
+      {{-- ── Learning ─────────────────────────────────────────────────────── --}}
+      @if($u->isAdmin())
+      <li class="menu-heading"><span class="menu-label">Learning</span></li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.learning.courses.index') }}">
+          <i class="fi fi-rr-graduation-cap"></i>
+          <span class="menu-label">Courses</span>
+        </a>
+      </li>
+      @endif
 
       {{-- ── Performance Management ─────────────────────────────────────── --}}
       @if($u->isAdmin())
@@ -461,6 +478,18 @@
         <a class="menu-link" href="{{ route('staff.shifts.index') }}">
           <i class="fi fi-rr-time-half-past"></i>
           <span class="menu-label">My Shift</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.assets.index') }}">
+          <i class="fi fi-rr-laptop"></i>
+          <span class="menu-label">My Assets</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.learning.index') }}">
+          <i class="fi fi-rr-graduation-cap"></i>
+          <span class="menu-label">Learning</span>
         </a>
       </li>
 
