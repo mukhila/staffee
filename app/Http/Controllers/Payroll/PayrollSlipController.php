@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Payroll;
 
 use App\Http\Controllers\Controller;
 use App\Models\Payroll\PayrollSlip;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class PayrollSlipController extends Controller
 {
@@ -28,14 +29,10 @@ class PayrollSlipController extends Controller
 
         $payrollSlip->load('lines.definition', 'employee');
 
-        $content = view('payroll.slips.download', compact('payrollSlip'))->render();
+        $pdf = Pdf::loadView('payroll.slips.download', compact('payrollSlip'));
 
-        return response()->streamDownload(
-            static function () use ($content) {
-                echo $content;
-            },
-            ($payrollSlip->slip_number ?? 'payroll-slip') . '.html',
-            ['Content-Type' => 'text/html']
-        );
+        $filename = ($payrollSlip->slip_number ?? 'payroll-slip') . '.pdf';
+
+        return $pdf->download($filename);
     }
 }

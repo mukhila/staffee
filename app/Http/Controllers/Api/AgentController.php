@@ -116,7 +116,7 @@ class AgentController extends Controller
         }
 
         $dir  = "monitoring/screenshots/{$user->id}/" . now()->format('Y/m/d');
-        $path = $request->file('file')->store($dir, 'public');
+        $path = $request->file('file')->store($dir, 'local');
 
         MonitoringScreenshot::create([
             'user_id'             => $user->id,

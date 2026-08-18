@@ -53,3 +53,8 @@ Schedule::command('monitoring:check-idle')
     ->everyFiveMinutes()
     ->name('monitoring-idle-check')
     ->withoutOverlapping();
+
+// Purge old monitoring data based on configured retention window
+Schedule::command('monitoring:purge')
+    ->dailyAt('02:00')
+    ->withoutOverlapping();

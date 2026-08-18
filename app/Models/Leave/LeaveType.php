@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 class LeaveType extends Model
 {
     protected $fillable = [
-        'name', 'code', 'category', 'color', 'is_paid', 'requires_approval',
+        'name', 'code', 'category', 'color', 'is_paid', 'is_encashable', 'requires_approval',
         'max_days_per_year', 'allow_half_day', 'requires_document', 'is_active', 'description',
     ];
 
     protected $casts = [
         'is_paid'            => 'boolean',
+        'is_encashable'      => 'boolean',
         'requires_approval'  => 'boolean',
         'allow_half_day'     => 'boolean',
         'requires_document'  => 'boolean',

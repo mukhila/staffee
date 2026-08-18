@@ -28,6 +28,7 @@ class LeaveTypeController extends Controller
             'category'          => 'required|in:' . implode(',', array_keys(LeaveType::CATEGORIES)),
             'color'             => 'required|regex:/^#[0-9a-fA-F]{6}$/',
             'is_paid'           => 'boolean',
+            'is_encashable'     => 'boolean',
             'requires_approval' => 'boolean',
             'max_days_per_year' => 'nullable|integer|min:1|max:365',
             'allow_half_day'    => 'boolean',
@@ -36,6 +37,7 @@ class LeaveTypeController extends Controller
         ]);
 
         $data['is_paid']           = $request->boolean('is_paid');
+        $data['is_encashable']     = $request->boolean('is_encashable');
         $data['requires_approval'] = $request->boolean('requires_approval');
         $data['allow_half_day']    = $request->boolean('allow_half_day');
         $data['requires_document'] = $request->boolean('requires_document');
@@ -58,6 +60,7 @@ class LeaveTypeController extends Controller
             'category'          => 'required|in:' . implode(',', array_keys(LeaveType::CATEGORIES)),
             'color'             => 'required|regex:/^#[0-9a-fA-F]{6}$/',
             'is_paid'           => 'boolean',
+            'is_encashable'     => 'boolean',
             'requires_approval' => 'boolean',
             'max_days_per_year' => 'nullable|integer|min:1|max:365',
             'allow_half_day'    => 'boolean',
@@ -67,6 +70,7 @@ class LeaveTypeController extends Controller
         ]);
 
         $data['is_paid']           = $request->boolean('is_paid');
+        $data['is_encashable']     = $request->boolean('is_encashable');
         $data['requires_approval'] = $request->boolean('requires_approval');
         $data['allow_half_day']    = $request->boolean('allow_half_day');
         $data['requires_document'] = $request->boolean('requires_document');

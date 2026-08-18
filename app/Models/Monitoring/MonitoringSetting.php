@@ -11,6 +11,7 @@ class MonitoringSetting extends Model
         'user_id', 'enabled', 'screenshot_enabled', 'screenshot_interval_seconds',
         'activity_tracking_enabled', 'idle_threshold_seconds',
         'working_hours_only', 'work_start_time', 'work_end_time', 'notify_employee',
+        'retention_days',
     ];
 
     protected $casts = [

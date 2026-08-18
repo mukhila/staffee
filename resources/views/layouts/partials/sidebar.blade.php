@@ -20,22 +20,33 @@
         </a>
       </li>
 
-      @if(Auth::user()->isAdmin())
+      @php $u = Auth::user(); @endphp
+
+      {{-- ── Staff Management ─────────────────────────────────────────── --}}
+      @if($u->hasAnyPermission(['view-staff', 'view-attendance', 'approve-leave', 'manage-attendance']))
       <li class="menu-heading">
         <span class="menu-label">Staff Management</span>
       </li>
+
+      @if($u->hasPermission('view-staff'))
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.staff.index') }}">
           <i class="fi fi-rr-users"></i>
           <span class="menu-label">Staff</span>
         </a>
       </li>
+      @endif
+
+      @if($u->hasPermission('bulk-import-staff'))
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.staff.import') }}">
           <i class="fi fi-rr-file-upload"></i>
           <span class="menu-label">Bulk Import</span>
         </a>
       </li>
+      @endif
+
+      @if($u->isAdmin())
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.departments.index') }}">
           <i class="fi fi-rr-building"></i>
@@ -48,6 +59,9 @@
           <span class="menu-label">Roles</span>
         </a>
       </li>
+      @endif
+
+      @if($u->hasPermission('approve-leave'))
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.leaves.index') }}">
           <i class="fi fi-rr-calendar-exclamation"></i>
@@ -58,12 +72,18 @@
           @endif
         </a>
       </li>
+      @endif
+
+      @if($u->hasPermission('view-attendance'))
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.attendances.index') }}">
           <i class="fi fi-rr-calendar-clock"></i>
           <span class="menu-label">Attendance</span>
         </a>
       </li>
+      @endif
+
+      @if($u->isAdmin())
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.shifts.dashboard') }}">
           <i class="fi fi-rr-time-half-past"></i>
@@ -74,7 +94,11 @@
           @endif
         </a>
       </li>
+      @endif
+      @endif {{-- end Staff Management --}}
 
+      {{-- ── HR Management ───────────────────────────────────────────────── --}}
+      @if($u->isAdmin())
       <li class="menu-heading">
         <span class="menu-label">HR Management</span>
       </li>
@@ -120,7 +144,6 @@
           @endif
         </a>
       </li>
-
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.hr.transfers.index') }}">
           <i class="fi fi-rr-arrows-alt-h"></i>
@@ -141,23 +164,33 @@
           @endif
         </a>
       </li>
+      @endif {{-- end HR Management --}}
 
+      {{-- ── Project Management ──────────────────────────────────────────── --}}
+      @if($u->hasAnyPermission(['view-projects', 'view-tasks']))
       <li class="menu-heading">
         <span class="menu-label">Project Management</span>
       </li>
+      @if($u->hasPermission('view-projects'))
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.projects.index') }}">
           <i class="fi fi-rr-briefcase"></i>
           <span class="menu-label">Projects</span>
         </a>
       </li>
+      @endif
+      @if($u->hasPermission('view-tasks'))
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.tasks.index') }}">
           <i class="fi fi-rr-list-check"></i>
           <span class="menu-label">All Tasks</span>
         </a>
       </li>
+      @endif
+      @endif {{-- end Project Management --}}
 
+      {{-- ── Finance ─────────────────────────────────────────────────────── --}}
+      @if($u->isAdmin())
       <li class="menu-heading">
         <span class="menu-label">Finance</span>
       </li>
@@ -237,7 +270,10 @@
           <span class="menu-label">Announcements</span>
         </a>
       </li>
+      @endif {{-- end Finance / Admin sections --}}
 
+      {{-- ── Analytics ───────────────────────────────────────────────────── --}}
+      @if($u->hasPermission('view-reports'))
       <li class="menu-heading">
         <span class="menu-label">Analytics</span>
       </li>
@@ -247,10 +283,14 @@
           <span class="menu-label">Reports</span>
         </a>
       </li>
+      @endif
 
+      {{-- ── Monitoring ──────────────────────────────────────────────────── --}}
+      @if($u->hasAnyPermission(['view-monitoring', 'view-screenshots', 'manage-monitoring']))
       <li class="menu-heading">
         <span class="menu-label">Monitoring</span>
       </li>
+      @if($u->hasPermission('view-monitoring'))
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.monitoring.index') }}">
           <i class="fi fi-rr-desktop"></i>
@@ -264,19 +304,27 @@
           @endif
         </a>
       </li>
+      @endif
+      @if($u->hasPermission('manage-monitoring'))
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.monitoring.settings.index') }}">
           <i class="fi fi-rr-shield-check"></i>
           <span class="menu-label">Settings & Tokens</span>
         </a>
       </li>
+      @endif
+      @if($u->hasPermission('view-reports'))
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.monitoring.reports.daily') }}">
           <i class="fi fi-rr-chart-line-up"></i>
           <span class="menu-label">Monitoring Reports</span>
         </a>
       </li>
+      @endif
+      @endif {{-- end Monitoring --}}
 
+      {{-- ── Settings ────────────────────────────────────────────────────── --}}
+      @if($u->isAdmin())
       <li class="menu-heading">
         <span class="menu-label">Settings</span>
       </li>
@@ -288,6 +336,7 @@
       </li>
       @endif
 
+      {{-- ── Work (all authenticated users) ─────────────────────────────── --}}
       <li class="menu-heading">
         <span class="menu-label">Work</span>
       </li>

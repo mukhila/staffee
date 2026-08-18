@@ -26,12 +26,12 @@ class MonitoringScreenshot extends Model
 
     public function getUrlAttribute(): string
     {
-        return asset('storage/' . $this->file_path);
+        return route('admin.monitoring.screenshots.serve', $this);
     }
 
     public function getThumbnailUrlAttribute(): string
     {
-        $path = $this->thumbnail_path ?? $this->file_path;
-        return asset('storage/' . $path);
+        $suffix = $this->thumbnail_path ? '?thumb=1' : '';
+        return route('admin.monitoring.screenshots.serve', $this) . $suffix;
     }
 }

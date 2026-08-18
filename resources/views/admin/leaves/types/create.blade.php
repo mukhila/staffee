@@ -64,6 +64,10 @@
                             <label class="form-check-label" for="is_paid">Paid</label>
                         </div>
                         <div class="form-check form-check-inline">
+                            <input class="form-check-input" type="checkbox" name="is_encashable" id="is_encashable" value="1" {{ old('is_encashable') ? 'checked' : '' }}>
+                            <label class="form-check-label" for="is_encashable">Encashable on Exit</label>
+                        </div>
+                        <div class="form-check form-check-inline">
                             <input class="form-check-input" type="checkbox" name="requires_approval" id="requires_approval" value="1" {{ old('requires_approval', '1') ? 'checked' : '' }}>
                             <label class="form-check-label" for="requires_approval">Requires Approval</label>
                         </div>

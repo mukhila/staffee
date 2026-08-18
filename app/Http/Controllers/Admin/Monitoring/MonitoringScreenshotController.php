@@ -49,12 +49,29 @@ class MonitoringScreenshotController extends Controller
         return back()->with('success', $screenshot->is_flagged ? 'Screenshot unflagged.' : 'Screenshot flagged.');
     }
 
+    /** Stream a screenshot to an authorised viewer (admin or the subject employee). */
+    public function serve(MonitoringScreenshot $screenshot, Request $request)
+    {
+        abort_unless(
+            auth()->user()->role === 'admin' || auth()->id() === $screenshot->user_id,
+            403
+        );
+
+        $path = ($request->boolean('thumb') && $screenshot->thumbnail_path)
+            ? $screenshot->thumbnail_path
+            : $screenshot->file_path;
+
+        abort_if(!Storage::disk('local')->exists($path), 404);
+
+        return Storage::disk('local')->response($path);
+    }
+
     /** Delete a screenshot and its stored file. */
     public function destroy(MonitoringScreenshot $screenshot)
     {
-        Storage::disk('public')->delete($screenshot->file_path);
+        Storage::disk('local')->delete($screenshot->file_path);
         if ($screenshot->thumbnail_path) {
-            Storage::disk('public')->delete($screenshot->thumbnail_path);
+            Storage::disk('local')->delete($screenshot->thumbnail_path);
         }
         $screenshot->delete();
         return back()->with('success', 'Screenshot deleted.');

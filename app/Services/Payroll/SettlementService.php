@@ -6,6 +6,7 @@ use App\Models\HR\FinalSettlement;
 use App\Models\HR\TerminationRequest;
 use App\Models\Payroll\ComponentDefinition;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class SettlementService
@@ -20,16 +21,24 @@ class SettlementService
         $salaryStructure = $user->activeSalaryStructure()->with('components.definition')->first();
         $baseSalary = (string) ($salaryStructure?->base_salary ?? $profile?->current_salary ?? '0');
         $dailyRate = $this->calculationService->calculateDailyRate($baseSalary, (int) ($salaryStructure?->standard_work_days ?? 26));
-        $pendingSalaryDays = (int) now()->parse($lastWorkingDate)->day;
-        $pendingSalaryAmount = $this->calculationService->multiplyAmount($dailyRate, (string) $pendingSalaryDays);
 
-        $yearsOfService = (int) floor($profile?->years_of_service ?? 0);
-        $gratuity = $this->calculateGratuity($user, $yearsOfService);
+        // P-09: correct worked-days calculation using actual days in the final month
+        $lwdCarbon           = Carbon::parse($lastWorkingDate);
+        $pendingSalaryDays   = $lwdCarbon->copy()->startOfMonth()->diffInDays($lwdCarbon) + 1;
+        $daysInMonth         = $lwdCarbon->daysInMonth;
+        $finalMonthDailyRate = $this->calculationService->calculateDailyRate($baseSalary, $daysInMonth);
+        $pendingSalaryAmount = $this->calculationService->multiplyAmount($finalMonthDailyRate, (string) $pendingSalaryDays);
 
-        $settlementYear = (int) \Carbon\Carbon::parse($lastWorkingDate)->year;
+        // P-11 step 6: use raw float years for gratuity rounding
+        $rawYears = (float) ($profile?->years_of_service ?? 0);
+        $gratuity = $this->calculateGratuity($user, $rawYears);
+
+        $settlementYear = (int) Carbon::parse($lastWorkingDate)->year;
+
+        // P-11 step 5: filter encashable leaves by both is_paid and is_encashable
         $encashableLeaveDays = (string) (\App\Models\Leave\LeaveBalance::where('user_id', $user->id)
             ->where('year', $settlementYear)
-            ->whereHas('leaveType', fn ($query) => $query->where('is_paid', true))
+            ->whereHas('leaveType', fn ($query) => $query->where('is_paid', true)->where('is_encashable', true))
             ->selectRaw('COALESCE(SUM(available_balance - COALESCE(pending_days, 0)), 0) as total')
             ->value('total') ?? 0);
 
@@ -42,6 +51,10 @@ class SettlementService
         $totalEarnings = $this->calculationService->addAmount($pendingSalaryAmount, $leaveEncashment);
         $totalEarnings = $this->calculationService->addAmount($totalEarnings, $gratuity);
         $totalDeductions = $this->calculationService->normalizeDecimal($unpaidAdjustments);
+
+        // P-10: notice shortfall deduction
+        $noticePenalty = $this->calculateNoticeShortfall($user, $lastWorkingDate, $dailyRate);
+        $totalDeductions = $this->calculationService->addAmount($totalDeductions, $noticePenalty['notice_shortfall_deduction']);
         $netPayable = $this->calculationService->subtractAmount($totalEarnings, $totalDeductions);
 
         return [
@@ -52,8 +65,10 @@ class SettlementService
             'leave_encashment_amount' => $leaveEncashment,
             'gratuity' => $gratuity,
             'total_earnings' => $totalEarnings,
-            'pending_advances' => $totalDeductions,
+            'pending_advances' => $this->calculationService->normalizeDecimal($unpaidAdjustments),
             'total_deductions' => $totalDeductions,
+            'notice_shortfall_days' => $noticePenalty['notice_shortfall_days'],
+            'notice_shortfall_deduction' => $noticePenalty['notice_shortfall_deduction'],
             'net_payable' => $netPayable,
             'currency' => $salaryStructure?->currency_code ?? $profile?->salary_currency ?? 'USD',
         ];
@@ -68,12 +83,61 @@ class SettlementService
             return '0.000000';
         }
 
-        $fifteenByTwentySix = $this->calculationService->divideAmount('15', '26');
+        // P-11 step 6: round up if partial year >= 6 months (0.5 years), floor otherwise
+        $wholeYears   = (int) floor($yearsOfService);
+        $partialYear  = $yearsOfService - $wholeYears;
+        $roundedYears = $partialYear >= 0.5 ? $wholeYears + 1 : $wholeYears;
 
-        return $this->calculationService->multiplyAmount(
+        $fifteenByTwentySix = $this->calculationService->divideAmount('15', '26');
+        $gratuity = $this->calculationService->multiplyAmount(
             $this->calculationService->multiplyAmount($baseSalary, $fifteenByTwentySix),
-            (string) $yearsOfService
+            (string) $roundedYears
         );
+
+        // Apply statutory ceiling from config (0 = no ceiling)
+        $ceiling = (string) config('payroll.gratuity_ceiling', '0');
+        if (bccomp($ceiling, '0', 6) > 0 && bccomp($gratuity, $ceiling, 6) > 0) {
+            return $this->calculationService->normalizeDecimal($ceiling);
+        }
+
+        return $gratuity;
+    }
+
+    // P-10: calculate notice period shortfall and deduction
+    private function calculateNoticeShortfall(User $user, string $lastWorkingDate, string $dailyRate): array
+    {
+        $requiredDays = (int) ($user->profile->notice_period_days ?? 0);
+
+        if ($requiredDays === 0) {
+            return ['notice_shortfall_days' => 0, 'notice_shortfall_deduction' => '0.000000'];
+        }
+
+        $resignation = $user->resignations()
+            ->where('status', 'hr_approved')
+            ->latest('submitted_date')
+            ->first();
+
+        if (!$resignation) {
+            return ['notice_shortfall_days' => 0, 'notice_shortfall_deduction' => '0.000000'];
+        }
+
+        if ($resignation->notice_waived) {
+            return ['notice_shortfall_days' => 0, 'notice_shortfall_deduction' => '0.000000'];
+        }
+
+        $servedDays   = Carbon::parse($resignation->submitted_date)->diffInDays(Carbon::parse($lastWorkingDate));
+        $shortfallDays = max(0, $requiredDays - $servedDays);
+
+        if ($shortfallDays === 0) {
+            return ['notice_shortfall_days' => 0, 'notice_shortfall_deduction' => '0.000000'];
+        }
+
+        $deductionAmount = $this->calculationService->multiplyAmount($dailyRate, (string) $shortfallDays);
+
+        return [
+            'notice_shortfall_days'      => $shortfallDays,
+            'notice_shortfall_deduction' => $deductionAmount,
+        ];
     }
 
     public function generateSettlementSlip(User $user, ?TerminationRequest $termination = null, ?int $actorId = null): FinalSettlement
@@ -93,8 +157,6 @@ class SettlementService
                     'last_working_date' => $termination->last_working_date,
                     'bonus' => '0.00',
                     'other_earnings' => [],
-                    'notice_shortfall_days' => 0,
-                    'notice_shortfall_deduction' => '0.00',
                     'other_deductions' => [],
                     'status' => 'pending_approval',
                     'calculated_by' => $actorId,

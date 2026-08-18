@@ -56,3 +56,11 @@
            {{ old('notify_employee', $s?->notify_employee ?? false) ? 'checked' : '' }}>
     <label class="form-check-label" for="notify_employee">Notify Employee (transparency mode)</label>
 </div>
+
+<div class="mb-3 mt-3">
+    <label class="form-label form-label-sm">Data Retention (days)</label>
+    <input type="number" name="retention_days" class="form-control form-control-sm"
+           value="{{ old('retention_days', $s?->retention_days ?? 0) }}"
+           min="0" max="3650">
+    <div class="form-text">0 = keep forever. Screenshots, activity logs, and idle records older than this are purged nightly.</div>
+</div>

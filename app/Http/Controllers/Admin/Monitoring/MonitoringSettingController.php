@@ -33,6 +33,7 @@ class MonitoringSettingController extends Controller
             'work_start_time'             => 'required|date_format:H:i',
             'work_end_time'               => 'required|date_format:H:i|after:work_start_time',
             'notify_employee'             => 'boolean',
+            'retention_days'              => 'required|integer|min:0|max:3650',
         ]);
 
         // Checkboxes not submitted = false
