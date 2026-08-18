@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Announcement;
 use App\Models\Attendance;
 use App\Models\Bug;
-use App\Models\LeaveBalance;
+use App\Models\Leave\LeaveBalance;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\TimeTracker;

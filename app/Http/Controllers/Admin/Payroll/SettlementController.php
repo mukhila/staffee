@@ -30,7 +30,7 @@ class SettlementController extends Controller
 
     public function finalize(TerminationRequest $termination)
     {
-        $settlement = $this->settlementService->generateSettlementSlip($termination->employee, $termination);
+        $settlement = $this->settlementService->generateSettlementSlip($termination->employee, $termination, auth()->id());
         $termination->employee->notify(new SettlementSlipGeneratedNotification($settlement));
 
         return redirect()->route('admin.hr.terminations.show', $termination)
