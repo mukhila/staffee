@@ -7,6 +7,11 @@ Route::get('/', function () {
     return view('home');
 });
 
+// ── Public job board (unauthenticated) ────────────────────────────────────────
+Route::get('jobs', [\App\Http\Controllers\Admin\Recruitment\JobPostingController::class, 'publicIndex'])->name('jobs.index');
+Route::get('jobs/{posting}', [\App\Http\Controllers\Admin\Recruitment\JobPostingController::class, 'publicShow'])->name('jobs.show');
+Route::post('jobs/{posting}/apply', [\App\Http\Controllers\Admin\Recruitment\JobApplicationController::class, 'apply'])->name('jobs.apply');
+
 Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])->name('dashboard');
 
@@ -311,6 +316,26 @@ Route::middleware('auth')->group(function () {
                 Route::post('cycles/{cycle}/reviews', [\App\Http\Controllers\Admin\Performance\PerformanceReviewController::class, 'store'])->name('reviews.store');
                 Route::get('reviews/{review}', [\App\Http\Controllers\Admin\Performance\PerformanceReviewController::class, 'show'])->name('reviews.show');
                 Route::post('reviews/{review}/submit', [\App\Http\Controllers\Admin\Performance\PerformanceReviewController::class, 'submit'])->name('reviews.submit');
+            });
+
+            // Recruitment
+            Route::prefix('recruitment')->name('recruitment.')->group(function () {
+                Route::get('postings', [\App\Http\Controllers\Admin\Recruitment\JobPostingController::class, 'index'])->name('postings.index');
+                Route::get('postings/create', [\App\Http\Controllers\Admin\Recruitment\JobPostingController::class, 'create'])->name('postings.create');
+                Route::post('postings', [\App\Http\Controllers\Admin\Recruitment\JobPostingController::class, 'store'])->name('postings.store');
+                Route::get('postings/{posting}', [\App\Http\Controllers\Admin\Recruitment\JobPostingController::class, 'show'])->name('postings.show');
+                Route::post('postings/{posting}/publish', [\App\Http\Controllers\Admin\Recruitment\JobPostingController::class, 'publish'])->name('postings.publish');
+                Route::post('postings/{posting}/close', [\App\Http\Controllers\Admin\Recruitment\JobPostingController::class, 'close'])->name('postings.close');
+                Route::get('applications/{application}', [\App\Http\Controllers\Admin\Recruitment\JobApplicationController::class, 'show'])->name('applications.show');
+                Route::post('applications/{application}/status', [\App\Http\Controllers\Admin\Recruitment\JobApplicationController::class, 'updateStatus'])->name('applications.status');
+                Route::post('applications/{application}/hire', [\App\Http\Controllers\Admin\Recruitment\JobApplicationController::class, 'hire'])->name('applications.hire');
+            });
+
+            // Onboarding
+            Route::prefix('onboarding')->name('onboarding.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\HR\OnboardingController::class, 'index'])->name('index');
+                Route::get('{checklist}', [\App\Http\Controllers\Admin\HR\OnboardingController::class, 'show'])->name('show');
+                Route::post('tasks/{task}/complete', [\App\Http\Controllers\Admin\HR\OnboardingController::class, 'completeTask'])->name('tasks.complete');
             });
 
             // Internal API (admin-only — used by admin UI)

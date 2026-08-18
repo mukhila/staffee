@@ -164,6 +164,18 @@
           @endif
         </a>
       </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.recruitment.postings.index') }}">
+          <i class="fi fi-rr-user-add"></i>
+          <span class="menu-label">Recruitment</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.onboarding.index') }}">
+          <i class="fi fi-rr-user-check"></i>
+          <span class="menu-label">Onboarding</span>
+        </a>
+      </li>
       @endif {{-- end HR Management --}}
 
       {{-- ── Performance Management ─────────────────────────────────────── --}}
