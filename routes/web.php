@@ -229,6 +229,13 @@ Route::middleware('auth')->group(function () {
                 Route::post('loans', [\App\Http\Controllers\Admin\Payroll\LoanController::class, 'store'])->name('loans.store');
                 Route::get('loans/{loan}', [\App\Http\Controllers\Admin\Payroll\LoanController::class, 'show'])->name('loans.show');
                 Route::post('loans/{loan}/cancel', [\App\Http\Controllers\Admin\Payroll\LoanController::class, 'cancel'])->name('loans.cancel');
+                Route::get('benefit-deductions', [\App\Http\Controllers\Admin\Payroll\BenefitDeductionController::class, 'index'])->name('benefit-deductions.index');
+                Route::get('benefit-deductions/create', [\App\Http\Controllers\Admin\Payroll\BenefitDeductionController::class, 'create'])->name('benefit-deductions.create');
+                Route::post('benefit-deductions', [\App\Http\Controllers\Admin\Payroll\BenefitDeductionController::class, 'store'])->name('benefit-deductions.store');
+                Route::get('benefit-deductions/{deduction}', [\App\Http\Controllers\Admin\Payroll\BenefitDeductionController::class, 'show'])->name('benefit-deductions.show');
+                Route::post('benefit-deductions/{deduction}/pause', [\App\Http\Controllers\Admin\Payroll\BenefitDeductionController::class, 'pause'])->name('benefit-deductions.pause');
+                Route::post('benefit-deductions/{deduction}/resume', [\App\Http\Controllers\Admin\Payroll\BenefitDeductionController::class, 'resume'])->name('benefit-deductions.resume');
+                Route::post('benefit-deductions/{deduction}/terminate', [\App\Http\Controllers\Admin\Payroll\BenefitDeductionController::class, 'terminate'])->name('benefit-deductions.terminate');
             });
 
             // Shift management
