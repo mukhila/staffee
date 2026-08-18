@@ -166,6 +166,19 @@
       </li>
       @endif {{-- end HR Management --}}
 
+      {{-- ── Performance Management ─────────────────────────────────────── --}}
+      @if($u->isAdmin())
+      <li class="menu-heading">
+        <span class="menu-label">Performance</span>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.performance.cycles.index') }}">
+          <i class="fi fi-rr-star"></i>
+          <span class="menu-label">Review Cycles</span>
+        </a>
+      </li>
+      @endif
+
       {{-- ── Project Management ──────────────────────────────────────────── --}}
       @if($u->hasAnyPermission(['view-projects', 'view-tasks']))
       <li class="menu-heading">
@@ -234,6 +247,14 @@
           <span class="menu-label">Tax Regimes</span>
         </a>
       </li>
+      @if($u->isAdmin())
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.payroll.loans.index') }}">
+          <i class="fi fi-rr-money-bill-wave"></i>
+          <span class="menu-label">Employee Loans</span>
+        </a>
+      </li>
+      @endif
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.time-entries.approvals.index') }}">
           <i class="fi fi-rr-time-check"></i>
@@ -339,6 +360,12 @@
       {{-- ── Work (all authenticated users) ─────────────────────────────── --}}
       <li class="menu-heading">
         <span class="menu-label">Work</span>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.performance.index') }}">
+          <i class="fi fi-rr-star"></i>
+          <span class="menu-label">Performance</span>
+        </a>
       </li>
       <li class="menu-item">
         <a class="menu-link" href="{{ route('staff.tasks.index') }}">

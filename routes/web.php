@@ -102,6 +102,14 @@ Route::middleware('auth')->group(function () {
     Route::post('/my-shifts/change-request',                                         [\App\Http\Controllers\Staff\MyShiftController::class, 'requestChange'])->name('staff.shifts.change-request');
     Route::delete('/my-shifts/change-request/{changeRequest}/cancel',                [\App\Http\Controllers\Staff\MyShiftController::class, 'cancelRequest'])->name('staff.shifts.cancel-request');
 
+    // Staff performance (self-service)
+    Route::prefix('performance')->name('staff.performance.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Staff\PerformanceController::class, 'index'])->name('index');
+        Route::get('/{review}', [\App\Http\Controllers\Staff\PerformanceController::class, 'show'])->name('show');
+        Route::post('/{review}/self-assessment', [\App\Http\Controllers\Staff\PerformanceController::class, 'selfAssessment'])->name('self-assessment');
+        Route::post('/{review}/acknowledge', [\App\Http\Controllers\Staff\PerformanceController::class, 'acknowledge'])->name('acknowledge');
+    });
+
     // Admin panel — admins get full access; PMs get permission-gated access
     Route::middleware(['role:admin,pm'])->prefix('admin')->name('admin.')->group(function () {
 
@@ -201,6 +209,11 @@ Route::middleware('auth')->group(function () {
                 Route::post('adjustments/{adjustment}/cancel', [\App\Http\Controllers\Admin\Payroll\PayrollAdjustmentController::class, 'cancel'])->name('adjustments.cancel');
                 Route::post('settlements/initiate', [\App\Http\Controllers\Admin\Payroll\SettlementController::class, 'initiate'])->name('settlements.initiate');
                 Route::post('settlements/{termination}/finalize', [\App\Http\Controllers\Admin\Payroll\SettlementController::class, 'finalize'])->name('settlements.finalize');
+                Route::get('loans', [\App\Http\Controllers\Admin\Payroll\LoanController::class, 'index'])->name('loans.index');
+                Route::get('loans/create', [\App\Http\Controllers\Admin\Payroll\LoanController::class, 'create'])->name('loans.create');
+                Route::post('loans', [\App\Http\Controllers\Admin\Payroll\LoanController::class, 'store'])->name('loans.store');
+                Route::get('loans/{loan}', [\App\Http\Controllers\Admin\Payroll\LoanController::class, 'show'])->name('loans.show');
+                Route::post('loans/{loan}/cancel', [\App\Http\Controllers\Admin\Payroll\LoanController::class, 'cancel'])->name('loans.cancel');
             });
 
             // Shift management
@@ -286,6 +299,18 @@ Route::middleware('auth')->group(function () {
                 Route::delete('settings/{setting}', [\App\Http\Controllers\Admin\Monitoring\MonitoringSettingController::class, 'destroy'])->name('settings.destroy');
                 Route::post('tokens/{user}/generate', [\App\Http\Controllers\Admin\Monitoring\MonitoringSettingController::class, 'generateToken'])->name('tokens.generate');
                 Route::delete('tokens/{user}/revoke', [\App\Http\Controllers\Admin\Monitoring\MonitoringSettingController::class, 'revokeToken'])->name('tokens.revoke');
+            });
+
+            // Performance cycles & admin review management
+            Route::prefix('performance')->name('performance.')->group(function () {
+                Route::get('cycles', [\App\Http\Controllers\Admin\Performance\PerformanceCycleController::class, 'index'])->name('cycles.index');
+                Route::get('cycles/create', [\App\Http\Controllers\Admin\Performance\PerformanceCycleController::class, 'create'])->name('cycles.create');
+                Route::post('cycles', [\App\Http\Controllers\Admin\Performance\PerformanceCycleController::class, 'store'])->name('cycles.store');
+                Route::get('cycles/{cycle}', [\App\Http\Controllers\Admin\Performance\PerformanceCycleController::class, 'show'])->name('cycles.show');
+                Route::post('cycles/{cycle}/close', [\App\Http\Controllers\Admin\Performance\PerformanceCycleController::class, 'close'])->name('cycles.close');
+                Route::post('cycles/{cycle}/reviews', [\App\Http\Controllers\Admin\Performance\PerformanceReviewController::class, 'store'])->name('reviews.store');
+                Route::get('reviews/{review}', [\App\Http\Controllers\Admin\Performance\PerformanceReviewController::class, 'show'])->name('reviews.show');
+                Route::post('reviews/{review}/submit', [\App\Http\Controllers\Admin\Performance\PerformanceReviewController::class, 'submit'])->name('reviews.submit');
             });
 
             // Internal API (admin-only — used by admin UI)
