@@ -58,6 +58,23 @@ Route::middleware('auth')->group(function () {
     Route::get('my-profile', [\App\Http\Controllers\Staff\ProfileController::class, 'index'])->name('staff.profile.index');
     Route::get('my-profile/documents/{document}/download', [\App\Http\Controllers\Staff\ProfileController::class, 'downloadDocument'])->name('staff.profile.document.download');
 
+    // ESS Portal
+    Route::get('ess', [\App\Http\Controllers\Staff\EssController::class, 'index'])->name('staff.ess.index');
+
+    // Document Requests (staff)
+    Route::prefix('my-documents')->name('staff.document-requests.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Staff\DocumentRequestController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Staff\DocumentRequestController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Staff\DocumentRequestController::class, 'store'])->name('store');
+    });
+
+    // Suggestions (staff)
+    Route::prefix('suggestions')->name('staff.suggestions.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Staff\SuggestionController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Staff\SuggestionController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Staff\SuggestionController::class, 'store'])->name('store');
+    });
+
     // Notifications
     Route::get('notifications', [\App\Http\Controllers\NotificationController::class, 'index'])->name('notifications.index');
     Route::post('notifications/{notification}/read', [\App\Http\Controllers\NotificationController::class, 'markRead'])->name('notifications.read');
@@ -366,6 +383,29 @@ Route::middleware('auth')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Admin\HR\OnboardingController::class, 'index'])->name('index');
                 Route::get('{checklist}', [\App\Http\Controllers\Admin\HR\OnboardingController::class, 'show'])->name('show');
                 Route::post('tasks/{task}/complete', [\App\Http\Controllers\Admin\HR\OnboardingController::class, 'completeTask'])->name('tasks.complete');
+            });
+
+            // Document Requests (admin)
+            Route::prefix('document-requests')->name('document-requests.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\HR\DocumentRequestController::class, 'index'])->name('index');
+                Route::get('/{documentRequest}', [\App\Http\Controllers\Admin\HR\DocumentRequestController::class, 'show'])->name('show');
+                Route::post('/{documentRequest}/fulfill', [\App\Http\Controllers\Admin\HR\DocumentRequestController::class, 'fulfill'])->name('fulfill');
+                Route::post('/{documentRequest}/reject', [\App\Http\Controllers\Admin\HR\DocumentRequestController::class, 'reject'])->name('reject');
+            });
+
+            // Suggestions (admin)
+            Route::prefix('suggestions')->name('suggestions.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\HR\SuggestionController::class, 'index'])->name('index');
+                Route::get('/{suggestion}', [\App\Http\Controllers\Admin\HR\SuggestionController::class, 'show'])->name('show');
+                Route::post('/{suggestion}/respond', [\App\Http\Controllers\Admin\HR\SuggestionController::class, 'respond'])->name('respond');
+            });
+
+            // Workforce Analytics (admin-only)
+            Route::prefix('analytics')->name('analytics.')->group(function () {
+                Route::get('workforce', [\App\Http\Controllers\Admin\AnalyticsController::class, 'workforce'])->name('workforce');
+                Route::get('attendance', [\App\Http\Controllers\Admin\AnalyticsController::class, 'attendance'])->name('attendance');
+                Route::get('leaves', [\App\Http\Controllers\Admin\AnalyticsController::class, 'leaves'])->name('leaves');
+                Route::get('turnover', [\App\Http\Controllers\Admin\AnalyticsController::class, 'turnover'])->name('turnover');
             });
 
             // Expense categories & claims (admin)

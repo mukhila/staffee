@@ -182,6 +182,18 @@
           <span class="menu-label">Assets</span>
         </a>
       </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.document-requests.index') }}">
+          <i class="fi fi-rr-file-copy"></i>
+          <span class="menu-label">Document Requests</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.suggestions.index') }}">
+          <i class="fi fi-rr-comment-dots"></i>
+          <span class="menu-label">Suggestions</span>
+        </a>
+      </li>
       @endif {{-- end HR Management --}}
 
       {{-- ── Learning ─────────────────────────────────────────────────────── --}}
@@ -355,6 +367,12 @@
         <a class="menu-link" href="{{ route('admin.reports.index') }}">
           <i class="fi fi-rr-chart-histogram"></i>
           <span class="menu-label">Reports</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.analytics.workforce') }}">
+          <i class="fi fi-rr-chart-histogram"></i>
+          <span class="menu-label">Workforce Analytics</span>
         </a>
       </li>
       @endif
@@ -544,6 +562,24 @@
         <a class="menu-link" href="{{ route('staff.profile.index') }}">
           <i class="fi fi-rr-id-card-clip-alt"></i>
           <span class="menu-label">My Profile</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.ess.index') }}">
+          <i class="fi fi-rr-home"></i>
+          <span class="menu-label">ESS Portal</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.document-requests.index') }}">
+          <i class="fi fi-rr-file-copy"></i>
+          <span class="menu-label">Document Requests</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.suggestions.index') }}">
+          <i class="fi fi-rr-comment-dots"></i>
+          <span class="menu-label">Suggestions</span>
         </a>
       </li>
     </ul>
