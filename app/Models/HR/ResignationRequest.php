@@ -3,10 +3,13 @@
 namespace App\Models\HR;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ResignationRequest extends Model
 {
+    use HasFactory;
+
     protected $table = 'resignation_requests';
 
     protected $fillable = [

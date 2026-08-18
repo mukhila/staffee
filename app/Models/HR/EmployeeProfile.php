@@ -3,11 +3,14 @@
 namespace App\Models\HR;
 
 use App\Models\User;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EmployeeProfile extends Model
 {
+    use HasFactory;
+
     protected $table = 'employee_profiles';
 
     protected $fillable = [

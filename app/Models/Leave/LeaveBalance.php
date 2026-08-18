@@ -2,10 +2,13 @@
 
 namespace App\Models\Leave;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class LeaveBalance extends Model
 {
+    use HasFactory;
+
     protected $fillable = [
         'user_id', 'leave_type_id', 'year',
         'opening_balance', 'carry_forward_days', 'accrued_days',
