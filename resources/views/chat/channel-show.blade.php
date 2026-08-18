@@ -138,18 +138,28 @@ document.getElementById('msgInput').addEventListener('keydown', function (e) {
     }
 });
 
-// Poll for new messages every 5 seconds
-let lastId = {{ $messages->last()?->id ?? 0 }};
-setInterval(() => {
-    fetch('{{ route("chat.channels.messages", $channel) }}')
-        .then(r => r.json())
-        .then(msgs => {
-            msgs.filter(m => m.id > lastId && m.user_id !== authId).forEach(m => {
-                appendMessage(m);
-                lastId = m.id;
-            });
-            if (msgs.length) lastId = Math.max(lastId, msgs[msgs.length - 1].id);
+// Real-time: subscribe via Laravel Echo (Reverb)
+if (window.Echo) {
+    window.Echo.private('chat-channel.{{ $channel->id }}')
+        .listen('ChannelMessageSent', (e) => {
+            if (e.message && e.message.user_id !== authId) {
+                appendMessage(e.message);
+            }
         });
-}, 5000);
+} else {
+    // Fallback: poll every 5 seconds if Echo not initialised (Reverb not running)
+    let lastId = {{ $messages->last()?->id ?? 0 }};
+    setInterval(() => {
+        fetch('{{ route("chat.channels.messages", $channel) }}')
+            .then(r => r.json())
+            .then(msgs => {
+                msgs.filter(m => m.id > lastId && m.user_id !== authId).forEach(m => {
+                    appendMessage(m);
+                    lastId = m.id;
+                });
+                if (msgs.length) lastId = Math.max(lastId, msgs[msgs.length - 1].id);
+            });
+    }, 5000);
+}
 </script>
 </x-app-layout>

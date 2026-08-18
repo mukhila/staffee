@@ -116,6 +116,8 @@ class ChatChannelController extends Controller
             'attachment_type' => $type,
         ]);
 
+        broadcast(new \App\Events\ChannelMessageSent($msg))->toOthers();
+
         return response()->json($msg->load('user'));
     }
 
