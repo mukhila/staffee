@@ -267,6 +267,12 @@
         </a>
       </li>
       <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.payroll.benefit-deductions.index') }}">
+          <i class="fi fi-rr-shield-check"></i>
+          <span class="menu-label">Benefit Deductions</span>
+        </a>
+      </li>
+      <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.expenses.index') }}">
           <i class="fi fi-rr-receipt"></i>
           <span class="menu-label">Expenses</span>
