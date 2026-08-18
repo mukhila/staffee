@@ -17,7 +17,30 @@
       "Bash(python3 -c ' *)",
       "Bash(grep -E \"^-.*\\\\.\\(md|MD|txt|json\\)$|README\")",
       "Bash(xargs grep *)",
-      "Bash(grep -E \"\\\\.php$\")"
+      "Bash(grep -E \"\\\\.php$\")",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(Remove-Item \"D:\\\\xampp\\\\htdocs\\\\staffee\\\\app\\\\Models\\\\LeaveBalance.php\" -Force)",
+      "Bash(Remove-Item \"D:\\\\xampp\\\\htdocs\\\\staffee\\\\app\\\\Models\\\\LeaveType.php\" -Force)",
+      "Bash(Write-Output \"Deleted both files\")",
+      "Bash(git push *)",
+      "PowerShell(Head *)",
+      "Bash(git -C \"/d/xampp/htdocs/staffee\" log --oneline -- disk-forensics-app/)",
+      "PowerShell(Get-ChildItem \"D:\\\\xampp\\\\htdocs\\\\staffee\\\\database\\\\migrations\" | Where-Object { $_.Name -match \"resignation\" } | Select-Object Name)",
+      "PowerShell(Get-ChildItem \"D:\\\\xampp\\\\htdocs\\\\staffee\\\\database\\\\migrations\" | Where-Object { $_.Name -match \"employee_profile\" } | Select-Object Name)",
+      "Bash(git *)",
+      "PowerShell(Get-ChildItem \"D:\\\\xampp\\\\htdocs\\\\staffee\\\\database\\\\migrations\" | Where-Object { $_.Name -match \"leave_type\" } | Select-Object Name)",
+      "Bash(mklink /J vendor \"D:/xampp/htdocs/staffee/vendor\")",
+      "Bash(ln -s /d/xampp/htdocs/staffee/vendor /d/xampp/htdocs/staffee/.claude/worktrees/agent-aae146c4c3c68a597/vendor)",
+      "Bash(ln -s /d/xampp/htdocs/staffee/.env /d/xampp/htdocs/staffee/.claude/worktrees/agent-aae146c4c3c68a597/.env)",
+      "Bash(composer dump-autoload *)",
+      "PowerShell(cd \"D:\\\\xampp\\\\htdocs\\\\staffee\" && php -r \"try { $pdo = new PDO\\('sqlite::memory:'\\); $pdo->exec\\('CREATE TABLE t \\(a INTEGER, b INTEGER, c INTEGER GENERATED ALWAYS AS \\(a + b\\) STORED\\)'\\); echo 'supported'; } catch\\(Exception $e\\) { echo 'not supported: ' . $e->getMessage\\(\\); }\")",
+      "Bash(grep \"Client\\\\\\\\|Expense\\\\\\\\|Invoice\" \"D:/xampp/htdocs/staffee/vendor/composer/autoload_classmap.php\")",
+      "Bash(grep \"App\\\\\\\\\\\\\\\\\" \"D:/xampp/htdocs/staffee/vendor/composer/autoload_psr4.php\")",
+      "PowerShell(git *)",
+      "Bash(echo \"Exit: $?\")",
+      "PowerShell(php \"C:\\\\Users\\\\new\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\D--xampp-htdocs-staffee\\\\c89c3afc-4b34-46b1-9dc8-989d6ef385f3\\\\scratchpad\\\\check_paths.php\" 2>&1)",
+      "PowerShell(Remove-Item *)"
     ]
   }
 }

@@ -113,7 +113,7 @@ class SettlementService
         }
 
         $resignation = $user->resignations()
-            ->where('status', 'hr_approved')
+            ->where('status', 'approved')
             ->latest('submitted_date')
             ->first();
 

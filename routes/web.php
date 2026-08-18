@@ -107,6 +107,16 @@ Route::middleware('auth')->group(function () {
     Route::post('/my-shifts/change-request',                                         [\App\Http\Controllers\Staff\MyShiftController::class, 'requestChange'])->name('staff.shifts.change-request');
     Route::delete('/my-shifts/change-request/{changeRequest}/cancel',                [\App\Http\Controllers\Staff\MyShiftController::class, 'cancelRequest'])->name('staff.shifts.cancel-request');
 
+    // Expense claims (staff self-service)
+    Route::prefix('expenses')->name('staff.expenses.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Staff\ExpenseController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Staff\ExpenseController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Staff\ExpenseController::class, 'store'])->name('store');
+        Route::get('/{claim}', [\App\Http\Controllers\Staff\ExpenseController::class, 'show'])->name('show');
+        Route::delete('/{claim}', [\App\Http\Controllers\Staff\ExpenseController::class, 'destroy'])->name('destroy');
+        Route::post('/{claim}/submit', [\App\Http\Controllers\Staff\ExpenseController::class, 'submit'])->name('submit');
+    });
+
     // Staff performance (self-service)
     Route::prefix('performance')->name('staff.performance.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Staff\PerformanceController::class, 'index'])->name('index');
@@ -336,6 +346,29 @@ Route::middleware('auth')->group(function () {
                 Route::get('/', [\App\Http\Controllers\Admin\HR\OnboardingController::class, 'index'])->name('index');
                 Route::get('{checklist}', [\App\Http\Controllers\Admin\HR\OnboardingController::class, 'show'])->name('show');
                 Route::post('tasks/{task}/complete', [\App\Http\Controllers\Admin\HR\OnboardingController::class, 'completeTask'])->name('tasks.complete');
+            });
+
+            // Expense categories & claims (admin)
+            Route::resource('expense-categories', \App\Http\Controllers\Admin\Expense\ExpenseCategoryController::class)
+                ->only(['index', 'store', 'update', 'destroy']);
+            Route::prefix('expenses')->name('expenses.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\Expense\ExpenseController::class, 'index'])->name('index');
+                Route::get('/{claim}', [\App\Http\Controllers\Admin\Expense\ExpenseController::class, 'show'])->name('show');
+                Route::post('/{claim}/approve', [\App\Http\Controllers\Admin\Expense\ExpenseController::class, 'approve'])->name('approve');
+                Route::post('/{claim}/reject', [\App\Http\Controllers\Admin\Expense\ExpenseController::class, 'reject'])->name('reject');
+                Route::post('/{claim}/pay', [\App\Http\Controllers\Admin\Expense\ExpenseController::class, 'markPaid'])->name('pay');
+            });
+
+            // Clients & invoices (admin)
+            Route::resource('clients', \App\Http\Controllers\Admin\Client\ClientController::class);
+            Route::prefix('invoices')->name('invoices.')->group(function () {
+                Route::get('/', [\App\Http\Controllers\Admin\Client\InvoiceController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Http\Controllers\Admin\Client\InvoiceController::class, 'create'])->name('create');
+                Route::post('/', [\App\Http\Controllers\Admin\Client\InvoiceController::class, 'store'])->name('store');
+                Route::get('/{invoice}', [\App\Http\Controllers\Admin\Client\InvoiceController::class, 'show'])->name('show');
+                Route::post('/{invoice}/send', [\App\Http\Controllers\Admin\Client\InvoiceController::class, 'send'])->name('send');
+                Route::post('/{invoice}/payment', [\App\Http\Controllers\Admin\Client\InvoiceController::class, 'recordPayment'])->name('payment');
+                Route::post('/{invoice}/cancel', [\App\Http\Controllers\Admin\Client\InvoiceController::class, 'cancel'])->name('cancel');
             });
 
             // Internal API (admin-only — used by admin UI)

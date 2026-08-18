@@ -266,6 +266,24 @@
           <span class="menu-label">Employee Loans</span>
         </a>
       </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.expenses.index') }}">
+          <i class="fi fi-rr-receipt"></i>
+          <span class="menu-label">Expenses</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.clients.index') }}">
+          <i class="fi fi-rr-users"></i>
+          <span class="menu-label">Clients</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.invoices.index') }}">
+          <i class="fi fi-rr-file-invoice"></i>
+          <span class="menu-label">Invoices</span>
+        </a>
+      </li>
       @endif
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.time-entries.approvals.index') }}">
@@ -447,6 +465,12 @@
         <a class="menu-link" href="{{ route('staff.payslips.index') }}">
           <i class="fi fi-rr-money"></i>
           <span class="menu-label">My Payslips</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.expenses.index') }}">
+          <i class="fi fi-rr-receipt"></i>
+          <span class="menu-label">Expense Claims</span>
         </a>
       </li>
 
