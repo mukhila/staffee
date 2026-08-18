@@ -18,7 +18,9 @@
         </include>
     </source>
     <php>
+        <env name="APP_BASE_PATH" value="D:\xampp\htdocs\staffee\.claude\worktrees\agent-a4b851d90b3cba52a"/>
         <env name="APP_ENV" value="testing"/>
+        <env name="APP_KEY" value="base64:Y56zbdawxWy4OP7M+d0nU1XS5zTnSxQaFRVyvURNc5s="/>
         <env name="APP_MAINTENANCE_DRIVER" value="file"/>
         <env name="BCRYPT_ROUNDS" value="4"/>
         <env name="BROADCAST_CONNECTION" value="null"/>
