@@ -147,6 +147,15 @@ Route::middleware('auth')->group(function () {
         Route::post('/{claim}/submit', [\App\Http\Controllers\Staff\ExpenseController::class, 'submit'])->name('submit');
     });
 
+    // Tax declarations (staff self-service)
+    Route::prefix('tax-declarations')->name('staff.tax-declarations.')->group(function () {
+        Route::get('/', [\App\Http\Controllers\Staff\TaxDeclarationController::class, 'index'])->name('index');
+        Route::get('/create', [\App\Http\Controllers\Staff\TaxDeclarationController::class, 'create'])->name('create');
+        Route::post('/', [\App\Http\Controllers\Staff\TaxDeclarationController::class, 'store'])->name('store');
+        Route::post('/{declaration}/submit', [\App\Http\Controllers\Staff\TaxDeclarationController::class, 'submit'])->name('submit');
+        Route::post('/{declaration}/proof', [\App\Http\Controllers\Staff\TaxDeclarationController::class, 'uploadProof'])->name('proof');
+    });
+
     // Staff performance (self-service)
     Route::prefix('performance')->name('staff.performance.')->group(function () {
         Route::get('/', [\App\Http\Controllers\Staff\PerformanceController::class, 'index'])->name('index');
@@ -259,6 +268,9 @@ Route::middleware('auth')->group(function () {
                 Route::post('loans', [\App\Http\Controllers\Admin\Payroll\LoanController::class, 'store'])->name('loans.store');
                 Route::get('loans/{loan}', [\App\Http\Controllers\Admin\Payroll\LoanController::class, 'show'])->name('loans.show');
                 Route::post('loans/{loan}/cancel', [\App\Http\Controllers\Admin\Payroll\LoanController::class, 'cancel'])->name('loans.cancel');
+                Route::get('tax-declarations', [\App\Http\Controllers\Admin\Payroll\TaxDeclarationController::class, 'index'])->name('tax-declarations.index');
+                Route::get('tax-declarations/{declaration}', [\App\Http\Controllers\Admin\Payroll\TaxDeclarationController::class, 'show'])->name('tax-declarations.show');
+                Route::post('tax-declarations/{declaration}/verify', [\App\Http\Controllers\Admin\Payroll\TaxDeclarationController::class, 'verify'])->name('tax-declarations.verify');
                 Route::get('benefit-deductions', [\App\Http\Controllers\Admin\Payroll\BenefitDeductionController::class, 'index'])->name('benefit-deductions.index');
                 Route::get('benefit-deductions/create', [\App\Http\Controllers\Admin\Payroll\BenefitDeductionController::class, 'create'])->name('benefit-deductions.create');
                 Route::post('benefit-deductions', [\App\Http\Controllers\Admin\Payroll\BenefitDeductionController::class, 'store'])->name('benefit-deductions.store');

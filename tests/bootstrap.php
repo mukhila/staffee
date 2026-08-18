@@ -20,6 +20,12 @@ $worktree = dirname(__DIR__);
 $_ENV['APP_BASE_PATH']    = $worktree;
 $_SERVER['APP_BASE_PATH'] = $worktree;
 
+// Ensure an APP_KEY is available for HTTP tests (encryption service provider).
+if (empty($_ENV['APP_KEY'])) {
+    $_ENV['APP_KEY']    = 'base64:Y56zbdawxWy4OP7M+d0nU1XS5zTnSxQaFRVyvURNc5s=';
+    $_SERVER['APP_KEY'] = 'base64:Y56zbdawxWy4OP7M+d0nU1XS5zTnSxQaFRVyvURNc5s=';
+}
+
 // Load the (junctioned) main project vendor autoloader.
 /** @var \Composer\Autoload\ClassLoader $loader */
 $loader = require $worktree . '/vendor/autoload.php';

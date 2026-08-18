@@ -302,6 +302,12 @@
         </a>
       </li>
       <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.payroll.tax-declarations.index') }}">
+          <i class="fi fi-rr-file-invoice"></i>
+          <span class="menu-label">Tax Declarations</span>
+        </a>
+      </li>
+      <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.expenses.index') }}">
           <i class="fi fi-rr-receipt"></i>
           <span class="menu-label">Expenses</span>
@@ -524,6 +530,12 @@
         <a class="menu-link" href="{{ route('staff.expenses.index') }}">
           <i class="fi fi-rr-receipt"></i>
           <span class="menu-label">Expense Claims</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.tax-declarations.index') }}">
+          <i class="fi fi-rr-file-invoice"></i>
+          <span class="menu-label">Tax Declarations</span>
         </a>
       </li>
 
