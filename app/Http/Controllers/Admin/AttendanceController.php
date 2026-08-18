@@ -29,7 +29,7 @@ class AttendanceController extends Controller
             'status' => 'required|string',
         ]);
 
-        $attendance->update($request->all());
+        $attendance->update($request->only(['check_in', 'check_out', 'status']));
 
         return redirect()->route('admin.attendances.index')->with('success', 'Attendance updated successfully.');
     }

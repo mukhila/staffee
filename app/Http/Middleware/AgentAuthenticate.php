@@ -17,7 +17,7 @@ class AgentAuthenticate
             return response()->json(['error' => 'Agent token required.'], 401);
         }
 
-        $user = User::where('agent_token', $token)->first();
+        $user = User::where('agent_token', hash('sha256', $token))->first();
 
         if (!$user) {
             return response()->json(['error' => 'Invalid agent token.'], 401);
@@ -28,8 +28,8 @@ class AgentAuthenticate
         }
 
         // Attach the resolved user so controllers can call $request->agentUser()
-        $request->merge(['_agent_user' => $user]);
-        $request->macro('agentUser', fn () => $user);
+        $request->attributes->set('_agent_user', $user);
+        $request->macro('agentUser', fn () => $request->attributes->get('_agent_user'));
 
         return $next($request);
     }
@@ -40,6 +40,6 @@ class AgentAuthenticate
         if (str_starts_with($header, 'Bearer ')) {
             return substr($header, 7);
         }
-        return $request->query('agent_token') ?? null;
+        return null;
     }
 }

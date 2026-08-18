@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class ChatChannel extends Model
 {
     protected $fillable = [
-        'name', 'slug', 'type', 'reference_id', 'description', 'created_by',
+        'name', 'slug', 'type', 'reference_id', 'description', 'created_by', 'is_private',
     ];
 
     public function creator()  { return $this->belongsTo(User::class, 'created_by'); }

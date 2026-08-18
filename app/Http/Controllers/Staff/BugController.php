@@ -69,6 +69,23 @@ class BugController extends Controller
         return redirect()->route('staff.bugs.index')->with('success', 'Bug reported successfully.');
     }
 
+    public function show(\App\Models\Bug $bug)
+    {
+        if ($bug->reported_by != auth()->id() && $bug->assigned_to != auth()->id()) {
+            abort(403);
+        }
+        return view('staff.bugs.show', compact('bug'));
+    }
+
+    public function destroy(\App\Models\Bug $bug)
+    {
+        if ($bug->reported_by != auth()->id()) {
+            abort(403);
+        }
+        $bug->delete();
+        return redirect()->route('staff.bugs.index')->with('success', 'Bug deleted.');
+    }
+
     public function edit(\App\Models\Bug $bug)
     {
         // Allow reporter or assignee to edit

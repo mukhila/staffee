@@ -6,7 +6,6 @@ use App\Models\HR\FinalSettlement;
 use App\Models\HR\TerminationRequest;
 use App\Models\Payroll\ComponentDefinition;
 use App\Models\User;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
 class SettlementService
@@ -27,9 +26,12 @@ class SettlementService
         $yearsOfService = (int) floor($profile?->years_of_service ?? 0);
         $gratuity = $this->calculateGratuity($user, $yearsOfService);
 
-        $encashableLeaveDays = (string) \App\Models\Leave\LeaveBalance::where('user_id', $user->id)
+        $settlementYear = (int) \Carbon\Carbon::parse($lastWorkingDate)->year;
+        $encashableLeaveDays = (string) (\App\Models\Leave\LeaveBalance::where('user_id', $user->id)
+            ->where('year', $settlementYear)
             ->whereHas('leaveType', fn ($query) => $query->where('is_paid', true))
-            ->sum('balance');
+            ->selectRaw('COALESCE(SUM(available_balance - COALESCE(pending_days, 0)), 0) as total')
+            ->value('total') ?? 0);
 
         $leaveEncashment = $this->calculationService->multiplyAmount($dailyRate, $encashableLeaveDays);
         $unpaidAdjustments = (string) \App\Models\Payroll\PayrollAdjustment::where('user_id', $user->id)
@@ -74,12 +76,16 @@ class SettlementService
         );
     }
 
-    public function generateSettlementSlip(User $user, ?TerminationRequest $termination = null): FinalSettlement
+    public function generateSettlementSlip(User $user, ?TerminationRequest $termination = null, ?int $actorId = null): FinalSettlement
     {
+        if ($actorId === null) {
+            throw new \InvalidArgumentException('An acting user must be supplied to generate a settlement slip.');
+        }
+
         $termination ??= $user->terminations()->latest('last_working_date')->firstOrFail();
         $payload = $this->calculateFullAndFinal($user, $termination->last_working_date->toDateString());
 
-        return DB::transaction(function () use ($termination, $user, $payload) {
+        return DB::transaction(function () use ($termination, $user, $payload, $actorId) {
             return FinalSettlement::updateOrCreate(
                 ['termination_id' => $termination->id],
                 array_merge($payload, [
@@ -91,7 +97,7 @@ class SettlementService
                     'notice_shortfall_deduction' => '0.00',
                     'other_deductions' => [],
                     'status' => 'pending_approval',
-                    'calculated_by' => Auth::id() ?? User::query()->value('id'),
+                    'calculated_by' => $actorId,
                 ])
             );
         });

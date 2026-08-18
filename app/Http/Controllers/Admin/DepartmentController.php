@@ -28,7 +28,7 @@ class DepartmentController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        \App\Models\Department::create($request->all());
+        \App\Models\Department::create($request->only(['name', 'description']));
 
         return redirect()->route('admin.departments.index')->with('success', 'Department created successfully.');
     }
@@ -45,7 +45,7 @@ class DepartmentController extends Controller
             'description' => 'nullable|string',
         ]);
 
-        $department->update($request->all());
+        $department->update($request->only(['name', 'description']));
 
         return redirect()->route('admin.departments.index')->with('success', 'Department updated successfully.');
     }

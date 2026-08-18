@@ -35,16 +35,20 @@ return new class extends Migration
             $table->index(['leave_type_id', 'from_date']);
         });
 
-        // Expand status enum to include new workflow states
-        DB::statement("ALTER TABLE leave_requests MODIFY COLUMN status
-            ENUM('pending','manager_approved','approved','rejected','cancelled','auto_approved')
-            NOT NULL DEFAULT 'pending'");
+        // MySQL-only: expand status ENUM
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE leave_requests MODIFY COLUMN status
+                ENUM('pending','manager_approved','approved','rejected','cancelled','auto_approved')
+                NOT NULL DEFAULT 'pending'");
+        }
     }
 
     public function down(): void
     {
-        DB::statement("ALTER TABLE leave_requests MODIFY COLUMN status
-            ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending'");
+        if (DB::connection()->getDriverName() === 'mysql') {
+            DB::statement("ALTER TABLE leave_requests MODIFY COLUMN status
+                ENUM('pending','approved','rejected') NOT NULL DEFAULT 'pending'");
+        }
 
         Schema::table('leave_requests', function (Blueprint $table) {
             $table->dropForeign(['leave_type_id']);

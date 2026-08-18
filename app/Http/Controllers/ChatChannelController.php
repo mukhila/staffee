@@ -129,7 +129,27 @@ class ChatChannelController extends Controller
 
     public function join(ChatChannel $channel)
     {
-        $channel->members()->syncWithoutDetaching([Auth::id()]);
+        $user = Auth::user();
+
+        if ($channel->is_private) {
+            abort(403, 'This channel is invite-only.');
+        }
+
+        match ($channel->type) {
+            'department' => abort_unless(
+                $user->department_id && $channel->reference_id == $user->department_id,
+                403, 'You do not belong to this department.'
+            ),
+            'project' => abort_unless(
+                \App\Models\Project::where('id', $channel->reference_id)
+                    ->whereHas('users', fn ($q) => $q->where('user_id', $user->id))
+                    ->exists(),
+                403, 'You are not assigned to this project.'
+            ),
+            default => null, // 'general' — open to all authenticated users
+        };
+
+        $channel->members()->syncWithoutDetaching([$user->id]);
         return back()->with('success', 'Joined channel.');
     }
 }

@@ -83,6 +83,23 @@ class DailyStatusReportController extends Controller
         return redirect()->route('staff.daily-status-reports.index')->with('success', 'Daily Status Report submitted successfully.');
     }
 
+    public function show(\App\Models\DailyStatusReport $dailyStatusReport)
+    {
+        if ($dailyStatusReport->user_id != auth()->id()) {
+            abort(403);
+        }
+        return view('staff.dsr.show', compact('dailyStatusReport'));
+    }
+
+    public function destroy(\App\Models\DailyStatusReport $dailyStatusReport)
+    {
+        if ($dailyStatusReport->user_id != auth()->id()) {
+            abort(403);
+        }
+        $dailyStatusReport->delete();
+        return redirect()->route('staff.daily-status-reports.index')->with('success', 'Report deleted.');
+    }
+
     public function edit(\App\Models\DailyStatusReport $dailyStatusReport)
     {
         if ($dailyStatusReport->user_id != auth()->id()) {

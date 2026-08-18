@@ -43,6 +43,23 @@ class TestCaseController extends Controller
         return redirect()->route('staff.test-cases.index')->with('success', 'Test Case created successfully.');
     }
 
+    public function show(\App\Models\TestCase $testCase)
+    {
+        if ($testCase->created_by != auth()->id()) {
+            abort(403);
+        }
+        return view('staff.test_cases.show', compact('testCase'));
+    }
+
+    public function destroy(\App\Models\TestCase $testCase)
+    {
+        if ($testCase->created_by != auth()->id()) {
+            abort(403);
+        }
+        $testCase->delete();
+        return redirect()->route('staff.test-cases.index')->with('success', 'Test case deleted.');
+    }
+
     public function edit(\App\Models\TestCase $testCase)
     {
         if ($testCase->created_by != auth()->id()) {
@@ -60,14 +77,13 @@ class TestCaseController extends Controller
             abort(403);
         }
 
-        $request->validate([
+        $validated = $request->validate([
             'project_id' => 'required|exists:projects,id',
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'status' => 'required|in:pending,pass,fail,need_to_test',
         ]);
-
-        $testCase->update($request->all());
+        $testCase->update($validated);
 
         if ($request->status == 'fail') {
             // Redirect to bug creation with test case info

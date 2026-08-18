@@ -261,9 +261,9 @@ class User extends Authenticatable
 
     public function generateAgentToken(): string
     {
-        $token = bin2hex(random_bytes(32)); // 64-char hex
-        $this->update(['agent_token' => $token]);
-        return $token;
+        $token = bin2hex(random_bytes(32)); // 64-char hex plaintext
+        $this->update(['agent_token' => hash('sha256', $token)]);
+        return $token; // return plaintext once; only the hash is stored
     }
 
     public function revokeAgentToken(): void
