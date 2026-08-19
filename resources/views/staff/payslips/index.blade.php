@@ -46,7 +46,11 @@
                                 {{ $slip->published_at ? \Carbon\Carbon::parse($slip->published_at)->format('d M Y') : '—' }}
                             </td>
                             <td class="text-end">
-                                <span class="badge bg-success-subtle text-success">Published</span>
+                                <div class="d-flex gap-2 justify-content-end align-items-center">
+                                    <span class="badge bg-success-subtle text-success">Published</span>
+                                    <a href="{{ route('payroll.slips.show', $slip) }}" class="btn btn-outline-secondary btn-sm py-0">View</a>
+                                    <a href="{{ route('payroll.slips.download', $slip) }}" class="btn btn-outline-primary btn-sm py-0">PDF</a>
+                                </div>
                             </td>
                         </tr>
                         @empty

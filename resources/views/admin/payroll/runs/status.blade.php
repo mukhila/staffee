@@ -34,16 +34,25 @@
                             <th>Deductions</th>
                             <th>Net</th>
                             <th>Status</th>
+                            <th class="text-end">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach($payrollRun->slips as $slip)
                             <tr>
                                 <td>{{ $slip->employee?->name }}</td>
-                                <td>{{ $slip->gross_earnings }}</td>
-                                <td>{{ $slip->total_deductions }}</td>
-                                <td>{{ $slip->net_pay }}</td>
-                                <td>{{ ucfirst($slip->status) }}</td>
+                                <td>{{ number_format($slip->gross_earnings, 2) }}</td>
+                                <td>{{ number_format($slip->total_deductions, 2) }}</td>
+                                <td>{{ number_format($slip->net_pay, 2) }}</td>
+                                <td>
+                                    <span class="badge bg-{{ $slip->status === 'published' ? 'success' : 'secondary' }}-subtle text-{{ $slip->status === 'published' ? 'success' : 'secondary' }}">
+                                        {{ ucfirst($slip->status) }}
+                                    </span>
+                                </td>
+                                <td class="text-end">
+                                    <a href="{{ route('payroll.slips.show', $slip) }}" class="btn btn-outline-secondary btn-sm py-0">View</a>
+                                    <a href="{{ route('payroll.slips.download', $slip) }}" class="btn btn-outline-primary btn-sm py-0">PDF</a>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
