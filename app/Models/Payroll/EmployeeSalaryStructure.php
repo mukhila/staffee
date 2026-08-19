@@ -80,7 +80,7 @@ class EmployeeSalaryStructure extends Model
         return $this->hasMany(PayrollSlip::class, 'salary_structure_id');
     }
 
-    public function scopeActive($query, ?string $date = null)
+    public function scopeActive(\Illuminate\Database\Eloquent\Builder $query, ?string $date = null): \Illuminate\Database\Eloquent\Builder
     {
         $date ??= now()->toDateString();
 

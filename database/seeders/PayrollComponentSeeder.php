@@ -304,6 +304,20 @@ class PayrollComponentSeeder extends Seeder
                 'arrear_eligible' => false,
                 'display_order' => 110,
             ],
+            [
+                'code' => 'BENEFIT_DEDUCTION',
+                'name' => 'Benefit Deduction',
+                'category' => 'deduction',
+                'component_type' => 'benefit',
+                'calculation_method' => 'manual_input',
+                'taxable' => false,
+                'pro_ratable' => false,
+                'affects_gross' => false,
+                'affects_net' => true,
+                'employer_only' => false,
+                'arrear_eligible' => false,
+                'display_order' => 300,
+            ],
         ];
 
         $timestamp = now();

@@ -2,6 +2,10 @@
 
 namespace App\Services\Payroll;
 
+use App\Models\Payroll\ComponentDefinition;
+use App\Services\Payroll\BenefitDeductionService;
+use App\Services\Payroll\LoanService;
+use App\Models\Payroll\EmployeeBenefitDeduction;
 use App\Models\Payroll\PayrollAdjustment;
 use App\Models\Payroll\PayrollCalendar;
 use App\Models\Payroll\PayrollCalculationLog;
@@ -21,6 +25,8 @@ class PayrollProcessingService
 {
     public function __construct(
         private readonly PayrollCalculationService $calculationService,
+        private readonly BenefitDeductionService   $benefitDeductionService,
+        private readonly LoanService               $loanService,
     ) {}
 
     public function processPayroll(int $month, int $year): PayrollRun
@@ -139,6 +145,20 @@ class PayrollProcessingService
                 );
                 $slip->lines()->createMany($lines);
 
+                // Mark loan installments as recovered now that the slip line exists
+                $loanInstallments = $payload['loan_installments'] ?? collect();
+                if ($loanInstallments->isNotEmpty()) {
+                    $slip->loadMissing('lines');
+                    $loanLine = $slip->lines->firstWhere('line_code', 'LOAN_RECOVERY');
+                    foreach ($loanInstallments as $installment) {
+                        $this->loanService->markRecovered(
+                            $installment,
+                            (string) $installment->scheduled_amount,
+                            $loanLine?->id
+                        );
+                    }
+                }
+
                 PayrollInputSnapshot::updateOrCreate(
                     ['payroll_run_id' => $run->id, 'user_id' => $user->id],
                     [
@@ -156,11 +176,13 @@ class PayrollProcessingService
                             'overtime_pay' => $payload['overtime_pay'],
                         ],
                         'deduction_summary' => [
-                            'tax' => $payload['tax'],
-                            'pf' => $payload['pf_employee'],
-                            'esi' => $payload['esi_employee'],
-                            'professional_tax' => $payload['professional_tax'],
-                            'voluntary' => $payload['voluntary_deductions'],
+                            'tax'               => $payload['tax'],
+                            'pf'                => $payload['pf_employee'],
+                            'esi'               => $payload['esi_employee'],
+                            'professional_tax'  => $payload['professional_tax'],
+                            'voluntary'         => $payload['voluntary_deductions'],
+                            'loan_recovery'     => $payload['loan_installment_total'],
+                            'benefit_deductions' => $payload['benefit_deduction_total'],
                         ],
                         'salary_structure_snapshot' => [
                             'id' => $salaryStructure->id,
@@ -215,8 +237,69 @@ class PayrollProcessingService
     public function calculateSalary(User $user, array $period): array
     {
         $payload = $this->calculationService->getNetSalary($user, $period);
+        $periodStr = Carbon::parse($period['period_end'])->format('Y-m');
 
-        $payload['worked_days'] = $this->deriveWorkedDays($user, $period);
+        // ── Benefit deductions ────────────────────────────────────────────────
+        $benefitDeductions = $this->benefitDeductionService->activeDeductionsForPeriod($user, $periodStr);
+        $benefitTotal = '0.000000';
+        $benefitLines = [];
+        $benefitDef = ComponentDefinition::where('code', 'BENEFIT_DEDUCTION')->first();
+
+        foreach ($benefitDeductions as $bd) {
+            $amount = $this->calculationService->normalizeDecimal((string) $bd->amount);
+            $benefitTotal = $this->calculationService->addAmount($benefitTotal, $amount);
+            if ($benefitDef) {
+                $benefitLines[] = $this->calculationService->buildLinePayload($benefitDef, $amount, [
+                    'source_type'           => 'manual_adjustment',
+                    'source_reference_type' => EmployeeBenefitDeduction::class,
+                    'source_reference_id'   => $bd->id,
+                    'calculation_basis'     => $bd->benefit_name,
+                ]);
+            }
+        }
+
+        // ── Loan installment recovery ─────────────────────────────────────────
+        $loanInstallments = $this->loanService->dueInstallments($user, $periodStr);
+        $loanInstallmentTotal = '0.000000';
+        foreach ($loanInstallments as $inst) {
+            $loanInstallmentTotal = $this->calculationService->addAmount(
+                $loanInstallmentTotal, (string) $inst->scheduled_amount
+            );
+        }
+
+        if (bccomp($loanInstallmentTotal, '0', 6) === 1) {
+            $combinedLoanRecovery = $this->calculationService->addAmount(
+                $payload['voluntary_deductions'], $loanInstallmentTotal
+            );
+            // Rebuild LOAN_RECOVERY line to include both EMIs and voluntary deductions
+            $payload['deduction_lines'] = array_values(array_filter(
+                $payload['deduction_lines'],
+                fn($line) => ($line['line_code'] ?? '') !== 'LOAN_RECOVERY'
+            ));
+            $loanDef = ComponentDefinition::where('code', 'LOAN_RECOVERY')->first();
+            if ($loanDef) {
+                $payload['deduction_lines'][] = $this->calculationService->buildLinePayload($loanDef, $combinedLoanRecovery, [
+                    'source_type'       => 'manual_adjustment',
+                    'calculation_basis' => 'Loan EMI + voluntary deductions',
+                ]);
+            }
+        }
+
+        // ── Update totals ─────────────────────────────────────────────────────
+        $additionalDeductions = $this->calculationService->addAmount($benefitTotal, $loanInstallmentTotal);
+        $payload['total_deductions'] = $this->calculationService->addAmount(
+            $payload['total_deductions'], $additionalDeductions
+        );
+        $payload['net'] = $this->calculationService->subtractAmount(
+            $payload['gross'], $payload['total_deductions']
+        );
+        $payload['deduction_lines']  = array_values(array_merge($payload['deduction_lines'], $benefitLines));
+        $payload['benefit_deduction_total'] = $benefitTotal;
+        $payload['loan_installment_total']  = $loanInstallmentTotal;
+        $payload['loan_installments']       = $loanInstallments;
+
+        // ── Attendance / leave ────────────────────────────────────────────────
+        $payload['worked_days']     = $this->deriveWorkedDays($user, $period);
         $payload['paid_leave_days'] = $this->derivePaidLeaveDays($user, $period);
 
         return $payload;
