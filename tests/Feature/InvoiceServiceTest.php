@@ -133,8 +133,9 @@ class InvoiceServiceTest extends TestCase
         ], $this->admin->id);
 
         $this->assertMatchesRegularExpression('/^INV-\d{6}-\d{5}$/', $invoice->invoice_number);
-        $this->assertStringStartsWith('INV-202608-', $invoice->invoice_number);
-        $this->assertSame('INV-202608-00001', $invoice->invoice_number);
+        // The number is keyed to the month the invoice is created in, not invoice_date.
+        $prefix = 'INV-' . now()->format('Ym') . '-';
+        $this->assertSame($prefix . '00001', $invoice->invoice_number);
     }
 
     public function test_invoice_number_sequential_within_same_month(): void
@@ -151,9 +152,10 @@ class InvoiceServiceTest extends TestCase
         }
 
         $numbers = Invoice::pluck('invoice_number')->sort()->values()->all();
-        $this->assertSame('INV-202608-00001', $numbers[0]);
-        $this->assertSame('INV-202608-00002', $numbers[1]);
-        $this->assertSame('INV-202608-00003', $numbers[2]);
+        $prefix = 'INV-' . now()->format('Ym') . '-';
+        $this->assertSame($prefix . '00001', $numbers[0]);
+        $this->assertSame($prefix . '00002', $numbers[1]);
+        $this->assertSame($prefix . '00003', $numbers[2]);
     }
 
     public function test_mark_sent_throws_if_not_draft(): void

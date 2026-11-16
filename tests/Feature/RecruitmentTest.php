@@ -139,6 +139,31 @@ class RecruitmentTest extends TestCase
         $this->assertSame('hired', $app->fresh()->status);
         $this->assertSame(1, OnboardingChecklist::count());
         $this->assertTrue(OnboardingTask::count() > 0);
+
+        // The checklist belongs to a new staff account for the hire, not to the admin.
+        $hire = \App\Models\User::where('email', 'charlie@example.com')->first();
+        $this->assertNotNull($hire);
+        $this->assertSame('staff', $hire->role);
+        $this->assertSame($hire->id, OnboardingChecklist::first()->user_id);
+        $this->assertNotSame($this->admin->id, OnboardingChecklist::first()->user_id);
+    }
+
+    public function test_hire_reuses_existing_user_account(): void
+    {
+        $existing = \App\Models\User::factory()->create(['email' => 'erin@example.com']);
+        $posting  = $this->makePosting();
+        $app = JobApplication::create([
+            'job_posting_id'  => $posting->id,
+            'applicant_name'  => 'Erin',
+            'applicant_email' => 'erin@example.com',
+            'status'          => 'offer_sent',
+            'applied_at'      => now(),
+        ]);
+
+        $checklist = app(JobApplicationService::class)->hireApplicant($app, $this->admin->id);
+
+        $this->assertSame($existing->id, $checklist->user_id);
+        $this->assertSame(1, \App\Models\User::where('email', 'erin@example.com')->count());
     }
 
     // ── 6. Service: valid status transitions work ─────────────────────────────

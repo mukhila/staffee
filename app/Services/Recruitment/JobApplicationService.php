@@ -6,7 +6,10 @@ use App\Models\HR\OnboardingChecklist;
 use App\Models\HR\OnboardingTask;
 use App\Models\Recruitment\JobApplication;
 use App\Models\Recruitment\JobPosting;
+use App\Models\User;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Storage;
 use InvalidArgumentException;
 
@@ -93,28 +96,40 @@ class JobApplicationService
             );
         }
 
-        $app->update(['status' => 'hired']);
+        return DB::transaction(function () use ($app) {
+            $app->update(['status' => 'hired']);
 
-        // We need a user account for the hire — look up by email or use a placeholder user_id.
-        // In this flow the admin will link the user account manually; we use actorId as fallback.
-        $userId = \App\Models\User::where('email', $app->applicant_email)->value('id') ?? $actorId;
+            // The checklist must belong to the hire, never to the admin who clicked "hire".
+            // If the applicant has no account yet, create a staff account for them. The
+            // password is random and never shown; the hire sets their own via password reset.
+            $user = User::firstOrCreate(
+                ['email' => $app->applicant_email],
+                [
+                    'name'          => $app->applicant_name,
+                    'password'      => Str::random(40),
+                    'role'          => 'staff',
+                    'phone'         => $app->applicant_phone,
+                    'department_id' => $app->jobPosting?->department_id,
+                ]
+            );
 
-        $checklist = OnboardingChecklist::create([
-            'user_id'       => $userId,
-            'template_name' => 'Standard Onboarding',
-            'due_date'      => now()->addDays(30)->toDateString(),
-            'status'        => 'pending',
-        ]);
-
-        foreach (self::STANDARD_TASKS as $task) {
-            OnboardingTask::create([
-                'checklist_id' => $checklist->id,
-                'title'        => $task['title'],
-                'sort_order'   => $task['sort_order'],
-                'status'       => 'pending',
+            $checklist = OnboardingChecklist::create([
+                'user_id'       => $user->id,
+                'template_name' => 'Standard Onboarding',
+                'due_date'      => now()->addDays(30)->toDateString(),
+                'status'        => 'pending',
             ]);
-        }
 
-        return $checklist;
+            foreach (self::STANDARD_TASKS as $task) {
+                OnboardingTask::create([
+                    'checklist_id' => $checklist->id,
+                    'title'        => $task['title'],
+                    'sort_order'   => $task['sort_order'],
+                    'status'       => 'pending',
+                ]);
+            }
+
+            return $checklist;
+        });
     }
 }

@@ -27,21 +27,25 @@ class RoleController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
-            'name'        => 'required|string|max:255|unique:roles',
-            'slug'        => 'required|string|max:255|unique:roles',
-            'description' => 'nullable|string',
+        $data = $request->validate([
+            'name'          => 'required|string|max:255|unique:roles',
+            'slug'          => 'required|string|max:255|unique:roles',
+            'description'   => 'nullable|string',
+            'department_id' => 'nullable|exists:departments,id',
+            'permissions'   => 'nullable|array',
+            'permissions.*' => 'integer|exists:permissions,id',
         ]);
 
-        $data = $request->all();
-        if (empty($data['department_id'])) {
-            $data['department_id'] = null;
-        }
+        $role = Role::create([
+            'name'          => $data['name'],
+            'slug'          => $data['slug'],
+            'description'   => $data['description'] ?? null,
+            'department_id' => $data['department_id'] ?? null,
+            'is_active'     => $request->boolean('is_active'),
+        ]);
 
-        $role = Role::create($data);
-
-        if ($request->has('permissions')) {
-            $role->permissions()->sync($request->permissions);
+        if (!empty($data['permissions'])) {
+            $role->permissions()->sync($data['permissions']);
             Cache::forget("role_permissions:{$role->slug}");
         }
 
@@ -58,21 +62,24 @@ class RoleController extends Controller
 
     public function update(Request $request, Role $role)
     {
-        $request->validate([
-            'name'        => 'required|string|max:255|unique:roles,name,' . $role->id,
-            'slug'        => 'required|string|max:255|unique:roles,slug,' . $role->id,
-            'description' => 'nullable|string',
+        $data = $request->validate([
+            'name'          => 'required|string|max:255|unique:roles,name,' . $role->id,
+            'slug'          => 'required|string|max:255|unique:roles,slug,' . $role->id,
+            'description'   => 'nullable|string',
+            'department_id' => 'nullable|exists:departments,id',
+            'permissions'   => 'nullable|array',
+            'permissions.*' => 'integer|exists:permissions,id',
         ]);
 
-        $data              = $request->all();
-        $data['is_active'] = $request->has('is_active');
-        if (empty($data['department_id'])) {
-            $data['department_id'] = null;
-        }
+        $role->update([
+            'name'          => $data['name'],
+            'slug'          => $data['slug'],
+            'description'   => $data['description'] ?? null,
+            'department_id' => $data['department_id'] ?? null,
+            'is_active'     => $request->boolean('is_active'),
+        ]);
 
-        $role->update($data);
-
-        $role->permissions()->sync($request->input('permissions', []));
+        $role->permissions()->sync($data['permissions'] ?? []);
         Cache::forget("role_permissions:{$role->slug}");
 
         return redirect()->route('admin.roles.index')->with('success', 'Role updated successfully.');

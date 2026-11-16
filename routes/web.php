@@ -171,8 +171,8 @@ Route::middleware('auth')->group(function () {
         Route::middleware(['role:admin'])->group(function () {
             Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
             Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
-            Route::resource('departments', \App\Http\Controllers\Admin\DepartmentController::class);
-            Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class);
+            Route::resource('departments', \App\Http\Controllers\Admin\DepartmentController::class)->except(['show']);
+            Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class)->except(['show']);
             Route::get('roles-matrix', [\App\Http\Controllers\Admin\RoleController::class, 'matrix'])->name('roles.matrix');
             Route::post('roles-matrix', [\App\Http\Controllers\Admin\RoleController::class, 'updateMatrix'])->name('roles.matrix.update');
 
@@ -203,7 +203,7 @@ Route::middleware('auth')->group(function () {
             });
 
             // Announcements
-            Route::resource('announcements', \App\Http\Controllers\Admin\AnnouncementController::class);
+            Route::resource('announcements', \App\Http\Controllers\Admin\AnnouncementController::class)->except(['show']);
 
             // Time tracking (admin-managed)
             Route::prefix('time')->name('time.')->group(function () {
@@ -473,7 +473,6 @@ Route::middleware('auth')->group(function () {
         // ── Staff: view list & profile ────────────────────────────────────────
         Route::middleware(['permission:view-staff'])->group(function () {
             Route::get('staff', [\App\Http\Controllers\Admin\StaffController::class, 'index'])->name('staff.index');
-            Route::get('staff/{staff}', [\App\Http\Controllers\Admin\StaffController::class, 'show'])->name('staff.show');
         });
 
         // ── Attendance ────────────────────────────────────────────────────────
