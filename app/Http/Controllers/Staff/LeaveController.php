@@ -53,7 +53,7 @@ class LeaveController extends Controller
         ]);
 
         try {
-            $this->leaveSvc->submit(auth()->user(), $request->only([
+            $leave = $this->leaveSvc->submit(auth()->user(), $request->only([
                 'leave_type_id', 'from_date', 'to_date',
                 'half_day', 'half_day_period', 'reason',
             ]));
@@ -61,7 +61,18 @@ class LeaveController extends Controller
             return back()->withInput()->with('error', $e->getMessage());
         }
 
-        return redirect()->route('staff.leaves.index')->with('success', 'Leave request submitted successfully.');
+        $message = 'Leave request submitted successfully.';
+
+        // Let the requester know up front if teammates are already off on those dates.
+        $clashes = $this->leaveSvc->teamClashes(auth()->user(), $leave->from_date, $leave->to_date, $leave->id);
+        if ($clashes->isNotEmpty()) {
+            $names = $clashes->pluck('user.name')->filter()->unique()->take(3)->implode(', ');
+            $more  = $clashes->pluck('user_id')->unique()->count() - 3;
+            $message .= " Note: {$names}" . ($more > 0 ? " and {$more} more" : '')
+                . ' from your team already have leave on overlapping dates.';
+        }
+
+        return redirect()->route('staff.leaves.index')->with('success', $message);
     }
 
     public function show(LeaveRequest $leave)

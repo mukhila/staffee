@@ -35,7 +35,9 @@ class LeaveController extends Controller
     public function show(LeaveRequest $leave)
     {
         $leave->load(['user.department', 'leaveType', 'approvals.approver', 'managerApprover', 'hrApprover']);
-        return view('admin.leaves.show', compact('leave'));
+        $clashes = $this->leaveSvc->teamClashes($leave->user, $leave->from_date, $leave->to_date, $leave->id);
+
+        return view('admin.leaves.show', compact('leave', 'clashes'));
     }
 
     public function approve(Request $request, LeaveRequest $leave)

@@ -4,6 +4,7 @@ namespace App\Services\Leave;
 
 use App\Models\Attendance;
 use App\Models\Leave\LeaveApproval;
+use App\Models\Leave\LeaveApprovalDelegation;
 use App\Models\Leave\LeaveType;
 use App\Models\LeaveRequest;
 use App\Models\Shift\ShiftHoliday;
@@ -93,6 +94,18 @@ class LeaveRequestService
                 $manager = $employee->manager;
                 if ($manager) {
                     $manager->notify(new LeaveSubmittedNotification($request, $employee));
+
+                    // If the manager has handed approvals to someone while away, tell them too.
+                    $delegate = LeaveApprovalDelegation::activeOn()
+                        ->where('delegator_id', $manager->id)
+                        ->with('delegate')
+                        ->latest('id')
+                        ->first()
+                        ?->delegate;
+
+                    if ($delegate && $delegate->role !== 'admin' && $delegate->id !== $employee->id) {
+                        $delegate->notify(new LeaveSubmittedNotification($request, $employee));
+                    }
                 }
                 // Also notify admins
                 User::where('role', 'admin')->each(
@@ -224,6 +237,31 @@ class LeaveRequestService
                 $this->balanceSvc->releasePending($request);
             }
         });
+    }
+
+    // ── Team clash detection ──────────────────────────────────────────────────
+
+    /**
+     * Other people in the employee's department whose leave (pending or approved)
+     * overlaps the given dates. Used to warn the requester and the approver.
+     *
+     * @return \Illuminate\Database\Eloquent\Collection<int, LeaveRequest>
+     */
+    public function teamClashes(User $employee, Carbon $from, Carbon $to, ?int $excludeRequestId = null)
+    {
+        if (!$employee->department_id) {
+            return LeaveRequest::whereRaw('1 = 0')->get();
+        }
+
+        return LeaveRequest::with(['user:id,name,department_id', 'leaveType:id,name'])
+            ->active()
+            ->whereDate('from_date', '<=', $to->toDateString())
+            ->whereDate('to_date', '>=', $from->toDateString())
+            ->where('user_id', '!=', $employee->id)
+            ->when($excludeRequestId, fn ($q) => $q->where('id', '!=', $excludeRequestId))
+            ->whereHas('user', fn ($q) => $q->where('department_id', $employee->department_id))
+            ->orderBy('from_date')
+            ->get();
     }
 
     // ── Attendance integration ────────────────────────────────────────────────

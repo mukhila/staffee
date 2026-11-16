@@ -130,15 +130,20 @@ class ShiftService
      */
     public function isHoliday(Carbon $date): bool
     {
-        return ShiftHoliday::where('is_active', true)
-            ->where(function ($q) use ($date) {
-                $q->where('date', $date->toDateString())
-                  ->orWhere(function ($q2) use ($date) {
-                      $q2->where('is_recurring', true)
-                         ->whereRaw("DATE_FORMAT(`date`, '%m-%d') = ?", [$date->format('m-d')]);
-                  });
-            })
+        // Exact-date match first; recurring holidays are compared in PHP so the
+        // check does not depend on a MySQL-only date function.
+        $exact = ShiftHoliday::where('is_active', true)
+            ->whereDate('date', $date->toDateString())
             ->exists();
+
+        if ($exact) {
+            return true;
+        }
+
+        return ShiftHoliday::where('is_active', true)
+            ->where('is_recurring', true)
+            ->get(['date'])
+            ->contains(fn (ShiftHoliday $holiday) => Carbon::parse($holiday->date)->format('m-d') === $date->format('m-d'));
     }
 
     /**

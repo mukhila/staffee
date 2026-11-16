@@ -94,13 +94,22 @@ Route::middleware('auth')->group(function () {
     Route::get('time-tracker/categories', [App\Http\Controllers\Staff\TimeTrackerController::class, 'categories'])->name('time-tracker.categories');
     Route::resource('daily-status-reports', \App\Http\Controllers\Staff\DailyStatusReportController::class, ['as' => 'staff']);
 
+    // Team leave calendar (staff-visible). Declared before the resource so that
+    // "team-calendar" is not captured by the leaves/{leave} show route.
+    Route::get('leaves/team-calendar', [\App\Http\Controllers\Staff\LeaveController::class, 'teamCalendar'])->name('staff.leaves.team-calendar');
+
     // Leave requests (staff)
     Route::resource('leaves', \App\Http\Controllers\Staff\LeaveController::class, ['as' => 'staff'])
         ->only(['index', 'create', 'store', 'show', 'destroy'])
         ->parameters(['leaves' => 'leave']);
 
-    // Team leave calendar (staff-visible)
-    Route::get('leaves/team-calendar', [\App\Http\Controllers\Staff\LeaveController::class, 'teamCalendar'])->name('staff.leaves.team-calendar');
+    // Comp-off claims (earned by working a weekend or holiday)
+    Route::get('comp-off', [\App\Http\Controllers\Staff\CompOffController::class, 'index'])->name('staff.comp-off.index');
+    Route::post('comp-off', [\App\Http\Controllers\Staff\CompOffController::class, 'store'])->name('staff.comp-off.store');
+
+    // Attendance regularisation (missed or wrong punches)
+    Route::get('my-attendance/regularizations', [\App\Http\Controllers\Staff\AttendanceRegularizationController::class, 'index'])->name('staff.attendance.regularizations.index');
+    Route::post('my-attendance/regularizations', [\App\Http\Controllers\Staff\AttendanceRegularizationController::class, 'store'])->name('staff.attendance.regularizations.store');
 
     // Kanban board (all authenticated users — staff see their own tasks)
     Route::get('/kanban', [\App\Http\Controllers\Staff\KanbanController::class, 'index'])->name('kanban.index');
@@ -481,6 +490,10 @@ Route::middleware('auth')->group(function () {
         Route::middleware(['permission:manage-attendance'])->group(function () {
             Route::get('attendances/{attendance}/edit', [\App\Http\Controllers\Admin\AttendanceController::class, 'edit'])->name('attendances.edit');
             Route::put('attendances/{attendance}', [\App\Http\Controllers\Admin\AttendanceController::class, 'update'])->name('attendances.update');
+
+            Route::get('attendance-regularizations', [\App\Http\Controllers\Admin\AttendanceRegularizationController::class, 'index'])->name('attendances.regularizations.index');
+            Route::post('attendance-regularizations/{regularization}/approve', [\App\Http\Controllers\Admin\AttendanceRegularizationController::class, 'approve'])->name('attendances.regularizations.approve');
+            Route::post('attendance-regularizations/{regularization}/reject', [\App\Http\Controllers\Admin\AttendanceRegularizationController::class, 'reject'])->name('attendances.regularizations.reject');
         });
 
         // ── Projects ──────────────────────────────────────────────────────────
@@ -540,6 +553,14 @@ Route::middleware('auth')->group(function () {
             Route::post('leaves/{leave}/reject', [\App\Http\Controllers\Admin\LeaveController::class, 'reject'])->name('leaves.reject');
             Route::get('leave-approvals', [\App\Http\Controllers\Admin\LeaveController::class, 'approvalDashboard'])->name('leaves.approvals');
             Route::get('leave-calendar', [\App\Http\Controllers\Admin\LeaveController::class, 'calendar'])->name('leaves.calendar');
+
+            Route::get('comp-off', [\App\Http\Controllers\Admin\Leave\CompOffController::class, 'index'])->name('leaves.comp-off.index');
+            Route::post('comp-off/{credit}/approve', [\App\Http\Controllers\Admin\Leave\CompOffController::class, 'approve'])->name('leaves.comp-off.approve');
+            Route::post('comp-off/{credit}/reject', [\App\Http\Controllers\Admin\Leave\CompOffController::class, 'reject'])->name('leaves.comp-off.reject');
+
+            Route::get('leave-delegations', [\App\Http\Controllers\Admin\Leave\LeaveDelegationController::class, 'index'])->name('leaves.delegations.index');
+            Route::post('leave-delegations', [\App\Http\Controllers\Admin\Leave\LeaveDelegationController::class, 'store'])->name('leaves.delegations.store');
+            Route::delete('leave-delegations/{delegation}', [\App\Http\Controllers\Admin\Leave\LeaveDelegationController::class, 'destroy'])->name('leaves.delegations.destroy');
         });
         Route::middleware(['permission:view-reports'])->prefix('leave-reports')->name('leaves.reports.')->group(function () {
             Route::get('/', [\App\Http\Controllers\Admin\Leave\LeaveReportController::class, 'index'])->name('index');

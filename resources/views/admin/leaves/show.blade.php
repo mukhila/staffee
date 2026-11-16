@@ -143,6 +143,26 @@
 
         {{-- Actions sidebar --}}
         <div class="col-md-4">
+            @if(isset($clashes) && $clashes->isNotEmpty())
+            <div class="card mb-3 border-warning">
+                <div class="card-header bg-warning-subtle">
+                    <h6 class="mb-0"><i class="fi fi-rr-triangle-warning me-1"></i> Team clash: {{ $clashes->count() }} overlapping</h6>
+                </div>
+                <ul class="list-group list-group-flush">
+                    @foreach($clashes as $clash)
+                    <li class="list-group-item small">
+                        <strong>{{ $clash->user?->name }}</strong>
+                        <span class="badge bg-{{ $clash->status_color }} ms-1">{{ $clash->status_label }}</span>
+                        <div class="text-muted">
+                            {{ $clash->from_date->format('d M') }} – {{ $clash->to_date->format('d M Y') }}
+                            · {{ $clash->leaveType?->name ?? ucfirst((string) $clash->type) }}
+                        </div>
+                    </li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+
             @if(in_array($leave->status, ['pending', 'manager_approved']))
             <div class="card mb-3">
                 <div class="card-header"><h6 class="mb-0">Actions</h6></div>

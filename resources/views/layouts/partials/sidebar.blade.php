@@ -83,6 +83,38 @@
       </li>
       @endif
 
+      @if($u->hasPermission('manage-attendance'))
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.attendances.regularizations.index') }}">
+          <i class="fi fi-rr-time-check"></i>
+          <span class="menu-label">Regularisation</span>
+          @php $pendingRegularizations = \App\Models\AttendanceRegularization::where('status','pending')->count(); @endphp
+          @if($pendingRegularizations > 0)
+          <span class="badge bg-warning ms-auto">{{ $pendingRegularizations }}</span>
+          @endif
+        </a>
+      </li>
+      @endif
+
+      @if($u->hasPermission('approve-leave'))
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.leaves.comp-off.index') }}">
+          <i class="fi fi-rr-calendar-plus"></i>
+          <span class="menu-label">Comp-Off Claims</span>
+          @php $pendingCompOff = \App\Models\Leave\CompOffCredit::where('status','pending')->count(); @endphp
+          @if($pendingCompOff > 0)
+          <span class="badge bg-warning ms-auto">{{ $pendingCompOff }}</span>
+          @endif
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.leaves.delegations.index') }}">
+          <i class="fi fi-rr-user-time"></i>
+          <span class="menu-label">Approval Delegation</span>
+        </a>
+      </li>
+      @endif
+
       @if($u->isAdmin())
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.shifts.dashboard') }}">
@@ -490,6 +522,18 @@
         <a class="menu-link" href="{{ route('staff.attendance.index') }}">
           <i class="fi fi-rr-calendar-clock"></i>
           <span class="menu-label">My Attendance</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.attendance.regularizations.index') }}">
+          <i class="fi fi-rr-time-check"></i>
+          <span class="menu-label">Regularisation</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.comp-off.index') }}">
+          <i class="fi fi-rr-calendar-plus"></i>
+          <span class="menu-label">Comp-Off</span>
         </a>
       </li>
       <li class="menu-item">

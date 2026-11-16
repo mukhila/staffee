@@ -3,9 +3,11 @@
 namespace App\Services\Leave;
 
 use App\Models\Leave\LeaveApproval;
+use App\Models\Leave\LeaveApprovalDelegation;
 use App\Models\Leave\LeavePolicy;
 use App\Models\LeaveRequest;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Support\Collection;
 
 class LeaveApprovalService
@@ -94,12 +96,83 @@ class LeaveApprovalService
             return $query->whereIn('status', ['pending', 'manager_approved'])->get();
         }
 
-        // Manager sees their own department's pending requests (not their own)
+        // Manager sees their own department's pending requests (not their own),
+        // plus the departments of anyone who has delegated approvals to them.
+        $departmentIds = $this->approvableDepartmentIds($approver);
+
         return $query
             ->where('status', 'pending')
             ->where('user_id', '!=', $approver->id)
-            ->whereHas('user', fn ($q) => $q->where('department_id', $approver->department_id))
+            ->whereHas('user', fn ($q) => $q->whereIn('department_id', $departmentIds))
             ->get();
+    }
+
+    /**
+     * Departments this approver may act for today: their own, and those of
+     * managers who currently delegate their leave approvals to them.
+     *
+     * @return int[]
+     */
+    public function approvableDepartmentIds(User $approver): array
+    {
+        $delegated = LeaveApprovalDelegation::activeOn()
+            ->where('delegate_id', $approver->id)
+            ->with('delegator:id,department_id')
+            ->get()
+            ->pluck('delegator.department_id');
+
+        return $delegated
+            ->push($approver->department_id)
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /** The user currently covering this manager's leave approvals, if any. */
+    public function activeDelegateFor(User $manager): ?User
+    {
+        return LeaveApprovalDelegation::activeOn()
+            ->where('delegator_id', $manager->id)
+            ->with('delegate')
+            ->latest('id')
+            ->first()
+            ?->delegate;
+    }
+
+    /**
+     * @throws \InvalidArgumentException
+     */
+    public function delegate(User $delegator, User $delegate, Carbon $from, Carbon $to, ?string $reason = null): LeaveApprovalDelegation
+    {
+        if ($delegator->id === $delegate->id) {
+            throw new \InvalidArgumentException('You cannot delegate approvals to yourself.');
+        }
+
+        if ($to->lt($from)) {
+            throw new \InvalidArgumentException('The end date must be on or after the start date.');
+        }
+
+        if (!$delegate->hasPermission('approve-leave')) {
+            throw new \InvalidArgumentException("{$delegate->name} does not have permission to approve leave.");
+        }
+
+        $overlap = LeaveApprovalDelegation::where('delegator_id', $delegator->id)
+            ->whereDate('from_date', '<=', $to->toDateString())
+            ->whereDate('to_date', '>=', $from->toDateString())
+            ->exists();
+
+        if ($overlap) {
+            throw new \InvalidArgumentException('You already have a delegation covering those dates.');
+        }
+
+        return LeaveApprovalDelegation::create([
+            'delegator_id' => $delegator->id,
+            'delegate_id'  => $delegate->id,
+            'from_date'    => $from->toDateString(),
+            'to_date'      => $to->toDateString(),
+            'reason'       => $reason,
+        ]);
     }
 
     /**
@@ -112,7 +185,7 @@ class LeaveApprovalService
         }
 
         return $request->status === 'pending'
-            && $approver->department_id === $request->user->department_id
+            && in_array($request->user->department_id, $this->approvableDepartmentIds($approver), true)
             && $approver->id !== $request->user_id;
     }
 }
