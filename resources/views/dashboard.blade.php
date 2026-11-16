@@ -21,6 +21,9 @@
         @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show">{{ session('success') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
         @endif
+        @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">{{ session('error') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
+        @endif
 
         <div class="row g-3">
 
@@ -130,17 +133,26 @@
                                 </div>
                             @endif
                             @if(!$attendance->check_out)
-                                <form action="{{ route('attendance.check-out') }}" method="POST">
+                                <form action="{{ route('attendance.check-out') }}" method="POST" class="js-attendance-form">
                                     @csrf
-                                    <button type="submit" class="btn btn-danger w-100 btn-sm">Check Out</button>
+                                    <input type="hidden" name="latitude">
+                                    <input type="hidden" name="longitude">
+                                    <button type="submit" class="btn btn-danger w-100 btn-sm" data-label="Check Out">Check Out</button>
                                 </form>
                             @endif
                         @else
                             <p class="text-muted small mb-3">You haven't checked in today.</p>
-                            <form action="{{ route('attendance.check-in') }}" method="POST">
+                            <form action="{{ route('attendance.check-in') }}" method="POST" class="js-attendance-form">
                                 @csrf
-                                <button type="submit" class="btn btn-success w-100">Check In</button>
+                                <input type="hidden" name="latitude">
+                                <input type="hidden" name="longitude">
+                                <button type="submit" class="btn btn-success w-100" data-label="Check In">Check In</button>
                             </form>
+                        @endif
+                        @if($geofenceEnabled ?? false)
+                        <div class="small text-muted mt-2" id="attendance-location-status" aria-live="polite">
+                            <i class="fi fi-rr-marker me-1"></i> Your location is checked when you clock in or out at the office.
+                        </div>
                         @endif
                     </div>
                 </div>
@@ -345,6 +357,61 @@
         </div>
 
     </div>
+
+@if($geofenceEnabled ?? false)
+@push('scripts')
+<script>
+// Office geofence: fetch the browser position before submitting a check-in/out.
+document.querySelectorAll('.js-attendance-form').forEach(function (form) {
+    form.addEventListener('submit', function (event) {
+        if (form.dataset.located === '1') {
+            return; // position already attached, let it submit
+        }
+        event.preventDefault();
+
+        const button = form.querySelector('button[type="submit"]');
+        const status = document.getElementById('attendance-location-status');
+        const say = function (text, isError) {
+            if (!status) return;
+            status.textContent = text;
+            status.classList.toggle('text-danger', !!isError);
+            status.classList.toggle('text-muted', !isError);
+        };
+        const reset = function () {
+            button.disabled = false;
+            button.textContent = button.dataset.label;
+        };
+
+        if (!navigator.geolocation) {
+            say('This browser cannot share a location, so you cannot clock in here. Try your phone, or ask HR to regularise your attendance.', true);
+            return;
+        }
+
+        button.disabled = true;
+        button.textContent = 'Getting your location…';
+        say('Checking where you are. Your browser may ask for permission.');
+
+        navigator.geolocation.getCurrentPosition(function (position) {
+            form.querySelector('[name="latitude"]').value  = position.coords.latitude;
+            form.querySelector('[name="longitude"]').value = position.coords.longitude;
+            form.dataset.located = '1';
+            button.textContent = button.dataset.label + '…';
+            form.submit();
+        }, function (error) {
+            reset();
+            if (error.code === error.PERMISSION_DENIED) {
+                say('Location access is blocked. Allow location for this site in your browser settings, then try again.', true);
+            } else if (error.code === error.TIMEOUT) {
+                say('Finding your location took too long. Move near a window or turn on Wi-Fi, then try again.', true);
+            } else {
+                say('Your location could not be found. Check that location services are on, then try again.', true);
+            }
+        }, { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 });
+    });
+});
+</script>
+@endpush
+@endif
 
 <style>
 @keyframes pulse {

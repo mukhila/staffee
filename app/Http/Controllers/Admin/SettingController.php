@@ -17,6 +17,16 @@ class SettingController extends Controller
 
     public function update(Request $request)
     {
+        $request->validate([
+            'geofence_enabled'   => 'sometimes|in:0,1',
+            'geofence_latitude'  => 'nullable|required_if:geofence_enabled,1|numeric|between:-90,90',
+            'geofence_longitude' => 'nullable|required_if:geofence_enabled,1|numeric|between:-180,180',
+            'geofence_radius_m'  => 'nullable|integer|between:20,50000',
+        ], [
+            'geofence_latitude.required_if'  => 'Enter the office latitude to turn the geofence on.',
+            'geofence_longitude.required_if' => 'Enter the office longitude to turn the geofence on.',
+        ]);
+
         $data = $request->except(['_token', '_method', 'company_logo']);
 
         // Handle logo upload

@@ -175,6 +175,79 @@
                 </div>
             </div>
         </div>
+
+        {{-- Attendance geofence --}}
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header border-0 pb-0">
+                    <h6 class="card-title mb-0">Attendance Geofence</h6>
+                    <small class="text-muted">When on, staff can only check in and out within the radius of the office. Their position is recorded with each punch.</small>
+                </div>
+                <div class="card-body">
+                    @if($errors->hasAny(['geofence_enabled', 'geofence_latitude', 'geofence_longitude', 'geofence_radius_m']))
+                    <div class="alert alert-danger">
+                        @foreach(['geofence_enabled', 'geofence_latitude', 'geofence_longitude', 'geofence_radius_m'] as $field)
+                            @error($field)<div>{{ $message }}</div>@enderror
+                        @endforeach
+                    </div>
+                    @endif
+                    <form action="{{ route('admin.settings.update') }}" method="POST">
+                        @csrf
+                        <div class="row g-3 align-items-end">
+                            <div class="col-md-2">
+                                <label class="form-label" for="geofence_enabled">Geofence</label>
+                                <select name="geofence_enabled" id="geofence_enabled" class="form-select">
+                                    <option value="0" {{ old('geofence_enabled', $settings['geofence_enabled'] ?? '0') == '0' ? 'selected' : '' }}>Off</option>
+                                    <option value="1" {{ old('geofence_enabled', $settings['geofence_enabled'] ?? '0') == '1' ? 'selected' : '' }}>On</option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="geofence_latitude">Office latitude</label>
+                                <input type="number" step="any" min="-90" max="90" class="form-control" id="geofence_latitude" name="geofence_latitude"
+                                       value="{{ old('geofence_latitude', $settings['geofence_latitude'] ?? '') }}" placeholder="e.g. 13.0827">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label" for="geofence_longitude">Office longitude</label>
+                                <input type="number" step="any" min="-180" max="180" class="form-control" id="geofence_longitude" name="geofence_longitude"
+                                       value="{{ old('geofence_longitude', $settings['geofence_longitude'] ?? '') }}" placeholder="e.g. 80.2707">
+                            </div>
+                            <div class="col-md-2">
+                                <label class="form-label" for="geofence_radius_m">Radius (metres)</label>
+                                <input type="number" min="20" max="50000" class="form-control" id="geofence_radius_m" name="geofence_radius_m"
+                                       value="{{ old('geofence_radius_m', $settings['geofence_radius_m'] ?? \App\Services\Shift\GeofenceService::DEFAULT_RADIUS_M) }}">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-outline-secondary w-100" id="geofence-use-current">Use my location</button>
+                            </div>
+                        </div>
+                        <div class="form-text" id="geofence-status">Phone GPS is usually accurate to 10–30 m; laptops on Wi-Fi can be off by 100 m or more, so avoid a very small radius.</div>
+                        <div class="mt-3">
+                            <button type="submit" class="btn btn-primary">Save Geofence Settings</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
+
+@push('scripts')
+<script>
+document.getElementById('geofence-use-current')?.addEventListener('click', function () {
+    const status = document.getElementById('geofence-status');
+    if (!navigator.geolocation) {
+        status.textContent = 'This browser cannot provide a location.';
+        return;
+    }
+    status.textContent = 'Getting your location…';
+    navigator.geolocation.getCurrentPosition(function (position) {
+        document.getElementById('geofence_latitude').value  = position.coords.latitude.toFixed(7);
+        document.getElementById('geofence_longitude').value = position.coords.longitude.toFixed(7);
+        status.textContent = 'Location filled in (accurate to about ' + Math.round(position.coords.accuracy) + ' m). Save to apply.';
+    }, function () {
+        status.textContent = 'Could not get your location. Allow location access and try again.';
+    }, { enableHighAccuracy: true, timeout: 15000 });
+});
+</script>
+@endpush
 </x-app-layout>

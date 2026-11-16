@@ -28,8 +28,18 @@
                   <tr>
                     <td>{{ $attendance->user->name }}</td>
                     <td>{{ $attendance->date }}</td>
-                    <td>{{ $attendance->check_in }}</td>
-                    <td>{{ $attendance->check_out }}</td>
+                    <td>
+                        {{ $attendance->check_in }}
+                        @if($attendance->check_in_distance_m !== null)
+                        <div class="text-muted small" title="Distance from the office at check-in"><i class="fi fi-rr-marker"></i> {{ $attendance->check_in_distance_m }} m</div>
+                        @endif
+                    </td>
+                    <td>
+                        {{ $attendance->check_out }}
+                        @if($attendance->check_out_distance_m !== null)
+                        <div class="text-muted small" title="Distance from the office at check-out"><i class="fi fi-rr-marker"></i> {{ $attendance->check_out_distance_m }} m</div>
+                        @endif
+                    </td>
                     <td>
                         @if($attendance->status == 'present')
                             <span class="badge bg-success">Present</span>

@@ -9,6 +9,8 @@ class Attendance extends Model
     protected $fillable = [
         'user_id', 'shift_id', 'date', 'check_in', 'check_out', 'status',
         'worked_minutes', 'overtime_minutes', 'is_shift_day', 'validated_at',
+        'check_in_latitude', 'check_in_longitude', 'check_in_distance_m',
+        'check_out_latitude', 'check_out_longitude', 'check_out_distance_m',
     ];
 
     protected $casts = [

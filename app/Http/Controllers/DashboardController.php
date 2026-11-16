@@ -102,10 +102,12 @@ class DashboardController extends Controller
             $adminAlerts = compact('probationAlerts', 'contractAlerts');
         }
 
+        $geofenceEnabled = app(\App\Services\Shift\GeofenceService::class)->isEnabled();
+
         return view('dashboard', compact(
             'attendance', 'pendingTasks', 'assignedBugs',
             'workingHours', 'announcements', 'adminStats', 'adminAlerts',
-            'leaveBalances', 'todayLoggedMinutes', 'runningTimer'
+            'leaveBalances', 'todayLoggedMinutes', 'runningTimer', 'geofenceEnabled'
         ));
     }
 }
