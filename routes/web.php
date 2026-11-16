@@ -103,6 +103,9 @@ Route::middleware('auth')->group(function () {
         ->only(['index', 'create', 'store', 'show', 'destroy'])
         ->parameters(['leaves' => 'leave']);
 
+    // My Activity: each employee's own monitoring data
+    Route::get('my-activity', [\App\Http\Controllers\Staff\MyActivityController::class, 'index'])->name('staff.my-activity.index');
+
     // Comp-off claims (earned by working a weekend or holiday)
     Route::get('comp-off', [\App\Http\Controllers\Staff\CompOffController::class, 'index'])->name('staff.comp-off.index');
     Route::post('comp-off', [\App\Http\Controllers\Staff\CompOffController::class, 'store'])->name('staff.comp-off.store');
@@ -372,6 +375,12 @@ Route::middleware('auth')->group(function () {
                 Route::delete('settings/{setting}', [\App\Http\Controllers\Admin\Monitoring\MonitoringSettingController::class, 'destroy'])->name('settings.destroy');
                 Route::post('tokens/{user}/generate', [\App\Http\Controllers\Admin\Monitoring\MonitoringSettingController::class, 'generateToken'])->name('tokens.generate');
                 Route::delete('tokens/{user}/revoke', [\App\Http\Controllers\Admin\Monitoring\MonitoringSettingController::class, 'revokeToken'])->name('tokens.revoke');
+
+                // Productivity rules: which apps and websites count as productive
+                Route::get('app-rules', [\App\Http\Controllers\Admin\Monitoring\MonitoringAppRuleController::class, 'index'])->name('app-rules.index');
+                Route::post('app-rules', [\App\Http\Controllers\Admin\Monitoring\MonitoringAppRuleController::class, 'store'])->name('app-rules.store');
+                Route::put('app-rules/{rule}', [\App\Http\Controllers\Admin\Monitoring\MonitoringAppRuleController::class, 'update'])->name('app-rules.update');
+                Route::delete('app-rules/{rule}', [\App\Http\Controllers\Admin\Monitoring\MonitoringAppRuleController::class, 'destroy'])->name('app-rules.destroy');
             });
 
             // Performance cycles & admin review management
@@ -603,6 +612,7 @@ Route::middleware('auth')->group(function () {
             Route::get('daily', [\App\Http\Controllers\Admin\Monitoring\MonitoringReportController::class, 'daily'])->name('daily');
             Route::get('weekly', [\App\Http\Controllers\Admin\Monitoring\MonitoringReportController::class, 'weekly'])->name('weekly');
             Route::get('department', [\App\Http\Controllers\Admin\Monitoring\MonitoringReportController::class, 'department'])->name('department');
+            Route::get('productivity', [\App\Http\Controllers\Admin\Monitoring\MonitoringReportController::class, 'productivity'])->name('productivity');
         });
 
     }); // end role:admin,pm

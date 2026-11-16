@@ -58,3 +58,9 @@ Schedule::command('monitoring:check-idle')
 Schedule::command('monitoring:purge')
     ->dailyAt('02:00')
     ->withoutOverlapping();
+
+// Weekly activity summary: each monitored employee gets their own figures on Monday morning
+Schedule::command('monitoring:weekly-summary')
+    ->weeklyOn(1, '08:00')
+    ->name('monitoring-weekly-summary')
+    ->withoutOverlapping();

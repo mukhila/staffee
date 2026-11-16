@@ -443,6 +443,14 @@
         </a>
       </li>
       @endif
+      @if($u->isAdmin())
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.monitoring.app-rules.index') }}">
+          <i class="fi fi-rr-apps-sort"></i>
+          <span class="menu-label">Productivity Rules</span>
+        </a>
+      </li>
+      @endif
       @if($u->hasPermission('view-reports'))
       <li class="menu-item">
         <a class="menu-link" href="{{ route('admin.monitoring.reports.daily') }}">
@@ -522,6 +530,12 @@
         <a class="menu-link" href="{{ route('staff.attendance.index') }}">
           <i class="fi fi-rr-calendar-clock"></i>
           <span class="menu-label">My Attendance</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('staff.my-activity.index') }}">
+          <i class="fi fi-rr-chart-pie-alt"></i>
+          <span class="menu-label">My Activity</span>
         </a>
       </li>
       <li class="menu-item">

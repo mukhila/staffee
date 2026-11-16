@@ -8,6 +8,7 @@
         <div class="d-flex gap-2">
             <a href="{{ route('admin.monitoring.reports.daily') }}" class="btn btn-outline-secondary btn-sm">Daily View</a>
             <a href="{{ route('admin.monitoring.reports.weekly') }}" class="btn btn-outline-secondary btn-sm">Weekly View</a>
+            <a href="{{ route('admin.monitoring.reports.productivity') }}" class="btn btn-outline-secondary btn-sm">Productivity</a>
         </div>
     </div>
 

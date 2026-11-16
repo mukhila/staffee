@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Admin\Monitoring;
 use App\Http\Controllers\Controller;
 use App\Models\Department;
 use App\Models\Monitoring\MonitoringActivityLog;
+use App\Models\Monitoring\MonitoringIdlePeriod;
 use App\Models\Monitoring\MonitoringSession;
 use App\Models\User;
+use App\Services\Monitoring\ProductivityService;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -30,9 +32,8 @@ class MonitoringReportController extends Controller
                 return max(0, $s->started_at->diffInMinutes($end));
             });
 
-            $idleMinutes = MonitoringActivityLog::where('user_id', $user->id)
-                ->whereDate('recorded_at', $date)
-                ->where('is_idle', true)
+            $idleMinutes = MonitoringIdlePeriod::where('user_id', $user->id)
+                ->whereDate('idle_start', $date)
                 ->sum('duration_seconds') / 60;
 
             $productiveMinutes = max(0, $activeMinutes - $idleMinutes);
@@ -112,9 +113,8 @@ class MonitoringReportController extends Controller
                     return max(0, $s->started_at->diffInMinutes($end));
                 });
 
-            $idleMinutes = MonitoringActivityLog::whereIn('user_id', $userIds)
-                ->whereBetween('recorded_at', [$from, $to])
-                ->where('is_idle', true)
+            $idleMinutes = MonitoringIdlePeriod::whereIn('user_id', $userIds)
+                ->whereBetween('idle_start', [$from, $to])
                 ->sum('duration_seconds') / 60;
 
             $headCount         = $dept->users->count();
@@ -136,5 +136,28 @@ class MonitoringReportController extends Controller
         return view('admin.monitoring.reports.department', compact(
             'deptData', 'from', 'to', 'maxMinutes'
         ));
+    }
+    /**
+     * Productive / neutral / unproductive time per employee for a week,
+     * using the app and website rules.
+     */
+    public function productivity(Request $request, ProductivityService $productivity)
+    {
+        $data      = $request->validate(['week' => 'nullable|date']);
+        $weekStart = isset($data['week'])
+            ? Carbon::parse($data['week'])->startOfWeek()
+            : now()->startOfWeek();
+        $weekEnd = $weekStart->copy()->endOfWeek();
+
+        $rows = User::excludeAdmin()->with('department')->orderBy('name')->get()
+            ->map(fn (User $user) => [
+                'user'    => $user,
+                'summary' => $productivity->summarise($user->id, $weekStart, $weekEnd, 3),
+            ])
+            ->filter(fn (array $row) => $row['summary']['active_seconds'] > 0)
+            ->sortByDesc(fn (array $row) => $row['summary']['active_seconds'])
+            ->values();
+
+        return view('admin.monitoring.reports.productivity', compact('rows', 'weekStart', 'weekEnd'));
     }
 }
