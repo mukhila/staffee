@@ -111,6 +111,11 @@ Route::middleware('auth')->group(function () {
     Route::delete('profile/security/two-factor', [\App\Http\Controllers\SecurityController::class, 'disable'])->name('profile.security.two-factor.disable');
     Route::post('profile/security/recovery-codes', [\App\Http\Controllers\SecurityController::class, 'regenerateRecoveryCodes'])->name('profile.security.recovery-codes');
 
+    // Personal API tokens (mobile app, scripts)
+    Route::get('profile/api-tokens', [\App\Http\Controllers\ApiTokenController::class, 'index'])->name('profile.api-tokens');
+    Route::post('profile/api-tokens', [\App\Http\Controllers\ApiTokenController::class, 'store'])->name('profile.api-tokens.store');
+    Route::delete('profile/api-tokens/{tokenId}', [\App\Http\Controllers\ApiTokenController::class, 'destroy'])->whereNumber('tokenId')->name('profile.api-tokens.destroy');
+
     // My Activity: each employee's own monitoring data
     Route::get('my-activity', [\App\Http\Controllers\Staff\MyActivityController::class, 'index'])->name('staff.my-activity.index');
 
@@ -192,6 +197,13 @@ Route::middleware('auth')->group(function () {
             Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
             Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
 
+            // CSV imports: preview first, then confirm
+            Route::get('imports', [\App\Http\Controllers\Admin\ImportController::class, 'index'])->name('imports.index');
+            Route::get('imports/{type}', [\App\Http\Controllers\Admin\ImportController::class, 'show'])->name('imports.show');
+            Route::get('imports/{type}/template', [\App\Http\Controllers\Admin\ImportController::class, 'template'])->name('imports.template');
+            Route::post('imports/{type}/preview', [\App\Http\Controllers\Admin\ImportController::class, 'preview'])->name('imports.preview');
+            Route::post('imports/{type}/confirm', [\App\Http\Controllers\Admin\ImportController::class, 'confirm'])->name('imports.confirm');
+
             // Audit trail (read-only)
             Route::get('audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
             Route::get('audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AuditLogController::class, 'show'])->name('audit-logs.show');
@@ -204,8 +216,8 @@ Route::middleware('auth')->group(function () {
             Route::post('roles-matrix', [\App\Http\Controllers\Admin\RoleController::class, 'updateMatrix'])->name('roles.matrix.update');
 
             // Staff import + create/edit/delete (view is permission-gated below)
-            Route::get('staff/import', [\App\Http\Controllers\Admin\StaffController::class, 'importForm'])->name('staff.import');
-            Route::post('staff/import', [\App\Http\Controllers\Admin\StaffController::class, 'import'])->name('staff.import.upload');
+            // Old staff import page now lives in the general importer
+            Route::redirect('staff/import', '/admin/imports/staff')->name('staff.import');
             Route::resource('staff', \App\Http\Controllers\Admin\StaffController::class)->except(['index', 'show']);
 
             // Leave configuration

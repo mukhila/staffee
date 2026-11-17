@@ -162,6 +162,11 @@
                 </a>
               </li>
               <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('profile.api-tokens') }}">
+                  <i class="fi fi-rr-key scale-1x"></i> API Tokens
+                </a>
+              </li>
+              <li>
                 <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('notifications.index') }}">
                   <i class="fi fi-rr-bell scale-1x"></i> Notifications
                   @if($unreadNotifCount > 0)

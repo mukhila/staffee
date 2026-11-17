@@ -24,7 +24,7 @@ use Illuminate\Support\Facades\Storage;
 class User extends Authenticatable
 {
     use \App\Traits\Auditable;
-    use HasFactory, Notifiable, HasPermissions;
+    use HasFactory, Notifiable, HasPermissions, \Laravel\Sanctum\HasApiTokens;
 
     protected $fillable = [
         'name', 'email', 'password', 'role', 'phone', 'address',

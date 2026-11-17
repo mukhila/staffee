@@ -25,6 +25,9 @@ class AuditLog extends Model
         'two_factor_failed'    => 'Failed two-factor code',
         'recovery_code_used'   => 'Recovery code used',
         'recovery_codes_regenerated' => 'Recovery codes regenerated',
+        'api_token_created'    => 'API token created',
+        'api_token_revoked'    => 'API token revoked',
+        'import'               => 'CSV import',
     ];
 
     public const EVENT_COLORS = [

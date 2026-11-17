@@ -478,6 +478,12 @@
           <span class="menu-label">Audit Log</span>
         </a>
       </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.imports.index') }}">
+          <i class="fi fi-rr-file-import"></i>
+          <span class="menu-label">Import Data</span>
+        </a>
+      </li>
       @endif
 
       {{-- ── Work (all authenticated users) ─────────────────────────────── --}}

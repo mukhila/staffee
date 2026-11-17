@@ -21,8 +21,13 @@ return Application::configure(basePath: dirname(__DIR__))
             'role'       => \App\Http\Middleware\CheckRole::class,
             'permission' => \App\Http\Middleware\CheckPermission::class,
             'agent'      => \App\Http\Middleware\AgentAuthenticate::class,
+            'abilities'  => \Laravel\Sanctum\Http\Middleware\CheckAbilities::class,
+            'active'     => \App\Http\Middleware\EnsureUserIsActive::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // API callers always get JSON errors, even without an Accept header.
+        $exceptions->shouldRenderJsonWhen(
+            fn (\Illuminate\Http\Request $request) => $request->is('api/*') || $request->expectsJson()
+        );
     })->create();

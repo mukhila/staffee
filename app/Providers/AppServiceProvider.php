@@ -11,6 +11,12 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        // Personal API tokens: 60 requests a minute per user.
+        \Illuminate\Support\Facades\RateLimiter::for('api', function (\Illuminate\Http\Request $request) {
+            return \Illuminate\Cache\RateLimiting\Limit::perMinute(60)
+                ->by($request->user()?->id ?: $request->ip());
+        });
+
         // Admin bypasses every Gate check before any policy or ability runs.
         Gate::before(function ($user, $ability) {
             if ($user->isAdmin()) {
