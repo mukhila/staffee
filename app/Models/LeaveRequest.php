@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class LeaveRequest extends Model
 {
+    use \App\Traits\Auditable;
     protected $fillable = [
         'user_id', 'leave_type_id', 'type',
         'from_date', 'to_date', 'days', 'half_day', 'half_day_period',

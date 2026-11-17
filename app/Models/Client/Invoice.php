@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Invoice extends Model
 {
+    use \App\Traits\Auditable;
     protected $fillable = [
         'invoice_number',
         'client_id',

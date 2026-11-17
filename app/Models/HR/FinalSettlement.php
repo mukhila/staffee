@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class FinalSettlement extends Model
 {
+    use \App\Traits\Auditable;
     protected $table = 'final_settlements';
 
     protected $fillable = [

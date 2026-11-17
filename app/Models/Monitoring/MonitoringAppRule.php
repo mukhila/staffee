@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MonitoringAppRule extends Model
 {
+    use \App\Traits\Auditable;
     public const CATEGORIES = ['productive', 'neutral', 'unproductive'];
 
     public const MATCH_TYPES = ['app', 'title'];

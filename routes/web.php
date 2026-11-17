@@ -103,6 +103,14 @@ Route::middleware('auth')->group(function () {
         ->only(['index', 'create', 'store', 'show', 'destroy'])
         ->parameters(['leaves' => 'leave']);
 
+    // Account security: two-step verification and sign-in activity
+    Route::get('profile/security', [\App\Http\Controllers\SecurityController::class, 'show'])->name('profile.security');
+    Route::post('profile/security/two-factor', [\App\Http\Controllers\SecurityController::class, 'enable'])->name('profile.security.two-factor.enable');
+    Route::post('profile/security/two-factor/confirm', [\App\Http\Controllers\SecurityController::class, 'confirm'])->name('profile.security.two-factor.confirm');
+    Route::post('profile/security/two-factor/cancel', [\App\Http\Controllers\SecurityController::class, 'cancelSetup'])->name('profile.security.two-factor.cancel');
+    Route::delete('profile/security/two-factor', [\App\Http\Controllers\SecurityController::class, 'disable'])->name('profile.security.two-factor.disable');
+    Route::post('profile/security/recovery-codes', [\App\Http\Controllers\SecurityController::class, 'regenerateRecoveryCodes'])->name('profile.security.recovery-codes');
+
     // My Activity: each employee's own monitoring data
     Route::get('my-activity', [\App\Http\Controllers\Staff\MyActivityController::class, 'index'])->name('staff.my-activity.index');
 
@@ -183,6 +191,13 @@ Route::middleware('auth')->group(function () {
         Route::middleware(['role:admin'])->group(function () {
             Route::get('settings', [\App\Http\Controllers\Admin\SettingController::class, 'index'])->name('settings.index');
             Route::post('settings', [\App\Http\Controllers\Admin\SettingController::class, 'update'])->name('settings.update');
+
+            // Audit trail (read-only)
+            Route::get('audit-logs', [\App\Http\Controllers\Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+            Route::get('audit-logs/{auditLog}', [\App\Http\Controllers\Admin\AuditLogController::class, 'show'])->name('audit-logs.show');
+
+            // Reset two-step verification for someone who has lost their phone
+            Route::delete('staff/{staff}/two-factor', [\App\Http\Controllers\SecurityController::class, 'adminReset'])->name('staff.two-factor.reset');
             Route::resource('departments', \App\Http\Controllers\Admin\DepartmentController::class)->except(['show']);
             Route::resource('roles', \App\Http\Controllers\Admin\RoleController::class)->except(['show']);
             Route::get('roles-matrix', [\App\Http\Controllers\Admin\RoleController::class, 'matrix'])->name('roles.matrix');

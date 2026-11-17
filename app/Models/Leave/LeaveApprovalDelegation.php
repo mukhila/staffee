@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class LeaveApprovalDelegation extends Model
 {
+    use \App\Traits\Auditable;
     protected $fillable = ['delegator_id', 'delegate_id', 'from_date', 'to_date', 'reason'];
 
     protected $casts = [

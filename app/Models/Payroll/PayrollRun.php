@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PayrollRun extends Model
 {
+    use \App\Traits\Auditable;
     protected $table = 'payroll_runs';
 
     protected $fillable = [

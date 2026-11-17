@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TerminationRequest extends Model
 {
+    use \App\Traits\Auditable;
     protected $table = 'termination_requests';
 
     protected $fillable = [

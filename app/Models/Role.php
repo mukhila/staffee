@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Role extends Model
 {
+    use \App\Traits\Auditable;
     protected $fillable = ['name', 'slug', 'description', 'is_active', 'department_id'];
 
     public function department()

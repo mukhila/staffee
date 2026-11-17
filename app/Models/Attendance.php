@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Attendance extends Model
 {
+    use \App\Traits\Auditable;
     protected $fillable = [
         'user_id', 'shift_id', 'date', 'check_in', 'check_out', 'status',
         'worked_minutes', 'overtime_minutes', 'is_shift_day', 'validated_at',

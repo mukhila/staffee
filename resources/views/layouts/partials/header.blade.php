@@ -154,6 +154,14 @@
                 </a>
               </li>
               <li>
+                <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('profile.security') }}">
+                  <i class="fi fi-rr-shield-check scale-1x"></i> Security
+                  @if(Auth::user() && !Auth::user()->hasTwoFactorEnabled())
+                  <span class="badge bg-warning-subtle text-warning ms-auto">2FA off</span>
+                  @endif
+                </a>
+              </li>
+              <li>
                 <a class="dropdown-item d-flex align-items-center gap-2" href="{{ route('notifications.index') }}">
                   <i class="fi fi-rr-bell scale-1x"></i> Notifications
                   @if($unreadNotifCount > 0)

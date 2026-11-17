@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TaxRegime extends Model
 {
+    use \App\Traits\Auditable;
     protected $table = 'tax_regimes';
 
     protected $fillable = [

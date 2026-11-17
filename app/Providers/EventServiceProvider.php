@@ -2,25 +2,15 @@
 
 namespace App\Providers;
 
-use App\Events\EmployeePromoted;
-use App\Events\ResignationSubmitted;
-use App\Events\TerminationInitiated;
-use App\Listeners\NotifyHROfTermination;
-use App\Listeners\NotifyManagerOfResignation;
-use App\Listeners\SendPromotionNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
+/**
+ * Listeners in app/Listeners are discovered automatically from the event type
+ * on their handle() method. Do not also list them in $listen: a listener in
+ * both places is registered twice and runs twice (which sent every promotion,
+ * resignation and termination notification two times).
+ */
 class EventServiceProvider extends ServiceProvider
 {
-    protected $listen = [
-        EmployeePromoted::class => [
-            SendPromotionNotification::class,
-        ],
-        TerminationInitiated::class => [
-            NotifyHROfTermination::class,
-        ],
-        ResignationSubmitted::class => [
-            NotifyManagerOfResignation::class,
-        ],
-    ];
+    protected $listen = [];
 }

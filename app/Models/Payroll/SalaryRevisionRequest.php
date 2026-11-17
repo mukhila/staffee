@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class SalaryRevisionRequest extends Model
 {
+    use \App\Traits\Auditable;
     protected $table = 'salary_revision_requests';
 
     protected $fillable = [

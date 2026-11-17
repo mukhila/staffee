@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class PromotionRequest extends Model
 {
+    use \App\Traits\Auditable;
     protected $table = 'promotion_requests';
 
     protected $fillable = [

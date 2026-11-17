@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MonitoringSetting extends Model
 {
+    use \App\Traits\Auditable;
     protected $fillable = [
         'user_id', 'enabled', 'screenshot_enabled', 'screenshot_interval_seconds',
         'activity_tracking_enabled', 'idle_threshold_seconds',

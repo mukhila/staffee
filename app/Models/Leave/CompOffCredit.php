@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class CompOffCredit extends Model
 {
+    use \App\Traits\Auditable;
     protected $fillable = [
         'user_id', 'worked_date', 'days', 'reason',
         'status', 'reviewed_by', 'reviewed_at', 'review_notes',

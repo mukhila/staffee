@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class AttendanceRegularization extends Model
 {
+    use \App\Traits\Auditable;
     protected $fillable = [
         'user_id', 'date', 'requested_check_in', 'requested_check_out',
         'reason', 'status', 'reviewed_by', 'reviewed_at', 'review_notes',

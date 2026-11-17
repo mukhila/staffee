@@ -83,6 +83,31 @@
                 </form>
             </div>
         </div>
+
+        @if(auth()->user()->isAdmin())
+        <div class="card mt-3">
+            <div class="card-body d-flex flex-wrap gap-3 align-items-center justify-content-between">
+                <div>
+                    <h6 class="mb-1">Two-step verification</h6>
+                    @if($staff->hasTwoFactorEnabled())
+                    <span class="badge bg-success">On</span>
+                    <span class="small text-muted ms-1">since {{ $staff->two_factor_confirmed_at->format('d M Y') }}</span>
+                    @else
+                    <span class="badge bg-secondary">Off</span>
+                    @endif
+                    <div class="small text-muted mt-1">Reset it if {{ $staff->name }} has lost their phone and recovery codes. They can then sign in with their password and set it up again.</div>
+                </div>
+                @if($staff->two_factor_secret)
+                <form method="POST" action="{{ route('admin.staff.two-factor.reset', $staff) }}"
+                      onsubmit="return confirm('Reset two-step verification for {{ addslashes($staff->name) }}?');">
+                    @csrf
+                    @method('DELETE')
+                    <button type="submit" class="btn btn-outline-danger">Reset two-step verification</button>
+                </form>
+                @endif
+            </div>
+        </div>
+        @endif
     </div>
 
     <script>

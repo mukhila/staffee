@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\Auth;
 
+use App\Models\User;
+use Illuminate\Auth\Events\Failed;
 use Illuminate\Auth\Events\Lockout;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Support\Facades\Auth;
@@ -39,10 +41,26 @@ class LoginRequest extends FormRequest
      */
     public function authenticate(): void
     {
+        Auth::login($this->validateCredentials(), $this->boolean('remember'));
+    }
+
+    /**
+     * Check the email and password without signing in, so the controller can
+     * ask for a two-factor code first.
+     *
+     * @throws ValidationException
+     */
+    public function validateCredentials(): User
+    {
         $this->ensureIsNotRateLimited();
 
-        if (! Auth::attempt($this->only('email', 'password'), $this->boolean('remember'))) {
+        $credentials = $this->only('email', 'password');
+        $guard       = Auth::guard('web');
+        $user        = $guard->getProvider()->retrieveByCredentials($credentials);
+
+        if (! $user || ! $guard->getProvider()->validateCredentials($user, $credentials)) {
             RateLimiter::hit($this->throttleKey());
+            event(new Failed('web', $user, $credentials));
 
             throw ValidationException::withMessages([
                 'email' => trans('auth.failed'),
@@ -50,6 +68,8 @@ class LoginRequest extends FormRequest
         }
 
         RateLimiter::clear($this->throttleKey());
+
+        return $user;
     }
 
     /**

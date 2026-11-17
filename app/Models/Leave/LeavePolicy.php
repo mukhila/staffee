@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class LeavePolicy extends Model
 {
+    use \App\Traits\Auditable;
     protected $fillable = [
         'leave_type_id', 'name', 'department_id', 'employee_level',
         'max_days_per_year', 'carry_forward_days', 'carry_forward_expiry_months',

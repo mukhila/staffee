@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class EmployeeLoan extends Model
 {
+    use \App\Traits\Auditable;
     protected $table = 'employee_loans';
 
     protected $fillable = [

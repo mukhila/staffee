@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class EmployeeBenefitDeduction extends Model
 {
+    use \App\Traits\Auditable;
     protected $table = 'employee_benefit_deductions';
 
     protected $fillable = [

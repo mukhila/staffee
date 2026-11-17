@@ -472,6 +472,12 @@
           <span class="menu-label">Company Settings</span>
         </a>
       </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.audit-logs.index') }}">
+          <i class="fi fi-rr-time-past"></i>
+          <span class="menu-label">Audit Log</span>
+        </a>
+      </li>
       @endif
 
       {{-- ── Work (all authenticated users) ─────────────────────────────── --}}

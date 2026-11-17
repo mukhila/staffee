@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class EmployeeSalaryStructure extends Model
 {
+    use \App\Traits\Auditable;
     protected $table = 'employee_salary_structures';
 
     protected $fillable = [

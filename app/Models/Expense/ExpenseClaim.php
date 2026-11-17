@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ExpenseClaim extends Model
 {
+    use \App\Traits\Auditable;
     protected $fillable = [
         'user_id',
         'project_id',
