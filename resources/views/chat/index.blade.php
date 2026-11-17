@@ -4,9 +4,15 @@
             <!-- Users List -->
             <div class="col-md-3 border-end bg-white h-100 p-0">
                 <div class="p-3 border-bottom">
-                    <h5 class="mb-0">Chats</h5>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <h5 class="mb-0">Chats</h5>
+                        <a href="{{ route('chat.search') }}" class="btn btn-sm btn-outline-secondary" title="Search messages" aria-label="Search messages">
+                            <i class="fi fi-rr-search"></i>
+                        </a>
+                    </div>
+                    <input type="search" id="people-filter" class="form-control form-control-sm" placeholder="Find a person" aria-label="Find a person">
                 </div>
-                <div class="list-group list-group-flush overflow-auto" style="height: calc(100vh - 150px);">
+                <div class="list-group list-group-flush overflow-auto" style="height: calc(100vh - 190px);">
                     @foreach($users as $user)
                         <a href="#" class="list-group-item list-group-item-action user-chat-item" data-id="{{ $user->id }}">
                             <div class="d-flex align-items-center">
@@ -47,7 +53,7 @@
                         <label for="attachment-input" class="btn btn-light text-secondary mb-0" style="cursor: pointer;">
                             <i class="fi fi-rr-clip"></i>
                         </label>
-                        <input type="file" id="attachment-input" class="d-none">
+                        <input type="file" id="attachment-input" class="d-none" accept=".jpg,.jpeg,.png,.gif,.webp,.pdf,.txt,.csv,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.zip">
 
                         <!-- Emoji Button -->
                         <button type="button" class="btn btn-light text-secondary" id="emoji-btn">
@@ -215,15 +221,18 @@
                 fetch('{{ route("chat.send") }}', {
                     method: 'POST',
                     headers: {
-                        'X-CSRF-TOKEN': '{{ csrf_token() }}'
+                        'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                        'Accept': 'application/json'
                         // Content-Type not set for FormData
                     },
                     body: formData
                 })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.error) {
-                        alert(data.error);
+                .then(response => response.json().then(data => ({ ok: response.ok, data })))
+                .then(({ ok, data }) => {
+                    if (!ok || data.error) {
+                        // Show the first validation message, e.g. a blocked file type.
+                        const first = data.errors ? Object.values(data.errors)[0][0] : null;
+                        alert(first || data.error || data.message || 'The message could not be sent.');
                         return;
                     }
                     appendMessage(data, true);
@@ -253,17 +262,23 @@
                     });
             }
 
+            // Message text is user input: always escape it before it goes into the page.
+            function escapeHtml(value) {
+                return String(value ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+            }
+
             function appendMessage(msg, isMe) {
                 const div = document.createElement('div');
                 div.className = `d-flex mb-3 ${isMe ? 'justify-content-end' : 'justify-content-start'}`;
-                
+
                 let attachmentHtml = '';
-                if (msg.attachment_path) {
-                    const url = `{{ asset('storage') }}/${msg.attachment_path}`;
-                    if (msg.attachment_type && msg.attachment_type.startsWith('image/')) {
-                        attachmentHtml = `<div class="mb-2"><img src="${url}" class="img-fluid rounded" style="max-height: 200px;"></div>`;
+                if (msg.attachment_url) {
+                    const url  = escapeHtml(msg.attachment_url);
+                    const name = escapeHtml(msg.attachment_name || 'Attachment');
+                    if (/^image\/(jpeg|png|gif|webp)$/.test(msg.attachment_type || '')) {
+                        attachmentHtml = `<div class="mb-2"><a href="${url}" target="_blank" rel="noopener"><img src="${url}" alt="${name}" class="img-fluid rounded" style="max-height: 200px;"></a></div>`;
                     } else {
-                        attachmentHtml = `<div class="mb-2"><a href="${url}" target="_blank" class="btn btn-sm btn-light"><i class="fi fi-rr-file"></i> Download Attachment</a></div>`;
+                        attachmentHtml = `<div class="mb-2"><a href="${url}" class="btn btn-sm btn-light"><i class="fi fi-rr-file"></i> ${name}</a></div>`;
                     }
                 }
 
@@ -271,7 +286,7 @@
                     <div class="card ${isMe ? 'bg-primary text-white' : 'bg-white'} shadow-sm" style="max-width: 70%;">
                         <div class="card-body p-2">
                             ${attachmentHtml}
-                            <p class="mb-0">${msg.body || ''}</p>
+                            <p class="mb-0" style="white-space: pre-wrap; word-break: break-word;">${escapeHtml(msg.body)}</p>
                             <small class="${isMe ? 'text-white-50' : 'text-muted'} d-block text-end mt-1" style="font-size: 0.7rem;">
                                 ${new Date(msg.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}
                             </small>
@@ -283,6 +298,21 @@
 
             function scrollToBottom() {
                 chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+
+            // Filter the people list as you type.
+            document.getElementById('people-filter')?.addEventListener('input', function () {
+                const term = this.value.trim().toLowerCase();
+                userItems.forEach(item => {
+                    const name = item.querySelector('h6').innerText.toLowerCase();
+                    item.classList.toggle('d-none', term !== '' && !name.includes(term));
+                });
+            });
+
+            // Open a conversation straight away when arriving from search (?user=ID).
+            const openUser = new URLSearchParams(window.location.search).get('user');
+            if (openUser) {
+                document.querySelector(`.user-chat-item[data-id="${CSS.escape(openUser)}"]`)?.click();
             }
             
             // Listen for new messages

@@ -1,0 +1,24 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    public function up(): void
+    {
+        Schema::table('messages', function (Blueprint $table) {
+            $table->string('attachment_name')->nullable();
+            // A message can be just a file; sending one without text used to fail.
+            $table->text('body')->nullable()->change();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('messages', function (Blueprint $table) {
+            $table->dropColumn('attachment_name');
+        });
+    }
+};

@@ -39,7 +39,10 @@ class ChatChannelController extends Controller
             ]);
         }
 
-        return view('chat.channel-show', compact('channel', 'messages', 'channels'));
+        // For @mention suggestions in the message box.
+        $mentionable = $channel->members->where('id', '!=', Auth::id())->pluck('name')->sort()->values();
+
+        return view('chat.channel-show', compact('channel', 'messages', 'channels', 'mentionable'));
     }
 
     public function markRead(ChatChannel $channel)
@@ -96,15 +99,16 @@ class ChatChannelController extends Controller
 
         $request->validate([
             'body'       => 'required_without:attachment|nullable|string|max:5000',
-            'attachment' => 'nullable|file|max:10240',
+            'attachment' => \App\Services\Chat\ChatAttachmentService::validationRule(),
+        ], [
+            'attachment.mimes' => 'That file type cannot be sent. Use an image, PDF, Office document, text/CSV or ZIP file.',
+            'attachment.max'   => 'Attachments must be 10 MB or smaller.',
         ]);
 
         $path = $name = $type = null;
         if ($request->hasFile('attachment')) {
-            $file = $request->file('attachment');
-            $path = $file->store('channel-attachments', 'public');
-            $name = $file->getClientOriginalName();
-            $type = $file->getClientMimeType();
+            ['path' => $path, 'name' => $name, 'type' => $type] = app(\App\Services\Chat\ChatAttachmentService::class)
+                ->store($request->file('attachment'), 'channels');
         }
 
         $msg = ChatChannelMessage::create([
@@ -118,15 +122,36 @@ class ChatChannelController extends Controller
 
         broadcast(new \App\Events\ChannelMessageSent($msg))->toOthers();
 
+        if ($msg->body) {
+            app(\App\Services\Chat\MentionService::class)->notify($msg);
+        }
+
         return response()->json($msg->load('user'));
     }
 
-    public function messages(ChatChannel $channel)
+    public function messages(Request $request, ChatChannel $channel)
     {
         abort_if(!$channel->members()->where('user_id', Auth::id())->exists(), 403);
+
+        // ?after=ID returns only newer messages, so polling stays light.
+        $after = (int) $request->query('after', 0);
+
         return response()->json(
-            $channel->messages()->with('user')->orderBy('created_at', 'asc')->get()
+            $channel->messages()->with('user:id,name')
+                ->when($after > 0, fn ($q) => $q->where('id', '>', $after))
+                ->orderBy('id')
+                ->get()
         );
+    }
+
+    /** Only channel members can open a channel attachment. */
+    public function attachment(ChatChannelMessage $message)
+    {
+        abort_unless($message->channel->members()->where('user_id', Auth::id())->exists(), 404);
+        abort_unless($message->attachment_path, 404);
+
+        return app(\App\Services\Chat\ChatAttachmentService::class)
+            ->respond($message->attachment_path, $message->attachment_name, $message->attachment_type);
     }
 
     public function join(ChatChannel $channel)

@@ -15,8 +15,13 @@ class ChatChannelMessage extends Model
     public function channel() { return $this->belongsTo(ChatChannel::class); }
     public function user()    { return $this->belongsTo(User::class); }
 
+    protected $hidden = ['attachment_path'];
+
+    protected $appends = ['attachment_url'];
+
+    /** Served through an authorised route, never as a public file. */
     public function getAttachmentUrlAttribute(): ?string
     {
-        return $this->attachment_path ? Storage::url($this->attachment_path) : null;
+        return $this->attachment_path ? route('chat.attachments.channel', $this->id) : null;
     }
 }

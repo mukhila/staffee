@@ -14,7 +14,9 @@ class ChatChannel extends Model
 
     public function members()
     {
-        return $this->belongsToMany(User::class, 'chat_channel_members')
+        // The pivot column is channel_id; without naming it Laravel looked for
+        // chat_channel_id and every channel action failed.
+        return $this->belongsToMany(User::class, 'chat_channel_members', 'channel_id', 'user_id')
             ->withPivot('last_read_message_id', 'last_read_at')
             ->withTimestamps();
     }

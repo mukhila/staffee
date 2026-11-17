@@ -103,11 +103,12 @@ class DashboardController extends Controller
         }
 
         $geofenceEnabled = app(\App\Services\Shift\GeofenceService::class)->isEnabled();
+        $celebrations    = app(\App\Services\People\CelebrationService::class)->upcoming(now(), 7);
 
         return view('dashboard', compact(
             'attendance', 'pendingTasks', 'assignedBugs',
             'workingHours', 'announcements', 'adminStats', 'adminAlerts',
-            'leaveBalances', 'todayLoggedMinutes', 'runningTimer', 'geofenceEnabled'
+            'leaveBalances', 'todayLoggedMinutes', 'runningTimer', 'geofenceEnabled', 'celebrations'
         ));
     }
 }

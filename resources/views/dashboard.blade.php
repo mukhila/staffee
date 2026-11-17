@@ -320,6 +320,17 @@
               @endif
             </div>
 
+            {{-- Celebrations --}}
+            <div class="card mb-3">
+              <div class="card-header border-0 pb-0 d-flex justify-content-between align-items-center">
+                <h6 class="card-title mb-0">Celebrations this week</h6>
+                <a href="{{ route('people.directory') }}" class="btn btn-sm btn-link">People</a>
+              </div>
+              <div class="card-body p-0">
+                @include('people._celebrations', ['celebrations' => $celebrations ?? collect(), 'emptyText' => 'No birthdays or work anniversaries in the next 7 days.'])
+              </div>
+            </div>
+
             {{-- Quick links --}}
             <div class="card">
               <div class="card-header border-0 pb-0">

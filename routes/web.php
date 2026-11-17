@@ -30,6 +30,14 @@ Route::middleware('auth')->group(function () {
     Route::get('chat/messages/{userId}', [App\Http\Controllers\ChatController::class, 'getMessages'])->name('chat.messages');
     Route::post('chat/send', [App\Http\Controllers\ChatController::class, 'sendMessage'])->name('chat.send');
     Route::get('chat/unread-count', [App\Http\Controllers\ChatController::class, 'unreadCount'])->name('chat.unread-count');
+    Route::get('chat/search', [App\Http\Controllers\ChatSearchController::class, 'index'])->name('chat.search');
+
+    // People directory and org chart (all signed-in staff)
+    Route::get('people', [App\Http\Controllers\PeopleController::class, 'directory'])->name('people.directory');
+    Route::get('people/org-chart', [App\Http\Controllers\PeopleController::class, 'orgChart'])->name('people.org-chart');
+    // Attachments are private files, served only to people in the conversation
+    Route::get('chat/attachments/direct/{message}', [App\Http\Controllers\ChatController::class, 'attachment'])->name('chat.attachments.direct');
+    Route::get('chat/attachments/channel/{message}', [App\Http\Controllers\ChatChannelController::class, 'attachment'])->name('chat.attachments.channel');
 
     // Chat channels (group)
     Route::get('channels', [App\Http\Controllers\ChatChannelController::class, 'index'])->name('chat.channels.index');

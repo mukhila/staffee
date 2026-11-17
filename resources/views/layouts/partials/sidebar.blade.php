@@ -631,6 +631,24 @@
         </a>
       </li>
       <li class="menu-item">
+        <a class="menu-link" href="{{ route('chat.search') }}">
+          <i class="fi fi-rr-search"></i>
+          <span class="menu-label">Search Messages</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('people.directory') }}">
+          <i class="fi fi-rr-users"></i>
+          <span class="menu-label">People</span>
+        </a>
+      </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('people.org-chart') }}">
+          <i class="fi fi-rr-sitemap"></i>
+          <span class="menu-label">Org Chart</span>
+        </a>
+      </li>
+      <li class="menu-item">
         <a class="menu-link" href="{{ route('mail.index') }}">
           <i class="fi fi-rr-envelope"></i>
           <span class="menu-label">Mail</span>
