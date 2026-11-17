@@ -36,7 +36,7 @@ class MonitoringCheckIdle extends Command
             if (!$setting || !$setting->enabled) continue;
 
             $thresholdMinutes = (int) ceil($setting->idle_threshold_seconds / 60);
-            $idleMinutes      = (int) ceil($now->diffInSeconds($period->idle_start) / 60);
+            $idleMinutes      = (int) ceil($period->idle_start->diffInSeconds($now) / 60);
 
             if ($idleMinutes < $thresholdMinutes) continue;
 

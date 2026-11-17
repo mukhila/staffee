@@ -33,6 +33,9 @@ class ProjectController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'estimation_time' => 'nullable|string',
+            'budget_amount' => 'nullable|numeric|min:0|max:999999999999',
+            'budget_currency' => 'nullable|required_with:budget_amount|string|size:3|alpha',
+            'budget_hours' => 'nullable|numeric|min:0|max:9999999',
             'team_members' => 'array',
             'team_members.*' => 'exists:users,id',
             'documents.*' => 'file|mimes:pdf,doc,docx,jpg,png|max:2048',
@@ -52,6 +55,9 @@ class ProjectController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'estimation_time' => $request->estimation_time,
+            'budget_amount' => $request->filled('budget_amount') ? (string) $request->budget_amount : null,
+            'budget_currency' => $request->filled('budget_currency') ? strtoupper($request->budget_currency) : null,
+            'budget_hours' => $request->filled('budget_hours') ? (string) $request->budget_hours : null,
             'status' => 'pending',
             'created_by' => auth()->id(),
             'documents' => $documents,
@@ -82,6 +88,9 @@ class ProjectController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'nullable|date|after_or_equal:start_date',
             'estimation_time' => 'nullable|string',
+            'budget_amount' => 'nullable|numeric|min:0|max:999999999999',
+            'budget_currency' => 'nullable|required_with:budget_amount|string|size:3|alpha',
+            'budget_hours' => 'nullable|numeric|min:0|max:9999999',
             'team_members' => 'array',
             'team_members.*' => 'exists:users,id',
             'documents.*' => 'file|mimes:pdf,doc,docx,jpg,png|max:2048',
@@ -101,6 +110,9 @@ class ProjectController extends Controller
             'start_date' => $request->start_date,
             'end_date' => $request->end_date,
             'estimation_time' => $request->estimation_time,
+            'budget_amount' => $request->filled('budget_amount') ? (string) $request->budget_amount : null,
+            'budget_currency' => $request->filled('budget_currency') ? strtoupper($request->budget_currency) : null,
+            'budget_hours' => $request->filled('budget_hours') ? (string) $request->budget_hours : null,
             'documents' => $documents,
         ]);
 
@@ -122,7 +134,12 @@ class ProjectController extends Controller
     public function show(\App\Models\Project $project)
     {
         $project->load(['users', 'tasks', 'bugs', 'testCases']);
-        return view('admin.projects.show', compact('project'));
+
+        $finance = app(\App\Services\Project\ProjectFinanceService::class)->summary($project);
+        // Labour cost comes from salaries, so money is only shown to those allowed to see payroll figures.
+        $canSeeMoney = auth()->user()->isAdmin() || auth()->user()->hasPermission('view-payroll-reports');
+
+        return view('admin.projects.show', compact('project', 'finance', 'canSeeMoney'));
     }
 
     public function downloadDocument(\App\Models\Project $project, int $index)
@@ -153,28 +170,37 @@ class ProjectController extends Controller
 
     public function timeline(\App\Models\Project $project)
     {
+        // Grouped so the "or" stays inside this project (it used to pull in
+        // dated tasks from every project).
         $tasks = $project->tasks()
-            ->with('assignedUser')
-            ->whereNotNull('start_date')
-            ->orWhereNotNull('due_date')
-            ->orderBy('start_date')
+            ->with(['assignedUser:id,name', 'blockers:id'])
+            ->where(fn ($q) => $q->whereNotNull('start_date')->orWhereNotNull('due_date'))
+            ->orderByRaw('COALESCE(start_date, due_date)')
             ->orderBy('due_date')
             ->get();
 
-        // Gantt boundaries: project start/end or min/max of task dates
-        $minDate = $tasks->filter(fn ($t) => $t->start_date)->min('start_date')
-            ?? $tasks->filter(fn ($t) => $t->due_date)->min('due_date')
-            ?? $project->start_date
-            ?? now()->toDateString();
+        $unscheduled = $project->tasks()->whereNull('start_date')->whereNull('due_date')->count();
+        $milestones  = $project->milestones()->orderBy('due_date')->get();
+        $sprints     = $project->sprints()->orderBy('start_date')->get();
 
-        $maxDate = $tasks->filter(fn ($t) => $t->due_date)->max('due_date')
-            ?? $project->end_date
-            ?? now()->addMonth()->toDateString();
+        $dates = collect([$project->start_date, $project->end_date])
+            ->merge($tasks->pluck('start_date'))
+            ->merge($tasks->pluck('due_date'))
+            ->merge($milestones->pluck('due_date'))
+            ->merge($sprints->pluck('start_date'))
+            ->merge($sprints->pluck('end_date'))
+            ->filter()
+            ->map(fn ($d) => \Carbon\Carbon::parse($d));
 
-        $rangeStart = \Carbon\Carbon::parse($minDate)->startOfMonth();
-        $rangeEnd   = \Carbon\Carbon::parse($maxDate)->endOfMonth();
-        $totalDays  = max(1, $rangeStart->diffInDays($rangeEnd));
+        $rangeStart = ($dates->min() ?? now())->copy()->startOfWeek();
+        $rangeEnd   = ($dates->max() ?? now()->addMonth())->copy()->endOfWeek();
+        if ($rangeEnd->lt(now()->endOfWeek()) && $rangeStart->lte(now())) {
+            $rangeEnd = now()->endOfWeek(); // keep "today" in view for live projects
+        }
+        $totalDays = max(1, (int) $rangeStart->diffInDays($rangeEnd) + 1);
 
-        return view('admin.projects.timeline', compact('project', 'tasks', 'rangeStart', 'rangeEnd', 'totalDays'));
+        return view('admin.projects.timeline', compact(
+            'project', 'tasks', 'milestones', 'sprints', 'unscheduled', 'rangeStart', 'rangeEnd', 'totalDays'
+        ));
     }
 }

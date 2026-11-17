@@ -9,6 +9,7 @@ class Task extends Model
     protected $fillable = [
         'project_id', 'sprint_id', 'milestone_id',
         'title', 'description', 'assigned_to', 'status', 'due_date', 'start_date',
+        'estimated_hours',
     ];
 
     protected $casts = [

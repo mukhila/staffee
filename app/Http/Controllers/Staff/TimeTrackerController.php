@@ -94,7 +94,7 @@ class TimeTrackerController extends Controller
 
         return response()->json([
             'running'   => true,
-            'seconds'   => now()->diffInSeconds($timer->start_time),
+            'seconds'   => (int) $timer->start_time->diffInSeconds(now()),
             'trackable' => $timer->trackable?->title ?? 'Unknown',
         ]);
     }

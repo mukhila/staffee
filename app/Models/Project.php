@@ -8,12 +8,18 @@ class Project extends Model
 {
     protected $fillable = [
         'name', 'description', 'start_date', 'end_date', 'status', 'created_by',
-        'documents', 'estimation_time'
+        'documents', 'estimation_time',
+        'budget_amount', 'budget_currency', 'budget_hours',
     ];
 
     protected $casts = [
         'documents' => 'array',
     ];
+
+    public function timeEntries()
+    {
+        return $this->hasMany(TimeTracker::class);
+    }
 
     public function users()
     {

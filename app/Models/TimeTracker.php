@@ -12,6 +12,9 @@ class TimeTracker extends Model
         'start_time', 'end_time',
         'is_billable', 'hours_decimal', 'rate_snapshot',
         'description', 'notes',
+        // Without these, back-dated entries never entered the approval queue
+        // and Approve / Reject silently changed nothing.
+        'approval_status', 'approved_by', 'approved_at', 'approval_notes',
     ];
 
     protected $casts = [

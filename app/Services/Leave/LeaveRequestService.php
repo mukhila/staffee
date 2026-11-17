@@ -40,7 +40,7 @@ class LeaveRequestService
             throw new \InvalidArgumentException('You already have a leave request for overlapping dates.');
         }
 
-        if ($policy && $policy->min_notice_days > 0 && $from->diffInDays(now()) < $policy->min_notice_days) {
+        if ($policy && $policy->min_notice_days > 0 && now()->startOfDay()->diffInDays($from->copy()->startOfDay()) < $policy->min_notice_days) {
             throw new \InvalidArgumentException(
                 "This leave type requires {$policy->min_notice_days} days advance notice."
             );

@@ -37,6 +37,24 @@
                         <label for="estimation_time" class="form-label">Estimation Time</label>
                         <input type="text" class="form-control" id="estimation_time" name="estimation_time" value="{{ $project->estimation_time }}" placeholder="e.g. 2 weeks, 100 hours">
                     </div>
+                    @php $trim = fn ($v) => $v === null ? '' : rtrim(rtrim((string) $v, '0'), '.'); @endphp
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="budget_hours" class="form-label">Budget (hours)</label>
+                            <input type="number" step="0.5" min="0" class="form-control @error('budget_hours') is-invalid @enderror" id="budget_hours" name="budget_hours" value="{{ old('budget_hours', $trim($project->budget_hours)) }}">
+                            @error('budget_hours')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-5 mb-3">
+                            <label for="budget_amount" class="form-label">Budget (labour cost)</label>
+                            <input type="number" step="0.01" min="0" class="form-control @error('budget_amount') is-invalid @enderror" id="budget_amount" name="budget_amount" value="{{ old('budget_amount', $trim($project->budget_amount)) }}">
+                            @error('budget_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="budget_currency" class="form-label">Currency</label>
+                            <input type="text" maxlength="3" class="form-control text-uppercase @error('budget_currency') is-invalid @enderror" id="budget_currency" name="budget_currency" value="{{ old('budget_currency', $project->budget_currency ?? 'INR') }}">
+                            @error('budget_currency')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                    </div>
                     <div class="mb-3">
                         <label for="team_members" class="form-label">Team Members</label>
                         <select class="form-select" id="team_members" name="team_members[]" multiple>

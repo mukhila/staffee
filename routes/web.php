@@ -537,6 +537,7 @@ Route::middleware('auth')->group(function () {
             Route::get('projects', [\App\Http\Controllers\Admin\ProjectController::class, 'index'])->name('projects.index');
             Route::get('projects/{project}', [\App\Http\Controllers\Admin\ProjectController::class, 'show'])->name('projects.show');
             Route::get('projects/{project}/timeline', [\App\Http\Controllers\Admin\ProjectController::class, 'timeline'])->name('projects.timeline');
+            Route::get('team-workload', [\App\Http\Controllers\Admin\ProjectInsightsController::class, 'workload'])->name('projects.workload');
             Route::get('projects/{project}/documents/{index}/download', [\App\Http\Controllers\Admin\ProjectController::class, 'downloadDocument'])->name('projects.documents.download');
         });
         Route::middleware(['permission:create-project'])->group(function () {

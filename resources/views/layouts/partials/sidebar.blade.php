@@ -264,6 +264,12 @@
           <span class="menu-label">Projects</span>
         </a>
       </li>
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('admin.projects.workload') }}">
+          <i class="fi fi-rr-users-alt"></i>
+          <span class="menu-label">Team Workload</span>
+        </a>
+      </li>
       @endif
       @if($u->hasPermission('view-tasks'))
       <li class="menu-item">

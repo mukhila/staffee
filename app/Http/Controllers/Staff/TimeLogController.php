@@ -66,7 +66,7 @@ class TimeLogController extends Controller
         $end   = Carbon::parse($validated['date'] . ' ' . $validated['end_time']);
         $hours = round($start->diffInSeconds($end) / 3600, 4);
 
-        $daysOld       = now()->diffInDays($start);
+        $daysOld       = $start->copy()->startOfDay()->diffInDays(now()->startOfDay()); // positive for past dates
         $needsApproval = $daysOld >= self::APPROVAL_THRESHOLD_DAYS;
 
         TimeTracker::create([
@@ -77,8 +77,8 @@ class TimeLogController extends Controller
             'start_time'      => $start,
             'end_time'        => $end,
             'hours_decimal'   => $hours,
-            'description'     => $validated['description'],
-            'notes'           => $validated['reason'],
+            'description'     => $validated['description'] ?? null,
+            'notes'           => $validated['reason'] ?? null,
             'is_billable'     => false,
             'approval_status' => $needsApproval ? 'pending' : null,
         ]);

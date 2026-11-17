@@ -10,7 +10,13 @@
                     &bull; {{ $project->start_date }} → {{ $project->end_date ?? 'Ongoing' }}
                 </span>
             </div>
-            <div class="d-flex gap-2">
+            <div class="d-flex gap-2 flex-wrap">
+                <a href="{{ route('admin.projects.timeline', $project) }}" class="btn btn-outline-primary waves-effect">
+                    <i class="fi fi-rr-chart-gantt me-1"></i> Timeline
+                </a>
+                <a href="{{ route('admin.projects.workload', ['project_id' => $project->id]) }}" class="btn btn-outline-primary waves-effect">
+                    <i class="fi fi-rr-users-alt me-1"></i> Team workload
+                </a>
                 <a href="{{ route('admin.projects.edit', $project) }}" class="btn btn-outline-primary waves-effect">Edit</a>
                 <a href="{{ route('admin.projects.index') }}" class="btn btn-outline-secondary waves-effect">
                     <i class="fi fi-rr-arrow-left me-1"></i> Back
@@ -21,6 +27,8 @@
         @if(session('success'))
         <div class="alert alert-success alert-dismissible fade show">{{ session('success') }}<button type="button" class="btn-close" data-bs-dismiss="alert"></button></div>
         @endif
+
+        @include('admin.projects._budget', ['finance' => $finance, 'canSeeMoney' => $canSeeMoney])
 
         <div class="row g-3">
             <!-- Info -->

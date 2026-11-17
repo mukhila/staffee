@@ -36,6 +36,24 @@
                         <label for="estimation_time" class="form-label">Estimation Time</label>
                         <input type="text" class="form-control" id="estimation_time" name="estimation_time" placeholder="e.g. 2 weeks, 100 hours">
                     </div>
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="budget_hours" class="form-label">Budget (hours)</label>
+                            <input type="number" step="0.5" min="0" class="form-control @error('budget_hours') is-invalid @enderror" id="budget_hours" name="budget_hours" value="{{ old('budget_hours') }}" placeholder="e.g. 400">
+                            @error('budget_hours')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-5 mb-3">
+                            <label for="budget_amount" class="form-label">Budget (labour cost)</label>
+                            <input type="number" step="0.01" min="0" class="form-control @error('budget_amount') is-invalid @enderror" id="budget_amount" name="budget_amount" value="{{ old('budget_amount') }}" placeholder="e.g. 500000">
+                            @error('budget_amount')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <label for="budget_currency" class="form-label">Currency</label>
+                            <input type="text" maxlength="3" class="form-control text-uppercase @error('budget_currency') is-invalid @enderror" id="budget_currency" name="budget_currency" value="{{ old('budget_currency', 'INR') }}">
+                            @error('budget_currency')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-12 form-text mt-n2 mb-3">Optional. Used to track spend against plan on the project page.</div>
+                    </div>
                     <div class="mb-3">
                         <label for="team_members" class="form-label">Team Members</label>
                         <select class="form-select" id="team_members" name="team_members[]" multiple>

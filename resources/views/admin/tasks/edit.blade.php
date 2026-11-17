@@ -50,9 +50,22 @@
                             <option value="completed" {{ $task->status == 'completed' ? 'selected' : '' }}>Completed</option>
                         </select>
                     </div>
-                    <div class="mb-3">
-                        <label for="due_date" class="form-label">Due Date</label>
-                        <input type="date" class="form-control" id="due_date" name="due_date" value="{{ $task->due_date }}">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label for="start_date" class="form-label">Start Date</label>
+                            <input type="date" class="form-control @error('start_date') is-invalid @enderror" id="start_date" name="start_date" value="{{ old('start_date', $task->start_date?->toDateString()) }}">
+                            @error('start_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="due_date" class="form-label">Due Date</label>
+                            <input type="date" class="form-control @error('due_date') is-invalid @enderror" id="due_date" name="due_date" value="{{ old('due_date', $task->due_date?->toDateString()) }}">
+                            @error('due_date')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <label for="estimated_hours" class="form-label">Estimated Hours</label>
+                            <input type="number" step="0.25" min="0" class="form-control @error('estimated_hours') is-invalid @enderror" id="estimated_hours" name="estimated_hours" value="{{ old('estimated_hours', $task->estimated_hours !== null ? rtrim(rtrim((string) $task->estimated_hours, '0'), '.') : '') }}" placeholder="e.g. 6">
+                            @error('estimated_hours')<div class="invalid-feedback">{{ $message }}</div>@enderror
+                        </div>
                     </div>
                     <button type="submit" class="btn btn-primary">Update Task</button>
                 </form>

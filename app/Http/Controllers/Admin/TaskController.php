@@ -32,8 +32,9 @@ class TaskController extends Controller
             'title'      => 'required|string|max:255',
             'description' => 'nullable|string',
             'assigned_to' => 'required|exists:users,id',
-            'due_date'   => 'nullable|date',
+            'due_date'   => 'nullable|date' . ($request->filled('start_date') ? '|after_or_equal:start_date' : ''),
             'start_date' => 'nullable|date',
+            'estimated_hours' => 'nullable|numeric|min:0|max:9999',
         ]);
 
         $task = \App\Models\Task::create([
@@ -44,6 +45,7 @@ class TaskController extends Controller
             'status'      => 'pending',
             'due_date'    => $request->due_date,
             'start_date'  => $request->start_date,
+            'estimated_hours' => $request->filled('estimated_hours') ? (string) $request->estimated_hours : null,
         ]);
 
         \App\Models\Notification::create([
@@ -104,10 +106,14 @@ class TaskController extends Controller
             'description' => 'nullable|string',
             'assigned_to' => 'required|exists:users,id',
             'status' => 'required|in:pending,in_progress,completed,review',
-            'due_date' => 'nullable|date',
+            'start_date' => 'nullable|date',
+            'due_date' => 'nullable|date' . ($request->filled('start_date') ? '|after_or_equal:start_date' : ''),
+            'estimated_hours' => 'nullable|numeric|min:0|max:9999',
         ]);
 
-        $task->update($request->only(['project_id', 'title', 'description', 'assigned_to', 'status', 'due_date']));
+        $task->update($request->only(['project_id', 'title', 'description', 'assigned_to', 'status', 'start_date', 'due_date']) + [
+            'estimated_hours' => $request->filled('estimated_hours') ? (string) $request->estimated_hours : null,
+        ]);
 
         return redirect()->route('admin.tasks.index')->with('success', 'Task updated successfully.');
     }
