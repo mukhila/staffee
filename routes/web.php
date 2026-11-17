@@ -32,6 +32,14 @@ Route::middleware('auth')->group(function () {
     Route::get('chat/unread-count', [App\Http\Controllers\ChatController::class, 'unreadCount'])->name('chat.unread-count');
     Route::get('chat/search', [App\Http\Controllers\ChatSearchController::class, 'index'])->name('chat.search');
 
+    // Reports by email: download now or subscribe (each report checks its own permission)
+    Route::get('reports/scheduled', [App\Http\Controllers\ScheduledReportController::class, 'index'])->name('reports.scheduled.index');
+    Route::get('reports/scheduled/download', [App\Http\Controllers\ScheduledReportController::class, 'download'])->name('reports.scheduled.download');
+    Route::post('reports/scheduled', [App\Http\Controllers\ScheduledReportController::class, 'store'])->name('reports.scheduled.store');
+    Route::patch('reports/scheduled/{subscription}', [App\Http\Controllers\ScheduledReportController::class, 'toggle'])->name('reports.scheduled.toggle');
+    Route::delete('reports/scheduled/{subscription}', [App\Http\Controllers\ScheduledReportController::class, 'destroy'])->name('reports.scheduled.destroy');
+    Route::post('reports/scheduled/{subscription}/send', [App\Http\Controllers\ScheduledReportController::class, 'sendNow'])->name('reports.scheduled.send');
+
     // People directory and org chart (all signed-in staff)
     Route::get('people', [App\Http\Controllers\PeopleController::class, 'directory'])->name('people.directory');
     Route::get('people/org-chart', [App\Http\Controllers\PeopleController::class, 'orgChart'])->name('people.org-chart');

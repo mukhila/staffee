@@ -59,6 +59,12 @@ Schedule::command('monitoring:purge')
     ->dailyAt('02:00')
     ->withoutOverlapping();
 
+// Subscribed reports: weekly ones go out on Mondays, monthly ones on the 1st
+Schedule::command('reports:send-scheduled')
+    ->dailyAt('07:00')
+    ->name('scheduled-reports')
+    ->withoutOverlapping();
+
 // Weekly activity summary: each monitored employee gets their own figures on Monday morning
 Schedule::command('monitoring:weekly-summary')
     ->weeklyOn(1, '08:00')

@@ -105,10 +105,17 @@ class DashboardController extends Controller
         $geofenceEnabled = app(\App\Services\Shift\GeofenceService::class)->isEnabled();
         $celebrations    = app(\App\Services\People\CelebrationService::class)->upcoming(now(), 7);
 
+        // Role-aware cards: what is waiting on me, my team today, the company today.
+        $insights       = app(\App\Services\Dashboard\DashboardInsightsService::class);
+        $pendingActions = $insights->pendingActions($user);
+        $teamToday      = $insights->teamToday($user);
+        $companyToday   = $user->isAdmin() ? $insights->companyToday() : null;
+
         return view('dashboard', compact(
             'attendance', 'pendingTasks', 'assignedBugs',
             'workingHours', 'announcements', 'adminStats', 'adminAlerts',
-            'leaveBalances', 'todayLoggedMinutes', 'runningTimer', 'geofenceEnabled', 'celebrations'
+            'leaveBalances', 'todayLoggedMinutes', 'runningTimer', 'geofenceEnabled', 'celebrations',
+            'pendingActions', 'teamToday', 'companyToday'
         ));
     }
 }

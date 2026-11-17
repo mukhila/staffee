@@ -29,6 +29,8 @@
 
           <div class="col-xxl-9">
 
+            @include('dashboard._role-cards')
+
             {{-- ── Admin stat cards ─────────────────────────────────────────────── --}}
             @if(Auth::user()->isAdmin() && $adminStats)
             <div class="row g-3 mb-3">

@@ -648,6 +648,14 @@
           <span class="menu-label">Org Chart</span>
         </a>
       </li>
+      @if(app(\App\Services\Reports\ReportService::class)->availableTo($u))
+      <li class="menu-item">
+        <a class="menu-link" href="{{ route('reports.scheduled.index') }}">
+          <i class="fi fi-rr-envelope-open-text"></i>
+          <span class="menu-label">Reports by Email</span>
+        </a>
+      </li>
+      @endif
       <li class="menu-item">
         <a class="menu-link" href="{{ route('mail.index') }}">
           <i class="fi fi-rr-envelope"></i>
