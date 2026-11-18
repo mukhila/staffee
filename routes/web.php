@@ -549,16 +549,16 @@ Route::middleware('auth')->group(function () {
         });
 
         // ── Projects ──────────────────────────────────────────────────────────
+        Route::middleware(['permission:create-project'])->group(function () {
+            Route::get('projects/create', [\App\Http\Controllers\Admin\ProjectController::class, 'create'])->name('projects.create');
+            Route::post('projects', [\App\Http\Controllers\Admin\ProjectController::class, 'store'])->name('projects.store');
+        });
         Route::middleware(['permission:view-projects'])->group(function () {
             Route::get('projects', [\App\Http\Controllers\Admin\ProjectController::class, 'index'])->name('projects.index');
             Route::get('projects/{project}', [\App\Http\Controllers\Admin\ProjectController::class, 'show'])->name('projects.show');
             Route::get('projects/{project}/timeline', [\App\Http\Controllers\Admin\ProjectController::class, 'timeline'])->name('projects.timeline');
             Route::get('team-workload', [\App\Http\Controllers\Admin\ProjectInsightsController::class, 'workload'])->name('projects.workload');
             Route::get('projects/{project}/documents/{index}/download', [\App\Http\Controllers\Admin\ProjectController::class, 'downloadDocument'])->name('projects.documents.download');
-        });
-        Route::middleware(['permission:create-project'])->group(function () {
-            Route::get('projects/create', [\App\Http\Controllers\Admin\ProjectController::class, 'create'])->name('projects.create');
-            Route::post('projects', [\App\Http\Controllers\Admin\ProjectController::class, 'store'])->name('projects.store');
         });
         Route::middleware(['permission:edit-project'])->group(function () {
             Route::get('projects/{project}/edit', [\App\Http\Controllers\Admin\ProjectController::class, 'edit'])->name('projects.edit');
@@ -578,13 +578,13 @@ Route::middleware('auth')->group(function () {
             ->middleware('permission:archive-project')->name('projects.destroy');
 
         // ── Tasks ─────────────────────────────────────────────────────────────
-        Route::middleware(['permission:view-tasks'])->group(function () {
-            Route::get('tasks', [\App\Http\Controllers\Admin\TaskController::class, 'index'])->name('tasks.index');
-            Route::get('tasks/{task}', [\App\Http\Controllers\Admin\TaskController::class, 'show'])->name('tasks.show');
-        });
         Route::middleware(['permission:create-task'])->group(function () {
             Route::get('tasks/create', [\App\Http\Controllers\Admin\TaskController::class, 'create'])->name('tasks.create');
             Route::post('tasks', [\App\Http\Controllers\Admin\TaskController::class, 'store'])->name('tasks.store');
+        });
+        Route::middleware(['permission:view-tasks'])->group(function () {
+            Route::get('tasks', [\App\Http\Controllers\Admin\TaskController::class, 'index'])->name('tasks.index');
+            Route::get('tasks/{task}', [\App\Http\Controllers\Admin\TaskController::class, 'show'])->name('tasks.show');
         });
         Route::middleware(['permission:update-task'])->group(function () {
             Route::get('tasks/{task}/edit', [\App\Http\Controllers\Admin\TaskController::class, 'edit'])->name('tasks.edit');
